@@ -42,36 +42,27 @@ class TTSService:
         return candidates[0]
 
     def _find_checkpoint(self) -> str:
-        """Locate or download the Fish Speech checkpoint directory."""
-        v2_candidates = [
-            self.config.models_dir / "fish-speech" / "openaudio-s1-mini",
-            self._get_fish_speech_dir() / "checkpoints" / "openaudio-s1-mini",
-        ]
-        for p in v2_candidates:
-            if p.exists() and (p / "config.json").exists():
-                logger.info(f"Found OpenAudio S1-mini checkpoint at {p}")
-                return str(p)
-
-        v15_candidates = [
+        """Locate or download the Fish Speech 1.5 checkpoint directory."""
+        candidates = [
             self.config.models_dir / "fish-speech" / "fish-speech-1.5",
             self.config.models_dir / "fish-speech",
             self._get_fish_speech_dir() / "checkpoints" / "fish-speech-1.5",
         ]
-        for p in v15_candidates:
+        for p in candidates:
             if p.exists() and (p / "config.json").exists():
                 logger.info(f"Found Fish Speech 1.5 checkpoint at {p}")
                 return str(p)
 
         from huggingface_hub import snapshot_download
-        logger.info("Downloading OpenAudio S1-mini checkpoint...")
+        logger.info("Downloading Fish Speech 1.5 checkpoint...")
         path = snapshot_download(
-            "fishaudio/openaudio-s1-mini",
-            local_dir=str(self.config.models_dir / "fish-speech" / "openaudio-s1-mini"),
+            "fishaudio/fish-speech-1.5",
+            local_dir=str(self.config.models_dir / "fish-speech" / "fish-speech-1.5"),
         )
         return path
 
     def _load_engine(self):
-        """Load Fish Speech engine — tries Python API, falls back to CLI."""
+        """Load Fish Speech 1.5 engine — tries Python API, falls back to CLI."""
         if self._engine is not None:
             return self._engine
 
@@ -82,45 +73,33 @@ class TTSService:
         device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
         precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
-        # Try Fish Speech 2.0 API (DAC decoder)
+        # Try Fish Speech 1.5 Python API (VQGAN decoder)
         try:
             from fish_speech.inference_engine import TTSInferenceEngine
             from fish_speech.models.text2semantic.inference import launch_thread_safe_queue
+            from fish_speech.models.vqgan.inference import load_model as load_decoder_model
 
-            decoder_model = None
             decoder_ckpt = None
-            for name in ["codec.pth", "firefly-gan-vq-fsq-8x1024-21hz-generator.pth"]:
+            for name in [
+                "firefly-gan-vq-fsq-8x1024-21hz-generator.pth",
+                "codec.pth",
+            ]:
                 p = Path(checkpoint_path) / name
                 if p.exists():
                     decoder_ckpt = str(p)
                     break
 
-            # Try DAC decoder (Fish Speech 2.0)
-            try:
-                from fish_speech.models.dac.inference import load_model as load_dac_model
-                decoder_model = load_dac_model(
-                    config_name="firefly_gan_vq",
-                    checkpoint_path=decoder_ckpt,
-                    device=device,
-                )
-                logger.info("Loaded DAC decoder (Fish Speech 2.0)")
-            except (ImportError, Exception) as e:
-                logger.info(f"DAC decoder not available: {e}")
-                # Try VQGAN decoder (Fish Speech 1.5)
-                try:
-                    from fish_speech.models.vqgan.inference import load_model as load_vqgan_model
-                    decoder_model = load_vqgan_model(
-                        config_name="firefly_gan_vq",
-                        checkpoint_path=decoder_ckpt,
-                        device=device,
-                    )
-                    logger.info("Loaded VQGAN decoder (Fish Speech 1.5)")
-                except (ImportError, Exception) as e2:
-                    logger.info(f"VQGAN decoder not available: {e2}")
+            if not decoder_ckpt:
+                raise FileNotFoundError(f"No decoder checkpoint in {checkpoint_path}")
 
-            if decoder_model is None:
-                raise RuntimeError("No decoder model could be loaded")
+            logger.info(f"Loading Fish Speech 1.5 decoder from {decoder_ckpt}")
+            decoder_model = load_decoder_model(
+                config_name="firefly_gan_vq",
+                checkpoint_path=decoder_ckpt,
+                device=device,
+            )
 
+            logger.info("Loading Fish Speech 1.5 LLM...")
             llm_queue = launch_thread_safe_queue(
                 checkpoint_path=checkpoint_path,
                 device=device,
@@ -134,7 +113,7 @@ class TTSService:
                 precision=precision,
                 compile=False,
             )
-            logger.info(f"Fish Speech engine loaded on {device}")
+            logger.info(f"Fish Speech 1.5 engine loaded on {device}")
             return self._engine
 
         except (ImportError, Exception) as e:

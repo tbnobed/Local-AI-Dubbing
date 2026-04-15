@@ -170,11 +170,13 @@ echo "────────────────────────�
 
 cd "$ROOT_DIR"
 if [ ! -d "$FISH_SPEECH_DIR" ]; then
-    echo "  [4a] Cloning Fish Speech repo..."
-    git clone https://github.com/fishaudio/fish-speech.git "$FISH_SPEECH_DIR"
+    echo "  [4a] Cloning Fish Speech repo (v1.5.1)..."
+    git clone --branch v1.5.1 --depth 1 https://github.com/fishaudio/fish-speech.git "$FISH_SPEECH_DIR"
 else
-    echo "  [4a] Updating Fish Speech repo..."
-    cd "$FISH_SPEECH_DIR" && git pull --ff-only 2>/dev/null || true
+    echo "  [4a] Fish Speech repo exists, ensuring v1.5.1 tag..."
+    cd "$FISH_SPEECH_DIR"
+    git fetch --tags 2>/dev/null || true
+    git checkout v1.5.1 2>/dev/null || git checkout tags/v1.5.1 2>/dev/null || true
     cd "$ROOT_DIR"
 fi
 
@@ -230,12 +232,12 @@ echo "Step 6: Download model weights"
 echo "──────────────────────────────────────────"
 
 mkdir -p data/models/fish-speech
-echo "  Downloading OpenAudio S1-mini (Fish Speech 2.0) (~3 GB)..."
+echo "  Downloading Fish Speech 1.5 (~3 GB)..."
 python3 -c "
 from huggingface_hub import snapshot_download
 path = snapshot_download(
-    'fishaudio/openaudio-s1-mini',
-    local_dir='data/models/fish-speech/openaudio-s1-mini',
+    'fishaudio/fish-speech-1.5',
+    local_dir='data/models/fish-speech/fish-speech-1.5',
 )
 print(f'  Downloaded to: {path}')
 " || echo "  Deferred — will download on first run."
