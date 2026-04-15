@@ -204,9 +204,8 @@ class TranscriptionService:
             progress_callback(0.35, "aligning")
 
         # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
-        # Force alignment to CPU — wav2vec2 causes intermittent SIGSEGV on Blackwell GPUs
-        align_device = "cpu"
-        logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on CPU...")
+        align_device = f"cuda:{self.config.secondary_gpu_id}" if self.config.use_gpu and torch.cuda.is_available() else "cpu"
+        logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on {align_device}...")
         audio = whisperx.load_audio(audio_path)
         duration = len(audio) / 16000.0
 
@@ -226,6 +225,8 @@ class TranscriptionService:
 
             del model_a
             gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
             aligned_segments = aligned.get("segments", raw_segments)
         except Exception as e:
@@ -241,10 +242,8 @@ class TranscriptionService:
 
         if hf_token:
             try:
-                # Use secondary GPU for diarization (keeps primary GPU free for TTS/translation)
-                # Force diarization to CPU — pyannote causes SIGSEGV on Blackwell GPUs
-                diarize_device = torch.device("cpu")
-                logger.info(f"Running speaker diarization (pyannote) on CPU...")
+                diarize_device = torch.device(f"cuda:{self.config.secondary_gpu_id}") if self.config.use_gpu and torch.cuda.is_available() else torch.device("cpu")
+                logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
 
                 # Try whisperx.DiarizationPipeline first, fall back to pyannote directly
                 diarize_model = None
