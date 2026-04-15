@@ -1,0 +1,43 @@
+──────────────────────────────────────────
+Step 2: PyTorch CUDA + WhisperX (alignment/diarization only)
+──────────────────────────────────────────
+  [2a] Installing PyTorch 2.8.0 with CUDA (cu128)...
+  [2b] Installing WhisperX (for alignment + diarization)...
+  [2c] Re-pinning PyTorch 2.8.0 CUDA (cu128)...
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+whisperx 3.8.5 requires nltk>=3.9.1, which is not installed.
+whisperx 3.8.5 requires omegaconf>=2.3.0, which is not installed.
+whisperx 3.8.5 requires transformers>=4.48.0, which is not installed.
+whisperx 3.8.5 requires huggingface-hub<1.0.0, but you have huggingface-hub 1.10.2 which is incompatible.
+whisperx 3.8.5 requires torchcodec<0.8.0,>=0.6.0; (sys_platform == "linux" and platform_machine == "x86_64") or sys_platform == "darwin" or sys_platform == "win32", but you have torchcodec 0.11.1 which is incompatible.
+  [2d] Installing onnxruntime-gpu...
+
+──────────────────────────────────────────
+Step 3: Backend dependencies
+──────────────────────────────────────────
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+whisperx 3.8.5 requires nltk>=3.9.1, which is not installed.
+whisperx 3.8.5 requires omegaconf>=2.3.0, which is not installed.
+whisperx 3.8.5 requires torchcodec<0.8.0,>=0.6.0; (sys_platform == "linux" and platform_machine == "x86_64") or sys_platform == "darwin" or sys_platform == "win32", but you have torchcodec 0.11.1 which is incompatible.
+
+──────────────────────────────────────────
+Step 4: Fish Speech (voice cloning TTS)
+──────────────────────────────────────────
+  [4a] Updating Fish Speech repo...
+Already up to date.
+  [4b] Installing Fish Speech (editable, cu128)...
+  Fish Speech [cu128] failed, trying bare install...
+
+  WARNING: Fish Speech install failed.
+  Manual fix: cd /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech && pip install -e '.[cu128]'
+
+
+──────────────────────────────────────────
+Step 5: Lock down final package versions
+──────────────────────────────────────────
+  [5a] Final PyTorch 2.8.0 CUDA pin (cu128)...
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+whisperx 3.8.5 requires nltk>=3.9.1, which is not installed.
+whisperx 3.8.5 requires omegaconf>=2.3.0, which is not installed.
+whisperx 3.8.5 requires torchcodec<0.8.0,>=0.6.0; (sys_platform == "linux" and platform_machine == "x86_64") or sys_platform == "darwin" or sys_platform == "win32", but you have torchcodec 0.11.1 which is incompatible.
+  [5b] Installing accelerate (required for transformers Whisper)..

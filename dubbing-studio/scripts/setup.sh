@@ -120,19 +120,19 @@ echo "────────────────────────�
 echo "Step 2: PyTorch CUDA + WhisperX (alignment/diarization only)"
 echo "──────────────────────────────────────────"
 
-# Pin PyTorch FIRST so WhisperX doesn't pull in CPU-only builds
-echo "  [2a] Installing PyTorch 2.8.0 with CUDA ($CUDA_INDEX)..."
-pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
-
 # WhisperX is used ONLY for wav2vec2 alignment + pyannote diarization.
 # Transcription uses pure PyTorch Whisper (transformers) because
 # CTranslate2/faster-whisper does NOT support Blackwell sm_120 GPUs.
-echo "  [2b] Installing WhisperX (for alignment + diarization)..."
-pip install whisperx -q --no-deps 2>/dev/null || pip install whisperx -q
-# WhisperX deps we actually need (pyannote, etc.)
-pip install pyannote.audio faster-whisper -q 2>/dev/null || true
 
-# Re-pin PyTorch CUDA (WhisperX may have overwritten with CPU builds)
+# Install WhisperX normally first — it pulls its own deps
+echo "  [2a] Installing WhisperX + all its dependencies..."
+pip install whisperx -q
+
+# Install WhisperX's missing/needed deps explicitly
+echo "  [2b] Installing WhisperX supplementary deps..."
+pip install nltk omegaconf pyannote.audio -q
+
+# Re-pin PyTorch to CUDA build (WhisperX pulls CPU-only torch)
 echo "  [2c] Re-pinning PyTorch 2.8.0 CUDA ($CUDA_INDEX)..."
 pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
 
@@ -170,16 +170,24 @@ fi
 source "$BACKEND_DIR/venv/bin/activate"
 
 cd "$FISH_SPEECH_DIR"
-echo "  [4b] Installing Fish Speech (editable, $CUDA_INDEX)..."
-pip install -e ".[$CUDA_INDEX]" -q 2>/dev/null || {
-    echo "  Fish Speech [$CUDA_INDEX] failed, trying bare install..."
-    pip install -e . -q 2>/dev/null || {
-        echo ""
-        echo "  WARNING: Fish Speech install failed."
-        echo "  Manual fix: cd $FISH_SPEECH_DIR && pip install -e '.[$CUDA_INDEX]'"
-        echo ""
-    }
-}
+echo "  [4b] Installing Fish Speech (editable)..."
+# Try with CUDA extra first, then bare install, then no-build-isolation
+FISH_INSTALLED=false
+for attempt in ".[${CUDA_INDEX}]" "." ". --no-build-isolation"; do
+    echo "    Trying: pip install -e $attempt ..."
+    if pip install -e $attempt -q 2>&1; then
+        FISH_INSTALLED=true
+        echo "    Fish Speech installed successfully."
+        break
+    fi
+done
+
+if [ "$FISH_INSTALLED" = false ]; then
+    echo ""
+    echo "  WARNING: Fish Speech install failed."
+    echo "  Try manually: cd $FISH_SPEECH_DIR && pip install -e ."
+    echo ""
+fi
 
 # ─────────────────────────────────────────────────
 echo ""
