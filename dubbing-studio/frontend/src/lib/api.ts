@@ -27,6 +27,15 @@ export async function cancelJob(jobId: string): Promise<void> {
   await fetch(`${BASE}/jobs/${jobId}`, { method: "DELETE" });
 }
 
+export async function retryJob(jobId: string): Promise<Job> {
+  const res = await fetch(`${BASE}/jobs/${jobId}/retry`, { method: "POST" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || "Failed to retry job");
+  }
+  return res.json();
+}
+
 export async function getSystemStatus(): Promise<SystemStatus> {
   const res = await fetch(`${BASE}/system/status`);
   if (!res.ok) throw new Error("Failed to fetch system status");

@@ -119,6 +119,38 @@ async def get_job(job_id: str, db: AsyncSession = Depends(get_db)):
     return _job_to_response(job)
 
 
+@router.post("/{job_id}/retry", response_model=JobResponse)
+async def retry_job(job_id: str, db: AsyncSession = Depends(get_db)):
+    job = await db.get(Job, job_id)
+    if not job:
+        raise HTTPException(404, "Job not found")
+
+    if job.status not in (JobStatus.FAILED, JobStatus.CANCELLED):
+        raise HTTPException(400, "Only failed or cancelled jobs can be retried")
+
+    if not job.input_path or not os.path.exists(job.input_path):
+        raise HTTPException(400, "Original video file no longer exists — please re-upload")
+
+    job.status = JobStatus.PENDING
+    job.progress = 0.0
+    job.current_stage = "pending"
+    job.error_message = None
+    job.output_video_path = None
+    job.output_srt_path = None
+    job.output_original_srt_path = None
+    job.processing_time_seconds = None
+    job.transcription_data = None
+    job.speakers_detected = 0
+
+    from app.workers.pipeline import run_dubbing_pipeline
+    task = run_dubbing_pipeline.apply_async(args=[job_id], queue="dubbing")
+    job.celery_task_id = task.id
+
+    await db.commit()
+    await db.refresh(job)
+    return _job_to_response(job)
+
+
 @router.delete("/{job_id}")
 async def cancel_job(job_id: str, db: AsyncSession = Depends(get_db)):
     job = await db.get(Job, job_id)

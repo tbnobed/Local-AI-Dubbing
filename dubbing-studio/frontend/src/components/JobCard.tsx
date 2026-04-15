@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
 import {
   FileVideo, Clock, Mic2, Download, XCircle, CheckCircle,
-  AlertCircle, Loader2, ChevronRight, Users, Timer
+  AlertCircle, Loader2, ChevronRight, Users, Timer, RefreshCw
 } from "lucide-react";
-import { getDownloadUrl, cancelJob } from "../lib/api";
+import { getDownloadUrl, cancelJob, retryJob } from "../lib/api";
 import { useJobWebSocket } from "../hooks/useJobWebSocket";
 import type { Job, WSMessage } from "../types";
 import clsx from "clsx";
@@ -51,6 +51,15 @@ export function JobCard({ job, onUpdate }: Props) {
       await cancelJob(job.id);
       onUpdate({ id: job.id, status: "cancelled" });
     } catch {}
+  };
+
+  const handleRetry = async () => {
+    try {
+      const updated = await retryJob(job.id);
+      onUpdate({ ...updated });
+    } catch (e: any) {
+      alert(e.message || "Failed to retry job");
+    }
   };
 
   const langs = `${job.source_language.toUpperCase()} → ${job.target_language.toUpperCase()}`;
@@ -125,11 +134,23 @@ export function JobCard({ job, onUpdate }: Props) {
             </div>
           )}
 
-          {/* Error */}
+          {/* Error + Retry */}
           {job.status === "failed" && job.error_message && (
             <p className="text-xs text-red-400 bg-red-950/30 rounded-lg px-3 py-2 mb-3 font-mono">
               {job.error_message}
             </p>
+          )}
+
+          {(job.status === "failed" || job.status === "cancelled") && (
+            <button
+              onClick={handleRetry}
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
+                         bg-brand-900/50 text-brand-300 border border-brand-700/30
+                         hover:bg-brand-800/50 transition-colors mb-2"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Retry
+            </button>
           )}
 
           {/* Actions */}
