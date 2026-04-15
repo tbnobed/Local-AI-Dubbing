@@ -20,6 +20,8 @@ echo -e "${CYAN}║       DubbingStudio Starting             ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
 echo ""
 
+FRONTEND_DIR="$ROOT_DIR/frontend"
+
 cd "$BACKEND_DIR"
 
 if [ ! -d "venv" ]; then
@@ -31,6 +33,26 @@ source venv/bin/activate
 
 # Ensure data directories exist
 mkdir -p ../data/{uploads,outputs,temp,models}
+
+# Build frontend if not already built
+if [ ! -d "$FRONTEND_DIR/dist" ]; then
+    echo -e "${YELLOW}Building frontend...${NC}"
+    cd "$FRONTEND_DIR"
+    if command -v npm &>/dev/null; then
+        npm install --silent 2>/dev/null
+        npm run build 2>&1
+        if [ -d "dist" ]; then
+            echo -e "${GREEN}Frontend built${NC}"
+        else
+            echo -e "${YELLOW}WARNING: Frontend build failed — API will run without UI${NC}"
+        fi
+    else
+        echo -e "${YELLOW}WARNING: npm not found — API will run without UI${NC}"
+    fi
+    cd "$BACKEND_DIR"
+else
+    echo -e "${GREEN}Frontend already built${NC}"
+fi
 
 # Start Redis if not running
 if ! redis-cli ping &>/dev/null 2>&1; then
