@@ -1,0 +1,27 @@
+obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing$ nvidia-smi
+Tue Apr 14 22:22:11 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.126.20             Driver Version: 580.126.20     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5090        On  |   00000000:01:00.0 Off |                  N/A |
+|  0%   42C    P8             17W /  575W |     613MiB /  32607MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA RTX PRO 4500 Blac...    On  |   00000000:07:00.0 Off |                  Off |
+| 30%   30C    P8             13W /  200W |      18MiB /  32623MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            1876      C   ...admin/ComfyUI/venv/bin/python        498MiB |
+|    0   N/A  N/A            2313      G   /usr/lib/xorg/Xorg                       67MiB |
+|    0   N/A  N/A            2651      G   /usr/bin/gnome-shell                     11MiB |
+|    1   N/A  N/A            2313      G   /usr/lib/xorg/Xorg                        4MiB |
