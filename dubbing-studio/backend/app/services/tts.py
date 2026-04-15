@@ -286,12 +286,10 @@ class TTSService:
                 audio = getattr(result, "audio", None)
 
                 if audio is None:
-                    logger.warning(f"result.audio is None (type={type(result).__name__}, "
-                                   f"code={getattr(result, 'code', 'N/A')})")
                     continue
 
-                logger.info(f"result.audio type={type(audio).__name__}, "
-                            f"repr={repr(audio)[:200]}")
+                if isinstance(audio, tuple) and len(audio) == 2:
+                    sample_rate, audio = audio
 
                 if hasattr(audio, "cpu"):
                     audio = audio.cpu().numpy()
@@ -300,17 +298,13 @@ class TTSService:
                         audio = audio.squeeze()
                     if audio.size > 0:
                         all_audio.append(audio)
-                        logger.info(f"Got audio chunk: shape={audio.shape}, dtype={audio.dtype}, sr={sample_rate}")
+                        logger.info(f"Got audio chunk: shape={audio.shape}, sr={sample_rate}")
                 elif isinstance(audio, (bytes, bytearray)) and len(audio) > 0:
                     all_bytes += bytes(audio)
-                    logger.info(f"Got audio bytes: {len(audio)} bytes")
                 elif hasattr(audio, "read"):
                     chunk = audio.read()
                     if chunk:
                         all_bytes += chunk
-                        logger.info(f"Got audio from stream: {len(chunk)} bytes")
-                else:
-                    logger.warning(f"Unknown audio type: {type(audio).__name__}")
 
             if _torch.cuda.is_available():
                 _torch.cuda.synchronize()
