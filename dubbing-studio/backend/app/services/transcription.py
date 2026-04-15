@@ -4,9 +4,10 @@ Transcription + word alignment + speaker diarization.
 Uses pure PyTorch Whisper (via transformers) for transcription — this works on
 ALL GPUs including Blackwell sm_120, unlike CTranslate2/faster-whisper.
 
-Then uses WhisperX for:
-  - wav2vec2 forced alignment (word-level timestamps)
-  - pyannote community-1 speaker diarization
+Word-level timestamps come from Whisper itself (return_timestamps="word"),
+eliminating the need for wav2vec2 forced alignment (which hangs on Blackwell).
+
+Speaker diarization uses pyannote via WhisperX.
 """
 import gc
 import logging
@@ -51,8 +52,9 @@ class TranscriptionService:
     """
     Transcription pipeline:
       1. Whisper via transformers (pure PyTorch — Blackwell-safe)
-      2. WhisperX alignment (wav2vec2)
-      3. WhisperX diarization (pyannote)
+         - Segment-level timestamps for subtitles-only mode
+         - Word-level timestamps for diarization mode
+      2. Speaker diarization (pyannote)
     """
 
     def __init__(self, config):
@@ -64,9 +66,17 @@ class TranscriptionService:
         return "cpu"
 
     def _transcribe_with_transformers(
-        self, audio_path: str, source_language: Optional[str] = None
+        self,
+        audio_path: str,
+        source_language: Optional[str] = None,
+        word_timestamps: bool = False,
     ) -> tuple[list[dict], str]:
-        """Transcribe using HuggingFace transformers Whisper (pure PyTorch)."""
+        """Transcribe using HuggingFace transformers Whisper (pure PyTorch).
+
+        Args:
+            word_timestamps: If True, return word-level timestamps (for diarization).
+                             If False, return segment-level timestamps (faster, for subtitles-only).
+        """
         from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
         device = self._get_device()
@@ -91,6 +101,8 @@ class TranscriptionService:
         if source_language:
             generate_kwargs["language"] = source_language
 
+        ts_mode = "word" if word_timestamps else True
+
         pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
@@ -100,14 +112,30 @@ class TranscriptionService:
             device=device,
             chunk_length_s=30,
             batch_size=self.config.whisper_batch_size,
-            return_timestamps=True,
+            return_timestamps=ts_mode,
         )
 
-        logger.info("Transcribing with transformers Whisper...")
+        mode_label = "word-level" if word_timestamps else "segment-level"
+        logger.info(f"Transcribing with transformers Whisper ({mode_label} timestamps)...")
         result = pipe(audio_path, generate_kwargs=generate_kwargs)
 
         detected_lang = source_language or "en"
 
+        if word_timestamps:
+            segments, words_flat = self._parse_word_level_output(result)
+            logger.info(f"Transcription complete: {len(segments)} segments, {len(words_flat)} words, lang={detected_lang}")
+        else:
+            segments = self._parse_segment_level_output(result)
+            logger.info(f"Transcription complete: {len(segments)} segments, lang={detected_lang}")
+
+        del pipe, model, processor
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        return segments, detected_lang
+
+    def _parse_segment_level_output(self, result: dict) -> list[dict]:
         segments = []
         if "chunks" in result:
             for chunk in result["chunks"]:
@@ -125,14 +153,60 @@ class TranscriptionService:
                 "end": 0.0,
                 "text": result["text"].strip(),
             })
+        return segments
 
-        del pipe, model, processor
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+    def _parse_word_level_output(self, result: dict) -> tuple[list[dict], list[dict]]:
+        """Parse word-level Whisper output into segments with word arrays.
 
-        logger.info(f"Transcription complete: {len(segments)} raw segments, lang={detected_lang}")
-        return segments, detected_lang
+        Groups consecutive words into segments based on pauses (>0.5s gap)
+        and sentence boundaries (. ! ?).
+        """
+        words_flat = []
+        if "chunks" in result:
+            for chunk in result["chunks"]:
+                ts = chunk.get("timestamp", (0.0, 0.0))
+                start = ts[0] if ts[0] is not None else 0.0
+                end = ts[1] if ts[1] is not None else start
+                word_text = chunk.get("text", "").strip()
+                if word_text:
+                    words_flat.append({
+                        "start": start,
+                        "end": end if end > start else start + 0.1,
+                        "word": word_text,
+                        "score": 1.0,
+                    })
+
+        if not words_flat:
+            text = result.get("text", "").strip()
+            return [{"start": 0.0, "end": 0.0, "text": text, "words": []}], []
+
+        segments = []
+        current_words = []
+        PAUSE_THRESHOLD = 0.5
+        SENTENCE_ENDINGS = {'.', '!', '?'}
+
+        for i, w in enumerate(words_flat):
+            current_words.append(w)
+
+            is_sentence_end = any(w["word"].rstrip().endswith(c) for c in SENTENCE_ENDINGS)
+            next_has_gap = (
+                i + 1 < len(words_flat)
+                and words_flat[i + 1]["start"] - w["end"] > PAUSE_THRESHOLD
+            )
+            is_last = i == len(words_flat) - 1
+
+            if is_sentence_end or next_has_gap or is_last:
+                seg_text = " ".join(cw["word"] for cw in current_words).strip()
+                seg_text = seg_text.replace("  ", " ")
+                segments.append({
+                    "start": current_words[0]["start"],
+                    "end": current_words[-1]["end"],
+                    "text": seg_text,
+                    "words": list(current_words),
+                })
+                current_words = []
+
+        return segments, words_flat
 
     def transcribe_only(
         self,
@@ -149,7 +223,7 @@ class TranscriptionService:
             progress_callback(0.0, "transcribing")
 
         raw_segments, detected_lang = self._transcribe_with_transformers(
-            audio_path, source_language
+            audio_path, source_language, word_timestamps=False
         )
 
         audio = whisperx.load_audio(audio_path)
@@ -189,64 +263,31 @@ class TranscriptionService:
     ) -> TranscriptionResult:
         import whisperx
 
-        device = self._get_device()
         hf_token = self.config.hf_token
 
-        # --- Stage 1: Transcribe (pure PyTorch — works on Blackwell) ---
+        # --- Stage 1: Transcribe with word-level timestamps (all on GPU 0) ---
         if progress_callback:
             progress_callback(0.0, "transcribing")
 
         raw_segments, detected_lang = self._transcribe_with_transformers(
-            audio_path, source_language
+            audio_path, source_language, word_timestamps=True
         )
 
-        if progress_callback:
-            progress_callback(0.35, "aligning")
-
-        # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
-        # Use primary GPU (cuda:0) — Whisper has been freed, context is warm
-        align_device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu and torch.cuda.is_available() else "cpu"
-        logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on {align_device}...")
         audio = whisperx.load_audio(audio_path)
         duration = len(audio) / 16000.0
 
-        try:
-            model_a, metadata = whisperx.load_align_model(
-                language_code=detected_lang,
-                device=align_device,
-            )
-            aligned = whisperx.align(
-                raw_segments,
-                model_a,
-                metadata,
-                audio,
-                align_device,
-                return_char_alignments=False,
-            )
-
-            del model_a
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-
-            aligned_segments = aligned.get("segments", raw_segments)
-        except Exception as e:
-            logger.warning(f"Alignment failed (using raw timestamps): {e}")
-            aligned_segments = raw_segments
-
         if progress_callback:
-            progress_callback(0.55, "diarizing")
+            progress_callback(0.50, "diarizing")
 
-        # --- Stage 3: Speaker diarization (pyannote via WhisperX) ---
+        # --- Stage 2: Speaker diarization (pyannote) ---
         num_speakers = 1
-        result_data = {"segments": aligned_segments}
+        result_data = {"segments": raw_segments}
 
         if hf_token:
             try:
                 diarize_device = torch.device(f"cuda:{self.config.secondary_gpu_id}") if self.config.use_gpu and torch.cuda.is_available() else torch.device("cpu")
                 logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
 
-                # Try whisperx.DiarizationPipeline first, fall back to pyannote directly
                 diarize_model = None
                 try:
                     diarize_model = whisperx.DiarizationPipeline(
@@ -273,12 +314,10 @@ class TranscriptionService:
                     else:
                         diarize_segments = diarize_model(audio)
 
-                    # Convert pyannote output to DataFrame for whisperx
                     import pandas as pd
                     if not isinstance(diarize_segments, pd.DataFrame):
                         try:
                             rows = []
-                            # DiarizeOutput wrapper — extract the Annotation from .speaker_diarization
                             annotation = None
                             if hasattr(diarize_segments, "speaker_diarization"):
                                 annotation = diarize_segments.speaker_diarization
