@@ -270,6 +270,7 @@ class TTSService:
                 streaming=False,
             )
 
+            import torch as _torch
             all_audio = []
             all_bytes = b""
             sample_rate = 44100
@@ -282,24 +283,37 @@ class TTSService:
                 if hasattr(result, "sample_rate") and result.sample_rate:
                     sample_rate = result.sample_rate
 
-                if hasattr(result, "audio"):
-                    audio = result.audio
-                    if audio is None:
-                        logger.warning("result.audio is None, skipping")
-                        continue
-                    if hasattr(audio, "cpu"):
-                        audio = audio.cpu().numpy()
-                    if isinstance(audio, np.ndarray):
-                        if audio.ndim > 1:
-                            audio = audio.squeeze()
-                        if audio.size > 0:
-                            all_audio.append(audio)
-                            logger.info(f"Got audio chunk: shape={audio.shape}, dtype={audio.dtype}, sr={sample_rate}")
-                    elif isinstance(audio, bytes) and len(audio) > 0:
-                        all_bytes += audio
-                        logger.info(f"Got audio bytes: {len(audio)} bytes")
-                elif isinstance(result, bytes):
-                    all_bytes += result
+                audio = getattr(result, "audio", None)
+
+                if audio is None:
+                    logger.warning(f"result.audio is None (type={type(result).__name__}, "
+                                   f"code={getattr(result, 'code', 'N/A')})")
+                    continue
+
+                logger.info(f"result.audio type={type(audio).__name__}, "
+                            f"repr={repr(audio)[:200]}")
+
+                if hasattr(audio, "cpu"):
+                    audio = audio.cpu().numpy()
+                if isinstance(audio, np.ndarray):
+                    if audio.ndim > 1:
+                        audio = audio.squeeze()
+                    if audio.size > 0:
+                        all_audio.append(audio)
+                        logger.info(f"Got audio chunk: shape={audio.shape}, dtype={audio.dtype}, sr={sample_rate}")
+                elif isinstance(audio, (bytes, bytearray)) and len(audio) > 0:
+                    all_bytes += bytes(audio)
+                    logger.info(f"Got audio bytes: {len(audio)} bytes")
+                elif hasattr(audio, "read"):
+                    chunk = audio.read()
+                    if chunk:
+                        all_bytes += chunk
+                        logger.info(f"Got audio from stream: {len(chunk)} bytes")
+                else:
+                    logger.warning(f"Unknown audio type: {type(audio).__name__}")
+
+            if _torch.cuda.is_available():
+                _torch.cuda.synchronize()
 
             if all_audio:
                 combined = np.concatenate(all_audio) if len(all_audio) > 1 else all_audio[0]
@@ -398,6 +412,12 @@ class TTSService:
                 logger.error(f"Failed to synthesize segment {i}: {e}")
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
+
+            import torch as _torch
+            if _torch.cuda.is_available():
+                _torch.cuda.synchronize()
+                if i % 5 == 4:
+                    _torch.cuda.empty_cache()
 
             if progress_callback:
                 progress_callback((i + 1) / total)
