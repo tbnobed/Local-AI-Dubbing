@@ -246,6 +246,10 @@ class TTSService:
         """
         engine = self._load_engine()
 
+        if len(text) > 300:
+            logger.warning(f"Truncating long text ({len(text)} chars) to 300 chars for TTS")
+            text = text[:300]
+
         if engine == "cli":
             self._synthesize_via_cli(text, speaker_wav, output_path)
         else:
@@ -268,6 +272,7 @@ class TTSService:
                 ],
                 format="wav",
                 streaming=False,
+                max_new_tokens=512,
             )
 
             import torch as _torch
