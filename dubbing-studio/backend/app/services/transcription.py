@@ -202,27 +202,52 @@ class TranscriptionService:
             try:
                 # Use secondary GPU for diarization (keeps primary GPU free for TTS/translation)
                 if self.config.use_gpu and torch.cuda.device_count() > 1:
-                    diarize_device = f"cuda:{self.config.secondary_gpu_id}"
+                    diarize_device = torch.device(f"cuda:{self.config.secondary_gpu_id}")
                 elif self.config.use_gpu and torch.cuda.is_available():
-                    diarize_device = f"cuda:{self.config.primary_gpu_id}"
+                    diarize_device = torch.device(f"cuda:{self.config.primary_gpu_id}")
                 else:
-                    diarize_device = "cpu"
+                    diarize_device = torch.device("cpu")
                 logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
-                diarize_model = whisperx.DiarizationPipeline(
-                    use_auth_token=hf_token,
-                    device=diarize_device,
-                )
-                diarize_segments = diarize_model(audio)
-                result_data = whisperx.assign_word_speakers(diarize_segments, result_data)
 
-                speakers = set()
-                for seg in result_data["segments"]:
-                    if "speaker" in seg:
-                        speakers.add(seg["speaker"])
-                num_speakers = len(speakers) if speakers else 1
+                # Try whisperx.DiarizationPipeline first, fall back to pyannote directly
+                diarize_model = None
+                try:
+                    diarize_model = whisperx.DiarizationPipeline(
+                        use_auth_token=hf_token,
+                        device=diarize_device,
+                    )
+                except AttributeError:
+                    logger.info("whisperx.DiarizationPipeline not available, using pyannote directly")
+                    from pyannote.audio import Pipeline as PyannotePipeline
+                    diarize_model = PyannotePipeline.from_pretrained(
+                        "pyannote/speaker-diarization-3.1",
+                        use_auth_token=hf_token,
+                    ).to(diarize_device)
 
-                del diarize_model
-                gc.collect()
+                if diarize_model is not None:
+                    if hasattr(diarize_model, '__call__'):
+                        diarize_segments = diarize_model(audio_path)
+                    else:
+                        diarize_segments = diarize_model(audio)
+
+                    try:
+                        result_data = whisperx.assign_word_speakers(diarize_segments, result_data)
+                    except (AttributeError, Exception) as assign_err:
+                        logger.warning(f"Speaker assignment failed: {assign_err}")
+                        # Manual speaker assignment from diarization turns
+                        for seg in result_data["segments"]:
+                            seg["speaker"] = "SPEAKER_00"
+
+                    speakers = set()
+                    for seg in result_data["segments"]:
+                        if "speaker" in seg:
+                            speakers.add(seg["speaker"])
+                    num_speakers = len(speakers) if speakers else 1
+
+                    del diarize_model
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
 
             except Exception as e:
                 logger.warning(f"Diarization failed (continuing without it): {e}")

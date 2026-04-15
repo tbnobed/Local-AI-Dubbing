@@ -1,0 +1,17 @@
+[2026-04-15 11:43:59,381: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 11:44:15,493: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[26de8cae-2952-4788-9252-fad33a6ac417] received
+[2026-04-15 11:44:15,495: INFO/ForkPoolWorker-1] Starting pipeline for job 3d2f3231-f7e4-413c-a721-378104006bbc
+[2026-04-15 11:44:15,599: INFO/ForkPoolWorker-1] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/3d2f3231-f7e4-413c-a721-378104006bbc.mp4
+[2026-04-15 11:44:18,388: INFO/ForkPoolWorker-1] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 11:44:18,555: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 11:44:20,598: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 11:44:20,598: WARNING/ForkPoolWorker-1] Device set to use cuda:0
+[2026-04-15 11:44:20,598: WARNING/ForkPoolWorker-1] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 11:44:20,598: INFO/ForkPoolWorker-1] Transcribing with transformers Whisper...
+[2026-04-15 11:44:23,585: INFO/ForkPoolWorker-1] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 11:44:23,599: INFO/ForkPoolWorker-1] Aligning words with WhisperX (lang=en)...
+[2026-04-15 11:44:26,057: INFO/ForkPoolWorker-1] Running speaker diarization (pyannote community-1)...
+[2026-04-15 11:44:26,057: WARNING/ForkPoolWorker-1] Diarization failed (continuing without it): module 'whisperx' has no attribute 'DiarizationPipeline'
+[2026-04-15 11:44:26,062: INFO/ForkPoolWorker-1] Pipeline complete: 45 segments, 1 speakers, lang=en
+[2026-04-15 11:44:26,086: INFO/ForkPoolWorker-1] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 11:44:29,354: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
