@@ -331,28 +331,46 @@ class TTSService:
         audio_path: str,
         output_path: str,
         target_duration: float,
-        min_rate: float = 0.75,
-        max_rate: float = 1.5,
+        min_rate: float = 0.5,
+        max_rate: float = 2.0,
     ) -> str:
-        """Time-stretch audio to fit within target duration using librosa."""
-        import librosa
+        """Time-stretch audio to fit within target duration using ffmpeg atempo."""
+        import subprocess, shutil
 
-        y, sr = librosa.load(audio_path, sr=None)
-        current_duration = len(y) / sr
+        info = sf.info(audio_path)
+        current_duration = info.duration
 
         if current_duration == 0:
-            sf.write(output_path, y, sr)
+            shutil.copy2(audio_path, output_path)
             return output_path
 
         rate = current_duration / target_duration
         rate = max(min_rate, min(max_rate, rate))
 
         if abs(rate - 1.0) < 0.02:
-            sf.write(output_path, y, sr)
+            shutil.copy2(audio_path, output_path)
             return output_path
 
-        y_stretched = librosa.effects.time_stretch(y, rate=rate)
-        sf.write(output_path, y_stretched, sr)
+        logger.info(f"Time-stretching {current_duration:.1f}s -> {target_duration:.1f}s (rate={rate:.2f})")
+
+        atempo_filters = []
+        r = rate
+        while r > 2.0:
+            atempo_filters.append("atempo=2.0")
+            r /= 2.0
+        while r < 0.5:
+            atempo_filters.append("atempo=0.5")
+            r *= 2.0
+        atempo_filters.append(f"atempo={r:.4f}")
+
+        filter_str = ",".join(atempo_filters)
+        cmd = [
+            "ffmpeg", "-y", "-i", audio_path,
+            "-filter:a", filter_str,
+            "-loglevel", "error",
+            output_path,
+        ]
+        subprocess.run(cmd, check=True, timeout=30)
         return output_path
 
     def synthesize_all_segments(
@@ -390,12 +408,14 @@ class TTSService:
             stretched_path = str(output_dir / f"seg_{i:04d}.wav")
 
             try:
+                logger.info(f"Synthesizing segment {i}/{total}: speaker={speaker_id}, text='{translated_text[:60]}...'")
                 synth_duration = self.synthesize_segment(
                     text=translated_text,
                     speaker_wav=speaker_wav,
                     language=target_language,
                     output_path=raw_path,
                 )
+                logger.info(f"Segment {i} synthesized: {synth_duration:.1f}s audio")
 
                 original_duration = seg.end - seg.start
                 self.time_stretch_audio(
@@ -403,12 +423,13 @@ class TTSService:
                     output_path=stretched_path,
                     target_duration=original_duration,
                 )
+                logger.info(f"Segment {i} stretched to fit {original_duration:.1f}s slot")
 
                 seg.synth_audio_path = stretched_path
                 seg.synth_duration = synth_duration
 
             except Exception as e:
-                logger.error(f"Failed to synthesize segment {i}: {e}")
+                logger.error(f"Failed to synthesize segment {i}: {e}", exc_info=True)
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
 
