@@ -1,0 +1,81 @@
+cd ~/Local-AI-Dubbing/dubbing-studio
+./scripts/stop.sh
+pkill -9 -f "celery.*worker"
+find backend -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
+./scripts/start.sh
+Stopping DubbingStudio...
+Redis stopped
+Done.
+
+╔══════════════════════════════════════════╗
+║       DubbingStudio Starting             ║
+╚══════════════════════════════════════════╝
+
+Frontend already built
+Starting Redis...
+Redis started
+Starting Celery worker...
+Celery worker started
+
+╔══════════════════════════════════════════╗
+║   DubbingStudio ready at                 ║
+║   http://localhost:8000                  ║
+║   API docs: http://localhost:8000/docs   ║
+╚══════════════════════════════════════════╝
+
+Logs:
+  Celery: tail -f /tmp/dubbing-celery.log
+  Redis:  tail -f /tmp/dubbing-redis.log
+
+Press Ctrl+C to stop the server (Redis and Celery will keep running)
+Run ./scripts/stop.sh to stop everything
+
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started parent process [6945]
+INFO:     Started server process [6947]
+INFO:     Waiting for application startup.
+INFO:     Started server process [6948]
+INFO:     Waiting for application startup.
+2026-04-15 16:09:23,740 [INFO] app.main: Initializing database...
+2026-04-15 16:09:23,740 [INFO] app.main: Initializing database...
+2026-04-15 16:09:23,741 [INFO] app.main: DubbingStudio ready.
+INFO:     Application startup complete.
+2026-04-15 16:09:23,742 [INFO] app.main: DubbingStudio ready.
+INFO:     Application startup complete.
+INFO:     10.10.1.150:56690 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:51850 - "WebSocket /ws/jobs/9686ca58-816b-4251-94b9-93a93292e0af" [accepted]
+2026-04-15 16:09:24,155 [INFO] app.api.websocket: WebSocket connected for job 9686ca58-816b-4251-94b9-93a93292e0af
+INFO:     connection open
+INFO:     172.31.204.16:50667 - "WebSocket /ws/jobs/9686ca58-816b-4251-94b9-93a93292e0af" [accepted]
+2026-04-15 16:09:26,149 [INFO] app.api.websocket: WebSocket connected for job 9686ca58-816b-4251-94b9-93a93292e0af
+INFO:     connection open
+INFO:     10.10.1.150:50123 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:56690 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     10.10.1.150:56690 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:56690 - "GET / HTTP/1.1" 200 OK
+2026-04-15 16:09:32,566 [INFO] app.api.websocket: WebSocket disconnected for job 9686ca58-816b-4251-94b9-93a93292e0af
+INFO:     connection closed
+INFO:     10.10.1.150:56690 - "GET /assets/index-BnUd-3oh.js HTTP/1.1" 304 Not Modified
+INFO:     10.10.1.150:60631 - "GET /assets/index-BBleCSQh.css HTTP/1.1" 304 Not Modified
+INFO:     10.10.1.150:56690 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:57359 - "GET /icon.svg HTTP/1.1" 200 OK
+INFO:     10.10.1.150:56783 - "WebSocket /ws/jobs/9686ca58-816b-4251-94b9-93a93292e0af" [accepted]
+2026-04-15 16:09:32,598 [INFO] app.api.websocket: WebSocket connected for job 9686ca58-816b-4251-94b9-93a93292e0af
+INFO:     connection open
+INFO:     10.10.1.150:60631 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     10.10.1.150:60631 - "DELETE /api/jobs/9686ca58-816b-4251-94b9-93a93292e0af HTTP/1.1" 200 OK
+2026-04-15 16:09:34,827 [INFO] app.api.websocket: WebSocket disconnected for job 9686ca58-816b-4251-94b9-93a93292e0af
+INFO:     connection closed
+INFO:     10.10.1.150:57359 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:60631 - "POST /api/jobs/9686ca58-816b-4251-94b9-93a93292e0af/retry HTTP/1.1" 200 OK
+INFO:     10.10.1.150:49736 - "WebSocket /ws/jobs/9686ca58-816b-4251-94b9-93a93292e0af" [accepted]
+2026-04-15 16:09:37,640 [INFO] app.api.websocket: WebSocket connected for job 9686ca58-816b-4251-94b9-93a93292e0af
+INFO:     connection open
+INFO:     10.10.1.150:57359 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:60631 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     10.10.1.150:60631 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:50887 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     10.10.1.150:50613 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54377 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     10.10.1.150:60631 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     10.10.1.150:60631 - "GET /api/jobs/ HTTP/1.1" 200 OK
