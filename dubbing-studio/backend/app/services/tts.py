@@ -270,47 +270,35 @@ class TTSService:
                 streaming=False,
             )
 
-            results = list(engine.inference(request))
-
-            audio_chunks = []
+            all_audio = []
             sample_rate = 44100
-            for result in results:
-                if isinstance(result, bytes):
-                    audio_chunks.append(result)
-                elif hasattr(result, "audio"):
+
+            for result in engine.inference(request):
+                if hasattr(result, "audio") and hasattr(result, "sample_rate"):
+                    sample_rate = result.sample_rate
                     audio = result.audio
-                    if isinstance(audio, bytes):
-                        audio_chunks.append(audio)
-                    elif hasattr(audio, "numpy"):
-                        audio_np = audio.cpu().numpy() if hasattr(audio, "cpu") else audio.numpy()
-                        if hasattr(result, "sample_rate"):
-                            sample_rate = result.sample_rate
-                        sf.write(output_path, audio_np, sample_rate)
+                    if hasattr(audio, "cpu"):
+                        audio = audio.cpu().numpy()
+                    if isinstance(audio, np.ndarray):
+                        if audio.ndim > 1:
+                            audio = audio.squeeze()
+                        all_audio.append(audio)
+                    elif isinstance(audio, bytes):
+                        with open(output_path, "wb") as f:
+                            f.write(audio)
                         info = sf.info(output_path)
                         return info.duration
-                    elif isinstance(audio, np.ndarray):
-                        if hasattr(result, "sample_rate"):
-                            sample_rate = result.sample_rate
-                        sf.write(output_path, audio, sample_rate)
-                        info = sf.info(output_path)
-                        return info.duration
-                elif hasattr(result, "numpy"):
-                    audio_np = result.cpu().numpy() if hasattr(result, "cpu") else result.numpy()
-                    sf.write(output_path, audio_np, sample_rate)
+                elif isinstance(result, bytes):
+                    with open(output_path, "wb") as f:
+                        f.write(result)
                     info = sf.info(output_path)
                     return info.duration
 
-            if audio_chunks:
-                audio_data = b"".join(audio_chunks)
-                with open(output_path, "wb") as f:
-                    f.write(audio_data)
+            if all_audio:
+                combined = np.concatenate(all_audio) if len(all_audio) > 1 else all_audio[0]
+                sf.write(output_path, combined, sample_rate)
             else:
-                raise RuntimeError(
-                    f"Fish Speech returned {len(results)} results of type "
-                    f"{type(results[0]).__name__ if results else 'empty'}, "
-                    f"could not extract audio data. "
-                    f"Attrs: {dir(results[0]) if results else 'N/A'}"
-                )
+                raise RuntimeError("Fish Speech inference produced no audio output")
 
         info = sf.info(output_path)
         return info.duration
