@@ -1,19 +1,20 @@
 """
 Text-to-Speech with voice cloning using Fish Speech 1.5.
 
-Fish Speech advantages over Coqui XTTS v2:
-  - Actively maintained (XTTS/Coqui is discontinued)
-  - State-of-the-art zero-shot voice cloning quality
-  - 80+ languages supported
-  - Python 3.12 native, CUDA 12.x compatible
-  - ~15x real-time on RTX 4090 class GPUs
+Fish Speech is installed from source (github.com/fishaudio/fish-speech)
+and provides the TTSInferenceEngine for programmatic usage.
 
-Uses a Dual-AR architecture (4B slow + 400M fast) for high-fidelity synthesis.
+Three-stage pipeline:
+  1. Encode reference audio → VQ tokens (voice characteristics)
+  2. Generate semantic tokens from text (using voice prompt)
+  3. Decode tokens → waveform
 """
 import logging
 import os
+import subprocess
 from pathlib import Path
 from typing import Optional
+
 import numpy as np
 import soundfile as sf
 
@@ -23,41 +24,155 @@ logger = logging.getLogger(__name__)
 class TTSService:
     def __init__(self, config):
         self.config = config
-        self._tts = None
-        self._sample_rate = None
+        self._engine = None
+        self._decoder_model = None
+        self._llm_queue = None
+        self._codec = None
+        self._sample_rate = 44100
+        self._checkpoint_path = None
 
-    def _load_model(self):
-        if self._tts is None:
-            try:
-                from fish_speech_lib.inference import FishSpeech
-                logger.info("Loading Fish Speech model via fish-speech-lib...")
-                device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
-                self._tts = FishSpeech(device=device)
-                self._sample_rate = 44100
-                logger.info("Fish Speech loaded via fish-speech-lib.")
-            except ImportError:
-                logger.info("fish-speech-lib not available, trying fish-speech-rs...")
-                try:
-                    from fish_speech import FireflyCodec, LM
-                    from huggingface_hub import snapshot_download
+    def _find_checkpoint(self) -> str:
+        """Locate the Fish Speech checkpoint directory."""
+        candidates = [
+            self.config.models_dir / "fish-speech" / "fish-speech-1.5",
+            self.config.models_dir / "fish-speech",
+            Path(self.config.base_dir).parent / "fish-speech" / "checkpoints" / "fish-speech-1.5",
+        ]
+        for p in candidates:
+            if p.exists() and (p / "config.json").exists():
+                return str(p)
 
-                    model_dir = snapshot_download(
-                        self.config.fish_speech_model,
-                        cache_dir=str(self.config.models_dir / "fish-speech"),
-                    )
-                    codec = FireflyCodec(model_dir, version="1.5", device="cuda")
-                    lm = LM(model_dir, version="1.5", device="cuda", dtype="bf16")
-                    self._tts = {"codec": codec, "lm": lm, "type": "native"}
-                    self._sample_rate = codec.sample_rate
-                    logger.info("Fish Speech loaded via fish-speech-rs.")
-                except ImportError:
-                    logger.error(
-                        "Neither fish-speech-lib nor fish-speech-rs found. "
-                        "Install one: pip install fish-speech-lib OR pip install fish-speech-rs"
-                    )
-                    raise RuntimeError("No Fish Speech backend available")
+        from huggingface_hub import snapshot_download
+        logger.info("Downloading Fish Speech 1.5 checkpoint...")
+        path = snapshot_download(
+            "fishaudio/fish-speech-1.5",
+            local_dir=str(self.config.models_dir / "fish-speech" / "fish-speech-1.5"),
+        )
+        return path
 
-        return self._tts
+    def _load_engine(self):
+        """Load the Fish Speech TTSInferenceEngine."""
+        if self._engine is not None:
+            return self._engine
+
+        import torch
+
+        checkpoint_path = self._find_checkpoint()
+        self._checkpoint_path = checkpoint_path
+        device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
+
+        try:
+            from fish_speech.inference_engine import TTSInferenceEngine
+            from fish_speech.models.text2semantic.inference import launch_thread_safe_queue
+            from fish_speech.models.vqgan.inference import load_model as load_decoder_model
+
+            logger.info(f"Loading Fish Speech decoder from {checkpoint_path}")
+
+            decoder_ckpt = None
+            for name in [
+                "firefly-gan-vq-fsq-8x1024-21hz-generator.pth",
+                "codec.pth",
+            ]:
+                p = Path(checkpoint_path) / name
+                if p.exists():
+                    decoder_ckpt = str(p)
+                    break
+
+            if not decoder_ckpt:
+                raise FileNotFoundError(
+                    f"No decoder checkpoint found in {checkpoint_path}. "
+                    f"Expected firefly-gan-vq-fsq-8x1024-21hz-generator.pth or codec.pth"
+                )
+
+            self._decoder_model = load_decoder_model(
+                config_name="firefly_gan_vq",
+                checkpoint_path=decoder_ckpt,
+                device=device,
+            )
+
+            precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+
+            self._llm_queue = launch_thread_safe_queue(
+                checkpoint_path=checkpoint_path,
+                device=device,
+                precision=precision,
+                compile=False,
+            )
+
+            self._engine = TTSInferenceEngine(
+                llm_queue=self._llm_queue,
+                decoder_model=self._decoder_model,
+                precision=precision,
+                compile=False,
+            )
+
+            logger.info(f"Fish Speech TTSInferenceEngine loaded on {device}")
+            return self._engine
+
+        except ImportError:
+            logger.info("TTSInferenceEngine not available, falling back to CLI pipeline")
+            self._engine = "cli"
+            return self._engine
+
+    def _synthesize_via_cli(
+        self,
+        text: str,
+        speaker_wav: str,
+        output_path: str,
+    ):
+        """Fallback: use Fish Speech CLI tools for synthesis."""
+        fish_speech_dir = Path(self.config.base_dir).parent / "fish-speech"
+        checkpoint_path = self._checkpoint_path or self._find_checkpoint()
+        temp_dir = Path(output_path).parent
+
+        decoder_ckpt = None
+        for name in [
+            "firefly-gan-vq-fsq-8x1024-21hz-generator.pth",
+            "codec.pth",
+        ]:
+            p = Path(checkpoint_path) / name
+            if p.exists():
+                decoder_ckpt = str(p)
+                break
+
+        fake_npy = str(temp_dir / "ref_tokens.npy")
+        codes_npy = str(temp_dir / "codes_0.npy")
+
+        # Step 1: Encode reference audio
+        cmd1 = [
+            "python3", str(fish_speech_dir / "fish_speech" / "models" / "dac" / "inference.py"),
+            "-i", speaker_wav,
+            "--checkpoint-path", decoder_ckpt or checkpoint_path,
+        ]
+        logger.info(f"Fish Speech CLI step 1: encoding reference audio")
+        subprocess.run(cmd1, check=True, cwd=str(fish_speech_dir), capture_output=True)
+
+        # Step 2: Generate semantic tokens
+        cmd2 = [
+            "python3", str(fish_speech_dir / "fish_speech" / "models" / "text2semantic" / "inference.py"),
+            "--text", text,
+            "--prompt-text", "",
+            "--prompt-tokens", fake_npy,
+            "--checkpoint-path", checkpoint_path,
+        ]
+        logger.info(f"Fish Speech CLI step 2: generating semantic tokens")
+        subprocess.run(cmd2, check=True, cwd=str(fish_speech_dir), capture_output=True)
+
+        # Step 3: Decode to audio
+        cmd3 = [
+            "python3", str(fish_speech_dir / "fish_speech" / "models" / "dac" / "inference.py"),
+            "-i", codes_npy,
+        ]
+        logger.info(f"Fish Speech CLI step 3: decoding to audio")
+        subprocess.run(cmd3, check=True, cwd=str(fish_speech_dir), capture_output=True)
+
+        # Move output
+        cli_output = Path(fish_speech_dir) / "fake.wav"
+        if cli_output.exists():
+            import shutil
+            shutil.move(str(cli_output), output_path)
+        else:
+            raise FileNotFoundError("Fish Speech CLI did not produce output audio")
 
     def synthesize_segment(
         self,
@@ -70,39 +185,32 @@ class TTSService:
         Synthesize speech for one segment, cloning the provided speaker voice.
         Returns duration of synthesized audio in seconds.
         """
-        tts = self._load_model()
+        engine = self._load_engine()
 
-        if isinstance(tts, dict) and tts.get("type") == "native":
-            # fish-speech-rs native API
-            codec = tts["codec"]
-            lm = tts["lm"]
-
-            ref_audio, ref_sr = sf.read(speaker_wav, dtype="float32")
-            if ref_audio.ndim > 1:
-                ref_audio = ref_audio.mean(axis=1)
-            ref_audio = ref_audio.reshape(1, -1)
-
-            codes = codec.encode(ref_audio, ref_sr)
-            speaker_prompt = lm.get_speaker_prompt(
-                [{"text": "", "codes": codes}],
-                sysprompt="Speak out the provided text.",
-            )
-            generated_codes = lm.generate([text], speaker_prompt=speaker_prompt)
-            pcm = codec.decode(generated_codes)
-
-            sf.write(output_path, pcm.flatten(), self._sample_rate)
+        if engine == "cli":
+            self._synthesize_via_cli(text, speaker_wav, output_path)
         else:
-            # fish-speech-lib simple API
-            # Read reference text from the first few seconds (empty is OK for zero-shot)
-            sample_rate, audio = tts(
+            from fish_speech.utils.schema import ServeTTSRequest, ServeReferenceAudio
+
+            ref_audio_bytes = open(speaker_wav, "rb").read()
+
+            request = ServeTTSRequest(
                 text=text,
-                reference_audio=speaker_wav,
-                reference_audio_text="",
-                max_new_tokens=2048,
-                chunk_length=1000,
+                references=[
+                    ServeReferenceAudio(
+                        audio=ref_audio_bytes,
+                        text="",
+                    )
+                ],
+                format="wav",
+                streaming=False,
             )
-            sf.write(output_path, audio, sample_rate, format="WAV")
-            self._sample_rate = sample_rate
+
+            result_chunks = list(engine.inference(request))
+            audio_data = b"".join(result_chunks)
+
+            with open(output_path, "wb") as f:
+                f.write(audio_data)
 
         info = sf.info(output_path)
         return info.duration
@@ -115,9 +223,7 @@ class TTSService:
         min_rate: float = 0.75,
         max_rate: float = 1.5,
     ) -> str:
-        """
-        Time-stretch audio to fit within target duration using librosa.
-        """
+        """Time-stretch audio to fit within target duration using librosa."""
         import librosa
 
         y, sr = librosa.load(audio_path, sr=None)
@@ -146,9 +252,7 @@ class TTSService:
         output_dir: str,
         progress_callback=None,
     ) -> list:
-        """
-        Synthesize all translated segments with voice cloning.
-        """
+        """Synthesize all translated segments with voice cloning."""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -183,7 +287,6 @@ class TTSService:
                 )
 
                 original_duration = seg.end - seg.start
-
                 self.time_stretch_audio(
                     audio_path=raw_path,
                     output_path=stretched_path,
@@ -204,10 +307,17 @@ class TTSService:
         return segments
 
     def unload(self):
-        if self._tts is not None:
-            del self._tts
-            self._tts = None
-            import torch
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            logger.info("TTS model unloaded.")
+        """Release GPU memory."""
+        import torch
+
+        if self._engine is not None and self._engine != "cli":
+            del self._engine
+            del self._decoder_model
+            del self._llm_queue
+        self._engine = None
+        self._decoder_model = None
+        self._llm_queue = None
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        logger.info("TTS model unloaded.")

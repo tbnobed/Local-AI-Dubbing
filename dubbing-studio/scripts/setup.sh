@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
+FISH_SPEECH_DIR="$ROOT_DIR/fish-speech"
 
 echo ""
 echo "╔══════════════════════════════════════════╗"
@@ -37,6 +38,22 @@ if command -v nvidia-smi &>/dev/null; then
 else
     echo "WARNING: nvidia-smi not found. CUDA support may not be available."
 fi
+
+# Detect CUDA version for PyTorch index URL
+CUDA_INDEX="cu124"
+if command -v nvidia-smi &>/dev/null; then
+    CUDA_DRIVER_VER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)
+    echo "Driver version: $CUDA_DRIVER_VER"
+
+    # Check if we have a Blackwell GPU (RTX 50xx, sm_120) needing CUDA 12.8+
+    GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)
+    if echo "$GPU_NAME" | grep -qiE "RTX 50[0-9]{2}|Blackwell"; then
+        echo "Detected Blackwell-architecture GPU: $GPU_NAME"
+        echo "Using CUDA 12.8 index for sm_120 support."
+        CUDA_INDEX="cu128"
+    fi
+fi
+echo "PyTorch CUDA index: $CUDA_INDEX"
 
 # Check ffmpeg
 if ! command -v ffmpeg &>/dev/null; then
@@ -71,68 +88,95 @@ else
 fi
 
 source venv/bin/activate
-pip install --upgrade pip -q
+pip install --upgrade pip setuptools wheel -q
 
 echo ""
 echo "──────────────────────────────────────────"
 echo "Step 2: PyTorch with CUDA"
 echo "──────────────────────────────────────────"
 
-# Detect CUDA version from nvidia-smi
-CUDA_VER=""
-if command -v nvidia-smi &>/dev/null; then
-    CUDA_VER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)
-    echo "Driver version: $CUDA_VER"
-fi
-
-echo "Installing PyTorch with CUDA 12.4 support..."
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 -q
+echo "Installing PyTorch with CUDA ($CUDA_INDEX)..."
+pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
 
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 3: WhisperX (transcription + diarization)"
-echo "──────────────────────────────────────────"
-
-# IMPORTANT: Install WhisperX first, then reinstall PyTorch CUDA
-# (WhisperX can overwrite PyTorch with CPU-only version)
-pip install whisperx -q
-
-# Reinstall PyTorch with CUDA (WhisperX may have overwritten it)
-echo "Re-pinning PyTorch CUDA wheels..."
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 -q
-
-# Fix onnxruntime for GPU diarization
-pip uninstall -y onnxruntime 2>/dev/null || true
-pip install --force-reinstall --no-cache-dir onnxruntime-gpu -q
-
-echo ""
-echo "──────────────────────────────────────────"
-echo "Step 4: Fish Speech (voice cloning TTS)"
-echo "──────────────────────────────────────────"
-
-pip install fish-speech-lib -q 2>/dev/null || {
-    echo "fish-speech-lib not available, trying fish-speech-rs..."
-    pip install fish-speech-rs -q 2>/dev/null || {
-        echo ""
-        echo "NOTE: Fish Speech pip packages not found."
-        echo "You may need to install from source:"
-        echo "  git clone https://github.com/fishaudio/fish-speech.git"
-        echo "  cd fish-speech && pip install -e .[cu124]"
-        echo ""
-    }
-}
-
-echo ""
-echo "──────────────────────────────────────────"
-echo "Step 5: Remaining backend dependencies"
+echo "Step 3: Core backend dependencies"
 echo "──────────────────────────────────────────"
 
 pip install -r requirements.txt -q
 
 echo ""
 echo "──────────────────────────────────────────"
+echo "Step 4: WhisperX (transcription + diarization)"
+echo "──────────────────────────────────────────"
+
+# WhisperX may pull in CPU-only torch as a transitive dep.
+# Install it, then re-pin CUDA torch afterwards.
+pip install whisperx -q
+
+echo "Re-pinning PyTorch CUDA wheels (WhisperX may have overwritten)..."
+pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
+
+# onnxruntime-gpu replaces onnxruntime for GPU-accelerated diarization.
+# faster-whisper requires onnxruntime>=1.14 — onnxruntime-gpu satisfies this.
+pip install onnxruntime-gpu -q 2>/dev/null || {
+    echo "onnxruntime-gpu install failed, keeping onnxruntime (CPU diarization)"
+}
+
+echo ""
+echo "──────────────────────────────────────────"
+echo "Step 5: Fish Speech (voice cloning TTS)"
+echo "──────────────────────────────────────────"
+
+cd "$ROOT_DIR"
+if [ ! -d "$FISH_SPEECH_DIR" ]; then
+    echo "Cloning Fish Speech repository..."
+    git clone https://github.com/fishaudio/fish-speech.git "$FISH_SPEECH_DIR"
+else
+    echo "Fish Speech repository already exists, pulling latest..."
+    cd "$FISH_SPEECH_DIR" && git pull && cd "$ROOT_DIR"
+fi
+
+cd "$FISH_SPEECH_DIR"
+echo "Installing Fish Speech (pip install -e .[$CUDA_INDEX])..."
+pip install -e ".[$CUDA_INDEX]" -q 2>/dev/null || {
+    echo "Fish Speech editable install with [$CUDA_INDEX] failed, trying default..."
+    pip install -e . -q 2>/dev/null || {
+        echo ""
+        echo "WARNING: Fish Speech install failed."
+        echo "You may need to install it manually:"
+        echo "  cd $FISH_SPEECH_DIR"
+        echo "  pip install -e .[$CUDA_INDEX]"
+        echo ""
+    }
+}
+
+# Re-pin PyTorch CUDA one more time (fish-speech may also overwrite)
+echo "Final PyTorch CUDA re-pin..."
+pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
+
+# Download model checkpoint
+echo "Downloading Fish Speech 1.5 model weights (~3GB)..."
+pip install huggingface-hub[cli] -q
+cd "$BACKEND_DIR"
+mkdir -p data/models/fish-speech
+python3 -c "
+from huggingface_hub import snapshot_download
+print('Downloading fishaudio/fish-speech-1.5...')
+path = snapshot_download(
+    'fishaudio/fish-speech-1.5',
+    local_dir='data/models/fish-speech/fish-speech-1.5',
+)
+print(f'Downloaded to: {path}')
+" || echo "Model download deferred — will download on first run."
+
+echo ""
+echo "──────────────────────────────────────────"
 echo "Step 6: Verify GPU setup"
 echo "──────────────────────────────────────────"
+
+cd "$BACKEND_DIR"
+source venv/bin/activate
 
 python3 -c "
 import torch
@@ -145,8 +189,30 @@ if torch.cuda.is_available():
         mem = torch.cuda.get_device_properties(i).total_mem / 1024**3
         print(f'  GPU {i}: {name} ({mem:.0f} GB)')
 else:
-    print('WARNING: CUDA not detected - pipeline will be very slow on CPU')
-" || echo "Could not verify PyTorch GPU setup"
+    print('WARNING: CUDA not detected — pipeline will be very slow on CPU')
+
+try:
+    import whisperx
+    print(f'WhisperX: OK')
+except ImportError as e:
+    print(f'WhisperX: MISSING ({e})')
+
+try:
+    import transformers
+    print(f'Transformers: {transformers.__version__}')
+except ImportError as e:
+    print(f'Transformers: MISSING ({e})')
+
+try:
+    import fish_speech
+    print(f'Fish Speech: OK')
+except ImportError:
+    try:
+        from fish_speech.inference_engine import TTSInferenceEngine
+        print(f'Fish Speech (engine): OK')
+    except ImportError as e:
+        print(f'Fish Speech: MISSING ({e})')
+" || echo "Could not verify full setup"
 
 echo ""
 echo "──────────────────────────────────────────"
@@ -173,19 +239,19 @@ if [ ! -f ".env" ]; then
     cp .env.example .env
     echo "Created .env from .env.example"
     echo ""
-    echo "╔══════════════════════════════════════════════════════╗"
-    echo "║  ACTION REQUIRED: Set your Hugging Face token       ║"
-    echo "╠══════════════════════════════════════════════════════╣"
-    echo "║  1. Get a free token at:                            ║"
-    echo "║     https://huggingface.co/settings/tokens           ║"
-    echo "║                                                      ║"
-    echo "║  2. Accept model terms at:                           ║"
+    echo "╔══════════════════════════════════════════════════════════╗"
+    echo "║  ACTION REQUIRED: Set your Hugging Face token           ║"
+    echo "╠══════════════════════════════════════════════════════════╣"
+    echo "║  1. Get a free token at:                                ║"
+    echo "║     https://huggingface.co/settings/tokens              ║"
+    echo "║                                                         ║"
+    echo "║  2. Accept model terms at:                              ║"
     echo "║     https://huggingface.co/pyannote/speaker-diarization-3.1  ║"
-    echo "║     https://huggingface.co/pyannote/segmentation-3.0 ║"
-    echo "║                                                      ║"
-    echo "║  3. Edit $BACKEND_DIR/.env                           ║"
-    echo "║     Set HF_TOKEN=hf_your_token_here                 ║"
-    echo "╚══════════════════════════════════════════════════════╝"
+    echo "║     https://huggingface.co/pyannote/segmentation-3.0    ║"
+    echo "║                                                         ║"
+    echo "║  3. Edit $BACKEND_DIR/.env                              ║"
+    echo "║     Set HF_TOKEN=hf_your_token_here                    ║"
+    echo "╚══════════════════════════════════════════════════════════╝"
 else
     echo ".env already exists (not overwriting)"
 fi
