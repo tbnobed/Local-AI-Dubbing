@@ -77,7 +77,7 @@ class TranscriptionService:
 
         model = AutoModelForSpeechSeq2Seq.from_pretrained(
             model_id,
-            torch_dtype=torch_dtype,
+            dtype=torch_dtype,
             low_cpu_mem_usage=True,
             cache_dir=str(self.config.models_dir / "whisper-hf"),
         ).to(device)
@@ -157,28 +157,29 @@ class TranscriptionService:
             progress_callback(0.35, "aligning")
 
         # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
-        logger.info(f"Aligning words with WhisperX (lang={detected_lang})...")
+        # Run on CPU to avoid SIGSEGV crashes on Blackwell GPUs.
+        # The wav2vec2 model is small (~360MB) so CPU is fast enough.
+        align_device = "cpu"
+        logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on {align_device}...")
         audio = whisperx.load_audio(audio_path)
         duration = len(audio) / 16000.0
 
         try:
             model_a, metadata = whisperx.load_align_model(
                 language_code=detected_lang,
-                device=device,
+                device=align_device,
             )
             aligned = whisperx.align(
                 raw_segments,
                 model_a,
                 metadata,
                 audio,
-                device,
+                align_device,
                 return_char_alignments=False,
             )
 
             del model_a
             gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
 
             aligned_segments = aligned.get("segments", raw_segments)
         except Exception as e:
@@ -194,10 +195,13 @@ class TranscriptionService:
 
         if hf_token:
             try:
-                logger.info("Running speaker diarization (pyannote community-1)...")
+                # Run diarization on CPU to avoid SIGSEGV on Blackwell GPUs
+                # (pyannote uses onnxruntime internally which may not support sm_120)
+                diarize_device = "cpu"
+                logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
                 diarize_model = whisperx.DiarizationPipeline(
                     use_auth_token=hf_token,
-                    device=device,
+                    device=diarize_device,
                 )
                 diarize_segments = diarize_model(audio)
                 result_data = whisperx.assign_word_speakers(diarize_segments, result_data)
@@ -210,8 +214,6 @@ class TranscriptionService:
 
                 del diarize_model
                 gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
 
             except Exception as e:
                 logger.warning(f"Diarization failed (continuing without it): {e}")
