@@ -41,7 +41,10 @@ class TranslationService:
             )
 
             if torch.cuda.is_available() and self.config.use_gpu:
-                self._device = torch.device(f"cuda:{self.config.primary_gpu_id}")
+                if torch.cuda.device_count() > 1:
+                    self._device = torch.device(f"cuda:{self.config.secondary_gpu_id}")
+                else:
+                    self._device = torch.device(f"cuda:{self.config.primary_gpu_id}")
             else:
                 self._device = torch.device("cpu")
 

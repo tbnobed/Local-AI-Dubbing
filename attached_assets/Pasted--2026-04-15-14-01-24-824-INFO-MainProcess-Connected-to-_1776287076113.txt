@@ -1,0 +1,397 @@
+[2026-04-15 14:01:24,824: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-04-15 14:01:24,825: INFO/MainProcess] mingle: searching for neighbors
+[2026-04-15 14:01:25,831: INFO/MainProcess] mingle: all alone
+[2026-04-15 14:01:25,847: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 14:01:38,580: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[9eac6417-3787-4f28-a7a4-938609b42b2a] received
+[2026-04-15 14:01:38,581: INFO/MainProcess] Starting pipeline for job 068ddc5a-aab2-42d9-af4d-6a8299776023
+[2026-04-15 14:01:38,681: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/068ddc5a-aab2-42d9-af4d-6a8299776023.mp4
+[2026-04-15 14:01:41,443: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 14:01:43,567: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:01:43,567: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 14:01:43,567: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 14:01:43,567: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 14:01:46,536: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 14:01:46,553: INFO/MainProcess] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 14:01:58,874: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 14:01:58,874: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 14:02:02,786: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 14:03:49,311: INFO/MainProcess] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 14:03:49,311: INFO/MainProcess] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 14:03:49,455: INFO/MainProcess] Pipeline complete: 45 segments, 8 speakers, lang=en
+[2026-04-15 14:03:49,609: INFO/MainProcess] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 14:03:50,495: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:03:51,940: INFO/MainProcess] MADLAD-400 loaded on cuda:0
+[2026-04-15 14:04:06,713: INFO/MainProcess] Translated 45 segments from en to es
+[2026-04-15 14:04:06,742: INFO/MainProcess] Translation model unloaded.
+[2026-04-15 14:04:06,972: INFO/MainProcess] Extracted 26.7s voice sample for SPEAKER_08
+[2026-04-15 14:04:07,126: INFO/MainProcess] Extracted 35.1s voice sample for SPEAKER_04
+[2026-04-15 14:04:07,234: INFO/MainProcess] Extracted 31.4s voice sample for SPEAKER_07
+[2026-04-15 14:04:07,392: INFO/MainProcess] Extracted 40.2s voice sample for SPEAKER_02
+[2026-04-15 14:04:07,564: INFO/MainProcess] Extracted 14.2s voice sample for SPEAKER_01
+[2026-04-15 14:04:07,708: INFO/MainProcess] Extracted 12.1s voice sample for SPEAKER_03
+[2026-04-15 14:04:07,806: INFO/MainProcess] Extracted 13.6s voice sample for SPEAKER_00
+[2026-04-15 14:04:07,960: INFO/MainProcess] Extracted 16.6s voice sample for SPEAKER_06
+[2026-04-15 14:04:07,960: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/068ddc5a-aab2-42d9-af4d-6a8299776023_original_en.srt (45 entries)
+[2026-04-15 14:04:07,961: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/068ddc5a-aab2-42d9-af4d-6a8299776023_translated_es.srt (45 entries)
+[2026-04-15 14:04:08,002: INFO/MainProcess] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 14:04:08,105: INFO/MainProcess] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth on cuda:1
+[2026-04-15 14:04:08,293: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:04:08,293: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:04:08,301: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/finite_scalar_quantization.py:147: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:04:08,302: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/lookup_free_quantization.py:209: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:04:08,505: WARNING/MainProcess] 2026-04-15 14:04:08.505 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 14:04:08,505: INFO/MainProcess] Loading Fish Speech 1.5 LLM on cuda:0...
+[2026-04-15 14:04:08,566: INFO/MainProcess] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 14:04:11,496: INFO/MainProcess] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 14:04:11,602: WARNING/MainProcess] 2026-04-15 14:04:11.601 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 14:04:11,602: WARNING/MainProcess] 2026-04-15 14:04:11.602 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 14:04:11,603: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 14:04:11,603: INFO/MainProcess] Fish Speech 1.5 engine loaded — LLM on cuda:0, decoder on cuda:1
+[2026-04-15 14:04:11,604: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:04:11,604: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:04:11,614: WARNING/MainProcess] 2026-04-15 14:04:11.614 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 14:04:11,650: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:04:11,655: WARNING/MainProcess] 2026-04-15 14:04:11.655 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 14:04:11,669: WARNING/MainProcess] 2026-04-15 14:04:11.669 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Anteriormente en God With Us.
+[2026-04-15 14:04:11,669: WARNING/MainProcess] 2026-04-15 14:04:11.669 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:11,670: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:11,821: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:11,821: ERROR/MainProcess] Failed to synthesize segment 0: Fish Speech inference produced no audio output
+[2026-04-15 14:04:11,845: WARNING/MainProcess] 2026-04-15 14:04:11.845 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 14:04:11,850: WARNING/MainProcess] 2026-04-15 14:04:11.850 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 14:04:11,864: WARNING/MainProcess] 2026-04-15 14:04:11.864 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Se supone que el mundo se pone peor y peor, pero luego justo en el último momento, como es súper oscuro, Jesús va a volver y poner todo bien.
+[2026-04-15 14:04:11,864: WARNING/MainProcess] 2026-04-15 14:04:11.864 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:11,864: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:12,007: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:12,008: ERROR/MainProcess] Failed to synthesize segment 1: Fish Speech inference produced no audio output
+[2026-04-15 14:04:12,035: WARNING/MainProcess] 2026-04-15 14:04:12.035 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:12,043: WARNING/MainProcess] 2026-04-15 14:04:12.043 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:12,058: WARNING/MainProcess] 2026-04-15 14:04:12.058 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Esta falsa promesa de que de alguna manera íbamos a ser atrapados, y luego el mundo iba a ir al infierno en una canasta de mano.
+[2026-04-15 14:04:12,058: WARNING/MainProcess] 2026-04-15 14:04:12.058 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:12,059: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:12,202: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:12,202: ERROR/MainProcess] Failed to synthesize segment 2: Fish Speech inference produced no audio output
+[2026-04-15 14:04:12,232: WARNING/MainProcess] 2026-04-15 14:04:12.232 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 14:04:12,239: WARNING/MainProcess] 2026-04-15 14:04:12.239 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 14:04:12,254: WARNING/MainProcess] 2026-04-15 14:04:12.254 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y simplemente no está en la Escritura.
+[2026-04-15 14:04:12,254: WARNING/MainProcess] 2026-04-15 14:04:12.254 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:12,255: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:12,401: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:12,401: ERROR/MainProcess] Failed to synthesize segment 3: Fish Speech inference produced no audio output
+[2026-04-15 14:04:12,416: WARNING/MainProcess] Truncating long text (369 chars) to 300 chars for TTS
+[2026-04-15 14:04:12,427: WARNING/MainProcess] 2026-04-15 14:04:12.427 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 14:04:12,432: WARNING/MainProcess] 2026-04-15 14:04:12.432 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 14:04:12,449: WARNING/MainProcess] 2026-04-15 14:04:12.449 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: ¿Cómo es que solo estos últimos 150 años esto se ha convertido en la visión dominante y de alguna manera hemos perdido el contacto creo con todo mi corazón que esa no es la historia que su
+[2026-04-15 14:04:12,455: WARNING/MainProcess] 2026-04-15 14:04:12.455 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: biblia está diciendo la nueva era ha sido inaugurada el reino de dios ha comenzado en la tierra como en el ciel
+[2026-04-15 14:04:12,455: WARNING/MainProcess] 2026-04-15 14:04:12.455 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/2 of sample 1/1
+[2026-04-15 14:04:12,456: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:12,603: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:12,603: ERROR/MainProcess] Failed to synthesize segment 4: Fish Speech inference produced no audio output
+[2026-04-15 14:04:12,631: WARNING/MainProcess] 2026-04-15 14:04:12.630 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:12,635: WARNING/MainProcess] 2026-04-15 14:04:12.635 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:12,654: WARNING/MainProcess] 2026-04-15 14:04:12.654 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Lo largo y lo corto de esto es que el Mesías vino en unos 490 años, que es 70 veces 7, y ese Mesías fue Jesucristo.
+[2026-04-15 14:04:12,654: WARNING/MainProcess] 2026-04-15 14:04:12.654 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:12,655: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:12,801: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:12,801: ERROR/MainProcess] Failed to synthesize segment 5: Fish Speech inference produced no audio output
+[2026-04-15 14:04:12,838: WARNING/MainProcess] 2026-04-15 14:04:12.838 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:12,843: WARNING/MainProcess] 2026-04-15 14:04:12.843 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:12,862: WARNING/MainProcess] 2026-04-15 14:04:12.862 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Ese es el mensaje de Daniel 9.
+[2026-04-15 14:04:12,862: WARNING/MainProcess] 2026-04-15 14:04:12.862 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:12,863: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:13,009: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:13,010: ERROR/MainProcess] Failed to synthesize segment 6: Fish Speech inference produced no audio output
+[2026-04-15 14:04:13,034: WARNING/MainProcess] 2026-04-15 14:04:13.034 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 14:04:13,038: WARNING/MainProcess] 2026-04-15 14:04:13.038 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 14:04:13,053: WARNING/MainProcess] 2026-04-15 14:04:13.053 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Mateo 24, en la popular visión dominante de los tiempos, es visto casi más que cualquier otro capítulo.
+[2026-04-15 14:04:13,053: WARNING/MainProcess] 2026-04-15 14:04:13.053 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:13,054: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:13,198: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:13,199: ERROR/MainProcess] Failed to synthesize segment 7: Fish Speech inference produced no audio output
+[2026-04-15 14:04:13,225: WARNING/MainProcess] 2026-04-15 14:04:13.225 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 14:04:13,229: WARNING/MainProcess] 2026-04-15 14:04:13.229 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 14:04:13,246: WARNING/MainProcess] 2026-04-15 14:04:13.246 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Jesús dijo: Jerusalén será destruida.
+[2026-04-15 14:04:13,246: WARNING/MainProcess] 2026-04-15 14:04:13.246 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:13,247: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:13,391: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:13,391: ERROR/MainProcess] Failed to synthesize segment 8: Fish Speech inference produced no audio output
+[2026-04-15 14:04:13,421: WARNING/MainProcess] 2026-04-15 14:04:13.421 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 14:04:13,425: WARNING/MainProcess] 2026-04-15 14:04:13.425 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 14:04:13,444: WARNING/MainProcess] 2026-04-15 14:04:13.443 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: En el año 70 d.C., tenemos la guerra judío-romana.
+[2026-04-15 14:04:13,444: WARNING/MainProcess] 2026-04-15 14:04:13.444 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:13,444: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:13,589: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:13,590: ERROR/MainProcess] Failed to synthesize segment 9: Fish Speech inference produced no audio output
+[2026-04-15 14:04:13,615: WARNING/MainProcess] 2026-04-15 14:04:13.615 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 14:04:13,620: WARNING/MainProcess] 2026-04-15 14:04:13.620 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 14:04:13,637: WARNING/MainProcess] 2026-04-15 14:04:13.637 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Muchos cristianos nunca han oído hablar de esto antes, cuando el gobierno romano envió soldados para destruir la ciudad de Jerusalén.
+[2026-04-15 14:04:13,637: WARNING/MainProcess] 2026-04-15 14:04:13.637 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:13,638: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:13,784: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:13,784: ERROR/MainProcess] Failed to synthesize segment 10: Fish Speech inference produced no audio output
+[2026-04-15 14:04:13,810: WARNING/MainProcess] 2026-04-15 14:04:13.810 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 14:04:13,814: WARNING/MainProcess] 2026-04-15 14:04:13.814 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 14:04:13,831: WARNING/MainProcess] 2026-04-15 14:04:13.831 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Cuando usted habla de la gran tribulación, no en el futuro.
+[2026-04-15 14:04:13,831: WARNING/MainProcess] 2026-04-15 14:04:13.831 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:13,832: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:13,983: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:13,983: ERROR/MainProcess] Failed to synthesize segment 11: Fish Speech inference produced no audio output
+[2026-04-15 14:04:14,021: WARNING/MainProcess] 2026-04-15 14:04:14.021 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 14:04:14,026: WARNING/MainProcess] 2026-04-15 14:04:14.026 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 14:04:14,042: WARNING/MainProcess] 2026-04-15 14:04:14.042 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Jesús dijo, en aquellos días habrá gran tribulación
+[2026-04-15 14:04:14,042: WARNING/MainProcess] 2026-04-15 14:04:14.042 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:14,043: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:14,195: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:14,195: ERROR/MainProcess] Failed to synthesize segment 12: Fish Speech inference produced no audio output
+[2026-04-15 14:04:14,218: WARNING/MainProcess] 2026-04-15 14:04:14.218 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 14:04:14,223: WARNING/MainProcess] 2026-04-15 14:04:14.223 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 14:04:14,238: WARNING/MainProcess] 2026-04-15 14:04:14.237 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Tal como el mundo nunca ha visto ni volverá a ver.
+[2026-04-15 14:04:14,238: WARNING/MainProcess] 2026-04-15 14:04:14.238 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:14,238: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:14,384: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:14,384: ERROR/MainProcess] Failed to synthesize segment 13: Fish Speech inference produced no audio output
+[2026-04-15 14:04:14,412: WARNING/MainProcess] 2026-04-15 14:04:14.412 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:14,420: WARNING/MainProcess] 2026-04-15 14:04:14.420 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:14,439: WARNING/MainProcess] 2026-04-15 14:04:14.439 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: El libro de Apocalipsis es una profecía de Jesucristo contada en el lenguaje de los símbolos.
+[2026-04-15 14:04:14,440: WARNING/MainProcess] 2026-04-15 14:04:14.440 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:14,440: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:14,585: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:14,585: ERROR/MainProcess] Failed to synthesize segment 14: Fish Speech inference produced no audio output
+[2026-04-15 14:04:14,617: WARNING/MainProcess] 2026-04-15 14:04:14.617 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:14,622: WARNING/MainProcess] 2026-04-15 14:04:14.622 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:14,640: WARNING/MainProcess] 2026-04-15 14:04:14.640 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Siento que no estoy yendo cuando la gente va a Apocalipsis es que todavía piensan que la mayor parte de ella es el futuro.
+[2026-04-15 14:04:14,640: WARNING/MainProcess] 2026-04-15 14:04:14.640 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:14,641: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:14,785: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:14,785: ERROR/MainProcess] Failed to synthesize segment 15: Fish Speech inference produced no audio output
+[2026-04-15 14:04:14,811: WARNING/MainProcess] 2026-04-15 14:04:14.811 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:14,816: WARNING/MainProcess] 2026-04-15 14:04:14.816 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:14,834: WARNING/MainProcess] 2026-04-15 14:04:14.834 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Ahora, hay un elemento de Apocalipsis que es futuro, pero los primeros 19 capítulos son claramente pasados.
+[2026-04-15 14:04:14,834: WARNING/MainProcess] 2026-04-15 14:04:14.834 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:14,835: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:14,979: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:14,980: ERROR/MainProcess] Failed to synthesize segment 16: Fish Speech inference produced no audio output
+[2026-04-15 14:04:15,002: WARNING/MainProcess] 2026-04-15 14:04:15.002 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 14.22 seconds
+[2026-04-15 14:04:15,034: WARNING/MainProcess] 2026-04-15 14:04:15.034 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 307])
+[2026-04-15 14:04:15,046: WARNING/MainProcess] 2026-04-15 14:04:15.046 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Nuestra hermosa producción es simplemente decir, hey, ¿y si hay una escatología victoriosa por delante?
+[2026-04-15 14:04:15,047: WARNING/MainProcess] 2026-04-15 14:04:15.047 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:15,047: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:15,192: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:15,193: ERROR/MainProcess] Failed to synthesize segment 17: Fish Speech inference produced no audio output
+[2026-04-15 14:04:15,240: WARNING/MainProcess] 2026-04-15 14:04:15.240 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 14.22 seconds
+[2026-04-15 14:04:15,244: WARNING/MainProcess] 2026-04-15 14:04:15.244 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 307])
+[2026-04-15 14:04:15,257: WARNING/MainProcess] 2026-04-15 14:04:15.257 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: ¿Y si hay una victoria?
+[2026-04-15 14:04:15,257: WARNING/MainProcess] 2026-04-15 14:04:15.257 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:15,258: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:15,403: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:15,403: ERROR/MainProcess] Failed to synthesize segment 18: Fish Speech inference produced no audio output
+[2026-04-15 14:04:15,425: WARNING/MainProcess] 2026-04-15 14:04:15.425 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 12.08 seconds
+[2026-04-15 14:04:15,432: WARNING/MainProcess] 2026-04-15 14:04:15.432 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 260])
+[2026-04-15 14:04:15,443: WARNING/MainProcess] 2026-04-15 14:04:15.443 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Esta noche, un viaje para redescubrir la esperanza, el propósito y la victoria que Jesús confió a sus discípulos.
+[2026-04-15 14:04:15,443: WARNING/MainProcess] 2026-04-15 14:04:15.443 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:15,443: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:15,589: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:15,589: ERROR/MainProcess] Failed to synthesize segment 19: Fish Speech inference produced no audio output
+[2026-04-15 14:04:15,612: WARNING/MainProcess] 2026-04-15 14:04:15.612 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 12.08 seconds
+[2026-04-15 14:04:15,616: WARNING/MainProcess] 2026-04-15 14:04:15.616 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 260])
+[2026-04-15 14:04:15,626: WARNING/MainProcess] 2026-04-15 14:04:15.626 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y finalmente cambiar nuestro miedo al fin por la fe en un futuro que solo puede haber llegado.
+[2026-04-15 14:04:15,626: WARNING/MainProcess] 2026-04-15 14:04:15.626 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:15,627: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:15,771: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:15,772: ERROR/MainProcess] Failed to synthesize segment 20: Fish Speech inference produced no audio output
+[2026-04-15 14:04:15,797: WARNING/MainProcess] 2026-04-15 14:04:15.797 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 12.08 seconds
+[2026-04-15 14:04:15,802: WARNING/MainProcess] 2026-04-15 14:04:15.802 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 260])
+[2026-04-15 14:04:15,811: WARNING/MainProcess] 2026-04-15 14:04:15.811 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: ya ha comenzado.
+[2026-04-15 14:04:15,811: WARNING/MainProcess] 2026-04-15 14:04:15.811 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:15,812: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:15,958: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:15,959: ERROR/MainProcess] Failed to synthesize segment 21: Fish Speech inference produced no audio output
+[2026-04-15 14:04:15,980: WARNING/MainProcess] 2026-04-15 14:04:15.980 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 14.22 seconds
+[2026-04-15 14:04:15,985: WARNING/MainProcess] 2026-04-15 14:04:15.985 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 307])
+[2026-04-15 14:04:15,995: WARNING/MainProcess] 2026-04-15 14:04:15.995 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Este es Dios con nosotros, repensando el fin volviendo al principio.
+[2026-04-15 14:04:15,995: WARNING/MainProcess] 2026-04-15 14:04:15.995 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:15,996: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:16,139: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:16,140: ERROR/MainProcess] Failed to synthesize segment 22: Fish Speech inference produced no audio output
+[2026-04-15 14:04:16,162: WARNING/MainProcess] 2026-04-15 14:04:16.162 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 13.56 seconds
+[2026-04-15 14:04:16,169: WARNING/MainProcess] 2026-04-15 14:04:16.169 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 292])
+[2026-04-15 14:04:16,178: WARNING/MainProcess] 2026-04-15 14:04:16.178 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Los pasajes del fin de los tiempos a menudo están llenos de imágenes confusas como dragones, bestias y estrellas cayendo del cielo.
+[2026-04-15 14:04:16,178: WARNING/MainProcess] 2026-04-15 14:04:16.178 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:16,179: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:16,325: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:16,326: ERROR/MainProcess] Failed to synthesize segment 23: Fish Speech inference produced no audio output
+[2026-04-15 14:04:16,366: WARNING/MainProcess] 2026-04-15 14:04:16.366 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 13.56 seconds
+[2026-04-15 14:04:16,370: WARNING/MainProcess] 2026-04-15 14:04:16.370 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 292])
+[2026-04-15 14:04:16,380: WARNING/MainProcess] 2026-04-15 14:04:16.380 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: He oído que se refiere como literatura apocalíptica, pero ¿qué es exactamente eso?
+[2026-04-15 14:04:16,381: WARNING/MainProcess] 2026-04-15 14:04:16.381 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:16,381: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:16,525: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:16,526: ERROR/MainProcess] Failed to synthesize segment 24: Fish Speech inference produced no audio output
+[2026-04-15 14:04:16,553: WARNING/MainProcess] 2026-04-15 14:04:16.553 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:16,558: WARNING/MainProcess] 2026-04-15 14:04:16.558 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:16,577: WARNING/MainProcess] 2026-04-15 14:04:16.577 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: El lenguaje apocalíptico es, es un género de lenguaje, y los escritos apocalínpticos fueron un género particular de escritura profética que fue popular desde aproximadamente el 100 a.C.
+[2026-04-15 14:04:16,580: WARNING/MainProcess] 2026-04-15 14:04:16.580 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: hasta el 200 d.
+[2026-04-15 14:04:16,580: WARNING/MainProcess] 2026-04-15 14:04:16.580 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/2 of sample 1/1
+[2026-04-15 14:04:16,581: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:16,729: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:16,729: ERROR/MainProcess] Failed to synthesize segment 25: Fish Speech inference produced no audio output
+[2026-04-15 14:04:16,756: WARNING/MainProcess] 2026-04-15 14:04:16.756 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:16,761: WARNING/MainProcess] 2026-04-15 14:04:16.761 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:16,779: WARNING/MainProcess] 2026-04-15 14:04:16.779 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Incluso fuera de la Biblia, son escritos proféticos y místicos donde se usa mucho simbolismo y se habla de las cosas en un lenguaje muy poético en lugar de un lenguaje literal.
+[2026-04-15 14:04:16,779: WARNING/MainProcess] 2026-04-15 14:04:16.779 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:16,780: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:16,925: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:16,925: ERROR/MainProcess] Failed to synthesize segment 26: Fish Speech inference produced no audio output
+[2026-04-15 14:04:16,967: WARNING/MainProcess] 2026-04-15 14:04:16.967 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:16,972: WARNING/MainProcess] 2026-04-15 14:04:16.972 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:16,990: WARNING/MainProcess] 2026-04-15 14:04:16.990 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Así que veremos cosas a través del Antiguo Testamento como, he aquí, las estrellas están cayendo del cielo.
+[2026-04-15 14:04:16,990: WARNING/MainProcess] 2026-04-15 14:04:16.990 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:16,991: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:17,136: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:17,136: ERROR/MainProcess] Failed to synthesize segment 27: Fish Speech inference produced no audio output
+[2026-04-15 14:04:17,163: WARNING/MainProcess] 2026-04-15 14:04:17.163 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:17,168: WARNING/MainProcess] 2026-04-15 14:04:17.168 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:17,185: WARNING/MainProcess] 2026-04-15 14:04:17.185 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: La Biblia dirá eso una y otra vez sobre la caída de Babilonia o Nínive o alguna otra ciudad.
+[2026-04-15 14:04:17,185: WARNING/MainProcess] 2026-04-15 14:04:17.185 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:17,186: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:17,331: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:17,331: ERROR/MainProcess] Failed to synthesize segment 28: Fish Speech inference produced no audio output
+[2026-04-15 14:04:17,357: WARNING/MainProcess] 2026-04-15 14:04:17.357 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:17,362: WARNING/MainProcess] 2026-04-15 14:04:17.362 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:17,379: WARNING/MainProcess] 2026-04-15 14:04:17.379 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y esas ciudades cayeron.
+[2026-04-15 14:04:17,379: WARNING/MainProcess] 2026-04-15 14:04:17.379 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:17,379: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:17,525: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:17,525: ERROR/MainProcess] Failed to synthesize segment 29: Fish Speech inference produced no audio output
+[2026-04-15 14:04:17,585: WARNING/MainProcess] 2026-04-15 14:04:17.585 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:17,590: WARNING/MainProcess] 2026-04-15 14:04:17.590 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:17,607: WARNING/MainProcess] 2026-04-15 14:04:17.607 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Las profecías se cumplieron, pero en realidad ninguna estrella cayó del cielo.
+[2026-04-15 14:04:17,608: WARNING/MainProcess] 2026-04-15 14:04:17.608 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:17,608: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:17,753: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:17,754: ERROR/MainProcess] Failed to synthesize segment 30: Fish Speech inference produced no audio output
+[2026-04-15 14:04:17,781: WARNING/MainProcess] 2026-04-15 14:04:17.781 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:17,786: WARNING/MainProcess] 2026-04-15 14:04:17.786 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:17,803: WARNING/MainProcess] 2026-04-15 14:04:17.803 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: No nos toca a nosotros decidir qué significan esas figuras de lenguaje
+[2026-04-15 14:04:17,803: WARNING/MainProcess] 2026-04-15 14:04:17.803 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:17,803: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:17,951: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:17,952: ERROR/MainProcess] Failed to synthesize segment 31: Fish Speech inference produced no audio output
+[2026-04-15 14:04:17,979: WARNING/MainProcess] 2026-04-15 14:04:17.979 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:17,984: WARNING/MainProcess] 2026-04-15 14:04:17.984 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:18,001: WARNING/MainProcess] 2026-04-15 14:04:18.001 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Mean.
+[2026-04-15 14:04:18,001: WARNING/MainProcess] 2026-04-15 14:04:18.001 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:18,001: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:18,148: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:18,148: ERROR/MainProcess] Failed to synthesize segment 32: Fish Speech inference produced no audio output
+[2026-04-15 14:04:18,194: WARNING/MainProcess] 2026-04-15 14:04:18.194 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 40.15 seconds
+[2026-04-15 14:04:18,199: WARNING/MainProcess] 2026-04-15 14:04:18.199 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 865])
+[2026-04-15 14:04:18,216: WARNING/MainProcess] 2026-04-15 14:04:18.216 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Depende de nosotros mirar el Antiguo Testamento y ver cómo la Biblia los usa consistentemente y luego continuar usándolos en el Nuevo Testamento de la misma manera.
+[2026-04-15 14:04:18,216: WARNING/MainProcess] 2026-04-15 14:04:18.216 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:18,217: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:18,362: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:18,362: ERROR/MainProcess] Failed to synthesize segment 33: Fish Speech inference produced no audio output
+[2026-04-15 14:04:18,389: WARNING/MainProcess] 2026-04-15 14:04:18.389 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:18,393: WARNING/MainProcess] 2026-04-15 14:04:18.393 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:18,408: WARNING/MainProcess] 2026-04-15 14:04:18.408 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Todo el simbolismo que encontramos en Apocalipsis está en el Antiguo Testamento.
+[2026-04-15 14:04:18,409: WARNING/MainProcess] 2026-04-15 14:04:18.409 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:18,409: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:18,555: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:18,555: ERROR/MainProcess] Failed to synthesize segment 34: Fish Speech inference produced no audio output
+[2026-04-15 14:04:18,582: WARNING/MainProcess] 2026-04-15 14:04:18.582 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:18,587: WARNING/MainProcess] 2026-04-15 14:04:18.587 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:18,602: WARNING/MainProcess] 2026-04-15 14:04:18.602 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Apocalipsis está escrito con exactamente el mismo esquema que Daniel.
+[2026-04-15 14:04:18,602: WARNING/MainProcess] 2026-04-15 14:04:18.602 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:18,603: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:18,747: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:18,748: ERROR/MainProcess] Failed to synthesize segment 35: Fish Speech inference produced no audio output
+[2026-04-15 14:04:18,793: WARNING/MainProcess] 2026-04-15 14:04:18.793 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:18,798: WARNING/MainProcess] 2026-04-15 14:04:18.798 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:18,813: WARNING/MainProcess] 2026-04-15 14:04:18.813 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y Daniel copia su esquema de Génesis con la historia de José.
+[2026-04-15 14:04:18,813: WARNING/MainProcess] 2026-04-15 14:04:18.813 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:18,813: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:18,959: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:18,959: ERROR/MainProcess] Failed to synthesize segment 36: Fish Speech inference produced no audio output
+[2026-04-15 14:04:18,987: WARNING/MainProcess] 2026-04-15 14:04:18.987 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:18,991: WARNING/MainProcess] 2026-04-15 14:04:18.991 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:19,006: WARNING/MainProcess] 2026-04-15 14:04:19.006 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Así que Daniel depende de José.
+[2026-04-15 14:04:19,007: WARNING/MainProcess] 2026-04-15 14:04:19.006 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:19,007: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:19,154: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:19,154: ERROR/MainProcess] Failed to synthesize segment 37: Fish Speech inference produced no audio output
+[2026-04-15 14:04:19,181: WARNING/MainProcess] 2026-04-15 14:04:19.181 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:19,186: WARNING/MainProcess] 2026-04-15 14:04:19.186 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:19,201: WARNING/MainProcess] 2026-04-15 14:04:19.201 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Juan, cuando escribe Apocalipsis, depende de Daniel.
+[2026-04-15 14:04:19,201: WARNING/MainProcess] 2026-04-15 14:04:19.201 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:19,201: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:19,347: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:19,347: ERROR/MainProcess] Failed to synthesize segment 38: Fish Speech inference produced no audio output
+[2026-04-15 14:04:19,365: WARNING/MainProcess] Truncating long text (343 chars) to 300 chars for TTS
+[2026-04-15 14:04:19,378: WARNING/MainProcess] 2026-04-15 14:04:19.378 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:19,383: WARNING/MainProcess] 2026-04-15 14:04:19.383 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:19,398: WARNING/MainProcess] 2026-04-15 14:04:19.398 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y si no retrocedemos y vemos lo que significan esos símbolos en los profetas principales, particularmente Daniel, pero también Isaías, Jeremías, Ezequiel, y también Zacarías,
+[2026-04-15 14:04:19,402: WARNING/MainProcess] 2026-04-15 14:04:19.402 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: si tomamos esos Símbolos y solo dibujamos imágenes de ellos sin mirar y ver lo que realmente significaban en el Antiguo Testa
+[2026-04-15 14:04:19,402: WARNING/MainProcess] 2026-04-15 14:04:19.402 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/2 of sample 1/1
+[2026-04-15 14:04:19,403: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:19,548: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:19,548: ERROR/MainProcess] Failed to synthesize segment 39: Fish Speech inference produced no audio output
+[2026-04-15 14:04:19,575: WARNING/MainProcess] 2026-04-15 14:04:19.575 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 14:04:19,579: WARNING/MainProcess] 2026-04-15 14:04:19.579 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 14:04:19,595: WARNING/MainProcess] 2026-04-15 14:04:19.595 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y creo que ahí es donde ocurrió la pista equivocada.
+[2026-04-15 14:04:19,595: WARNING/MainProcess] 2026-04-15 14:04:19.595 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:19,595: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:19,740: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:19,741: ERROR/MainProcess] Failed to synthesize segment 40: Fish Speech inference produced no audio output
+[2026-04-15 14:04:19,763: WARNING/MainProcess] 2026-04-15 14:04:19.763 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 16.55 seconds
+[2026-04-15 14:04:19,770: WARNING/MainProcess] 2026-04-15 14:04:19.770 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 357])
+[2026-04-15 14:04:19,779: WARNING/MainProcess] 2026-04-15 14:04:19.779 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: A menudo en la Biblia, Dios usa el lenguaje del colapso cósmico,
+[2026-04-15 14:04:19,779: WARNING/MainProcess] 2026-04-15 14:04:19.779 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:19,780: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:19,922: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:19,922: ERROR/MainProcess] Failed to synthesize segment 41: Fish Speech inference produced no audio output
+[2026-04-15 14:04:19,948: WARNING/MainProcess] 2026-04-15 14:04:19.948 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 16.55 seconds
+[2026-04-15 14:04:19,953: WARNING/MainProcess] 2026-04-15 14:04:19.953 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 357])
+[2026-04-15 14:04:19,962: WARNING/MainProcess] 2026-04-15 14:04:19.962 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: o lenguaje de destrucción cósmica, para ilustrar y mostrar la gravedad de un evento local.
+[2026-04-15 14:04:19,962: WARNING/MainProcess] 2026-04-15 14:04:19.962 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:19,963: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:20,104: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:20,105: ERROR/MainProcess] Failed to synthesize segment 42: Fish Speech inference produced no audio output
+[2026-04-15 14:04:20,127: WARNING/MainProcess] 2026-04-15 14:04:20.127 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 16.55 seconds
+[2026-04-15 14:04:20,132: WARNING/MainProcess] 2026-04-15 14:04:20.132 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 357])
+[2026-04-15 14:04:20,142: WARNING/MainProcess] 2026-04-15 14:04:20.142 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Nunca es la destrucción del planeta Tierra.
+[2026-04-15 14:04:20,142: WARNING/MainProcess] 2026-04-15 14:04:20.142 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:20,142: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:20,288: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:20,288: ERROR/MainProcess] Failed to synthesize segment 43: Fish Speech inference produced no audio output
+[2026-04-15 14:04:20,303: WARNING/MainProcess] 2026-04-15 14:04:20.303 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 16.55 seconds
+[2026-04-15 14:04:20,308: WARNING/MainProcess] 2026-04-15 14:04:20.308 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 357])
+[2026-04-15 14:04:20,317: WARNING/MainProcess] 2026-04-15 14:04:20.317 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: El planeta Tierra ha sido creado
+[2026-04-15 14:04:20,317: WARNING/MainProcess] 2026-04-15 14:04:20.317 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+[2026-04-15 14:04:20,317: WARNING/MainProcess] Inference error: Expected all tensors to be on the same device, but got index is on cuda:1, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA__index_select)
+[2026-04-15 14:04:20,463: WARNING/MainProcess] Inference error: No audio generated, please check the input text.
+[2026-04-15 14:04:20,463: ERROR/MainProcess] Failed to synthesize segment 44: Fish Speech inference produced no audio output
+[2026-04-15 14:04:20,482: INFO/MainProcess] TTS model unloaded.
+[2026-04-15 14:04:20,514: INFO/MainProcess] Building dubbed audio track (326.9s)
+[2026-04-15 14:04:20,550: INFO/MainProcess] Dubbed audio written to /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/temp/068ddc5a-aab2-42d9-af4d-6a8299776023/dubbed_audio.wav
+[2026-04-15 14:04:20,550: INFO/MainProcess] Merging dubbed audio into video
+[2026-04-15 14:04:20,770: INFO/MainProcess] Final dubbed video: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/test1_dubbed_es.mp4
+[2026-04-15 14:04:20,783: INFO/MainProcess] Pipeline complete for 068ddc5a-aab2-42d9-af4d-6a8299776023 in 162.2s
+[2026-04-15 14:04:20,783: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[9eac6417-3787-4f28-a7a4-938609b42b2a] succeeded in 162.2027510400003s: None

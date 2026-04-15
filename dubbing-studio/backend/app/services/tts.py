@@ -70,13 +70,8 @@ class TTSService:
 
         checkpoint_path = self._find_checkpoint()
         self._checkpoint_path = checkpoint_path
-        llm_device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
+        device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
         precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-
-        if self.config.use_gpu and torch.cuda.device_count() > 1:
-            decoder_device = f"cuda:{self.config.secondary_gpu_id}"
-        else:
-            decoder_device = llm_device
 
         # Try Fish Speech 1.5 Python API (VQGAN decoder)
         try:
@@ -97,17 +92,17 @@ class TTSService:
             if not decoder_ckpt:
                 raise FileNotFoundError(f"No decoder checkpoint in {checkpoint_path}")
 
-            logger.info(f"Loading Fish Speech 1.5 decoder from {decoder_ckpt} on {decoder_device}")
+            logger.info(f"Loading Fish Speech 1.5 decoder from {decoder_ckpt} on {device}")
             decoder_model = load_decoder_model(
                 config_name="firefly_gan_vq",
                 checkpoint_path=decoder_ckpt,
-                device=decoder_device,
+                device=device,
             )
 
-            logger.info(f"Loading Fish Speech 1.5 LLM on {llm_device}...")
+            logger.info(f"Loading Fish Speech 1.5 LLM on {device}...")
             llama_queue = launch_thread_safe_queue(
                 checkpoint_path=checkpoint_path,
-                device=llm_device,
+                device=device,
                 precision=precision,
                 compile=False,
             )
@@ -118,7 +113,7 @@ class TTSService:
                 precision=precision,
                 compile=False,
             )
-            logger.info(f"Fish Speech 1.5 engine loaded — LLM on {llm_device}, decoder on {decoder_device}")
+            logger.info(f"Fish Speech 1.5 engine loaded on {device}")
             return self._engine
 
         except (ImportError, Exception) as e:
