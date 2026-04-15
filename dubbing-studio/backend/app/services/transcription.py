@@ -157,9 +157,14 @@ class TranscriptionService:
             progress_callback(0.35, "aligning")
 
         # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
-        # Run on CPU to avoid SIGSEGV crashes on Blackwell GPUs.
-        # The wav2vec2 model is small (~360MB) so CPU is fast enough.
-        align_device = "cpu"
+        # Use the secondary GPU for alignment to keep primary GPU free for
+        # later pipeline stages (translation, TTS). Falls back to CPU if it crashes.
+        if self.config.use_gpu and torch.cuda.device_count() > 1:
+            align_device = f"cuda:{self.config.secondary_gpu_id}"
+        elif self.config.use_gpu and torch.cuda.is_available():
+            align_device = f"cuda:{self.config.primary_gpu_id}"
+        else:
+            align_device = "cpu"
         logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on {align_device}...")
         audio = whisperx.load_audio(audio_path)
         duration = len(audio) / 16000.0
@@ -195,9 +200,13 @@ class TranscriptionService:
 
         if hf_token:
             try:
-                # Run diarization on CPU to avoid SIGSEGV on Blackwell GPUs
-                # (pyannote uses onnxruntime internally which may not support sm_120)
-                diarize_device = "cpu"
+                # Use secondary GPU for diarization (keeps primary GPU free for TTS/translation)
+                if self.config.use_gpu and torch.cuda.device_count() > 1:
+                    diarize_device = f"cuda:{self.config.secondary_gpu_id}"
+                elif self.config.use_gpu and torch.cuda.is_available():
+                    diarize_device = f"cuda:{self.config.primary_gpu_id}"
+                else:
+                    diarize_device = "cpu"
                 logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
                 diarize_model = whisperx.DiarizationPipeline(
                     use_auth_token=hf_token,
