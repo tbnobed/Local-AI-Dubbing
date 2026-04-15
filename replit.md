@@ -3,6 +3,7 @@
 ## Overview
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Also contains the `dubbing-studio/` project — a complete local AI video dubbing system.
 
 ## Stack
 
@@ -25,3 +26,27 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+---
+
+## DubbingStudio (dubbing-studio/)
+
+A standalone local AI video dubbing system. Runs entirely on local GPU hardware.
+
+### Architecture
+- **Backend**: Python + FastAPI + Celery + Redis
+- **Frontend**: React + Vite + Tailwind CSS
+- **Pipeline**: faster-whisper → pyannote → NLLB-200 → XTTS v2 → ffmpeg
+- **DB**: SQLite (local jobs tracking)
+
+### Key Files
+- `dubbing-studio/README.md` — full setup and usage guide
+- `dubbing-studio/backend/app/` — FastAPI app, services, workers
+- `dubbing-studio/frontend/src/` — React UI
+- `dubbing-studio/scripts/` — setup.sh, start.sh, stop.sh
+
+### Models Used
+- Whisper large-v3 (transcription)
+- pyannote/speaker-diarization-3.1 (speaker detection)
+- facebook/nllb-200-distilled-600M (translation)
+- tts_models/multilingual/multi-dataset/xtts_v2 (voice cloning TTS)

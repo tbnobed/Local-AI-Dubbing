@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --surface-900: #0a0a12;
+    --surface-800: #11111e;
+    --surface-700: #1a1a2e;
+    --surface-600: #232338;
+    --surface-500: #2d2d48;
+    --surface-400: #3d3d5c;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background-color: #0a0a12;
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-surface-900 text-slate-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1a1a2e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3d3d5c;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #525270;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-surface-800/80 backdrop-blur-sm border border-surface-600/50;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-500 text-white font-medium px-5 py-2.5 rounded-xl
+           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+           disabled:active:scale-100 shadow-lg shadow-brand-900/30;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-600 hover:bg-surface-500 text-slate-200 font-medium px-5 py-2.5 rounded-xl
+           transition-all duration-200 active:scale-95 border border-surface-400/50;
+  }
+
+  .btn-ghost {
+    @apply text-slate-400 hover:text-slate-200 hover:bg-surface-700 font-medium px-4 py-2 rounded-lg
+           transition-all duration-200 active:scale-95;
+  }
+
+  .input-field {
+    @apply bg-surface-700 border border-surface-500 text-slate-100 rounded-xl px-4 py-3
+           focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50
+           placeholder:text-slate-500 transition-all duration-200;
+  }
+
+  .select-field {
+    @apply input-field appearance-none cursor-pointer;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+
+  .badge-pending {
+    @apply badge bg-slate-700/50 text-slate-300 border border-slate-600/30;
+  }
+
+  .badge-running {
+    @apply badge bg-brand-900/50 text-brand-300 border border-brand-700/30;
+  }
+
+  .badge-completed {
+    @apply badge bg-emerald-900/50 text-emerald-300 border border-emerald-700/30;
+  }
+
+  .badge-failed {
+    @apply badge bg-red-900/50 text-red-300 border border-red-700/30;
+  }
+
+  .progress-bar {
+    @apply h-1.5 bg-surface-600 rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-500;
+  }
+}

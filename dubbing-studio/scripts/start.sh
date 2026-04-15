@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# DubbingStudio Start Script
+# Starts Redis, Celery worker, and the FastAPI server.
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+BACKEND_DIR="$ROOT_DIR/backend"
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+echo ""
+echo -e "${CYAN}╔══════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║       DubbingStudio Starting             ║${NC}"
+echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
+echo ""
+
+cd "$BACKEND_DIR"
+
+if [ ! -d "venv" ]; then
+    echo "ERROR: Virtual environment not found. Run ./scripts/setup.sh first."
+    exit 1
+fi
+
+source venv/bin/activate
+
+# Ensure data directories exist
+mkdir -p ../data/{uploads,outputs,temp,models}
+
+# Start Redis if not running
+if ! redis-cli ping &>/dev/null 2>&1; then
+    echo -e "${YELLOW}Starting Redis...${NC}"
+    redis-server --daemonize yes --logfile /tmp/dubbing-redis.log
+    sleep 1
+    if redis-cli ping &>/dev/null 2>&1; then
+        echo -e "${GREEN}Redis started${NC}"
+    else
+        echo "ERROR: Failed to start Redis"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}Redis already running${NC}"
+fi
+
+# Start Celery worker in background
+echo -e "${YELLOW}Starting Celery worker...${NC}"
+celery -A app.core.celery_app worker \
+    -Q dubbing \
+    --concurrency=1 \
+    -l info \
+    --logfile=/tmp/dubbing-celery.log \
+    --detach \
+    --pidfile=/tmp/dubbing-celery.pid
+
+sleep 2
+echo -e "${GREEN}Celery worker started${NC}"
+
+echo ""
+echo -e "${GREEN}╔══════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║   DubbingStudio ready at                 ║${NC}"
+echo -e "${GREEN}║   http://localhost:8000                  ║${NC}"
+echo -e "${GREEN}║   API docs: http://localhost:8000/docs   ║${NC}"
+echo -e "${GREEN}╚══════════════════════════════════════════╝${NC}"
+echo ""
+echo "Logs:"
+echo "  Celery: tail -f /tmp/dubbing-celery.log"
+echo "  Redis:  tail -f /tmp/dubbing-redis.log"
+echo ""
+echo "Press Ctrl+C to stop the server (Redis and Celery will keep running)"
+echo "Run ./scripts/stop.sh to stop everything"
+echo ""
+
+# Start FastAPI server (foreground)
+uvicorn app.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 2 \
+    --loop uvloop \
+    --log-level info

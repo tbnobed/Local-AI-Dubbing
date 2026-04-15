@@ -1,0 +1,79 @@
+from pydantic_settings import BaseSettings
+from pathlib import Path
+from typing import Optional
+import os
+
+
+class Settings(BaseSettings):
+    app_name: str = "DubbingStudio"
+    debug: bool = False
+
+    # Paths
+    base_dir: Path = Path(__file__).parent.parent.parent
+    data_dir: Path = base_dir / "data"
+    uploads_dir: Path = data_dir / "uploads"
+    outputs_dir: Path = data_dir / "outputs"
+    temp_dir: Path = data_dir / "temp"
+    models_dir: Path = data_dir / "models"
+
+    # Database
+    database_url: str = "sqlite+aiosqlite:///./data/dubbing_studio.db"
+
+    # Redis / Celery
+    redis_url: str = "redis://localhost:6379/0"
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_result_backend: str = "redis://localhost:6379/1"
+
+    # GPU configuration
+    primary_gpu_id: int = 0
+    secondary_gpu_id: int = 1
+    use_gpu: bool = True
+
+    # Whisper settings
+    whisper_model_size: str = "large-v3"
+    whisper_device: str = "cuda"
+    whisper_compute_type: str = "float16"
+
+    # XTTS settings
+    xtts_model: str = "tts_models/multilingual/multi-dataset/xtts_v2"
+    xtts_device: str = "cuda"
+
+    # Translation settings
+    translation_model: str = "facebook/nllb-200-distilled-600M"
+    translation_device: str = "cuda"
+
+    # Speaker diarization
+    diarization_model: str = "pyannote/speaker-diarization-3.1"
+    hf_token: Optional[str] = None
+
+    # CORS / server
+    host: str = "0.0.0.0"
+    port: int = 8000
+    frontend_dir: str = "../frontend/dist"
+
+    # Supported languages (ISO 639-1 -> NLLB code)
+    supported_languages: dict = {
+        "en": {"name": "English", "nllb": "eng_Latn", "whisper": "en"},
+        "es": {"name": "Spanish", "nllb": "spa_Latn", "whisper": "es"},
+        "fr": {"name": "French", "nllb": "fra_Latn", "whisper": "fr"},
+        "de": {"name": "German", "nllb": "deu_Latn", "whisper": "de"},
+        "it": {"name": "Italian", "nllb": "ita_Latn", "whisper": "it"},
+        "pt": {"name": "Portuguese", "nllb": "por_Latn", "whisper": "pt"},
+        "ja": {"name": "Japanese", "nllb": "jpn_Jpan", "whisper": "ja"},
+        "zh": {"name": "Chinese", "nllb": "zho_Hans", "whisper": "zh"},
+        "ko": {"name": "Korean", "nllb": "kor_Hang", "whisper": "ko"},
+        "ar": {"name": "Arabic", "nllb": "arb_Arab", "whisper": "ar"},
+        "ru": {"name": "Russian", "nllb": "rus_Cyrl", "whisper": "ru"},
+        "hi": {"name": "Hindi", "nllb": "hin_Deva", "whisper": "hi"},
+    }
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+
+settings = Settings()
+
+# Ensure directories exist
+for d in [settings.uploads_dir, settings.outputs_dir, settings.temp_dir, settings.models_dir]:
+    d.mkdir(parents=True, exist_ok=True)
