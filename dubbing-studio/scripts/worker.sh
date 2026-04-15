@@ -15,7 +15,7 @@ export CUDA_DEVICE_ORDER=PCI_BUS_ID
 
 celery -A app.core.celery_app worker \
     -Q dubbing \
-    --concurrency=1 \
+    --pool=solo \
     -l info \
     --without-gossip \
     --without-mingle \

@@ -73,7 +73,7 @@ fi
 echo -e "${YELLOW}Starting Celery worker...${NC}"
 celery -A app.core.celery_app worker \
     -Q dubbing \
-    --concurrency=1 \
+    --pool=solo \
     -l info \
     --logfile=/tmp/dubbing-celery.log \
     --detach \
