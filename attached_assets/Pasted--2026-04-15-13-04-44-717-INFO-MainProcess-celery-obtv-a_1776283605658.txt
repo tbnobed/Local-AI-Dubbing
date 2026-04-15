@@ -1,0 +1,15 @@
+[2026-04-15 13:04:44,717: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 13:04:59,855: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[e594fc55-1e51-4d4c-a93b-ea63bbaf8b1b] received
+[2026-04-15 13:04:59,858: INFO/ForkPoolWorker-1] Starting pipeline for job 3d2f3231-f7e4-413c-a721-378104006bbc
+[2026-04-15 13:04:59,955: INFO/ForkPoolWorker-1] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/3d2f3231-f7e4-413c-a721-378104006bbc.mp4
+[2026-04-15 13:05:02,579: INFO/ForkPoolWorker-1] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 13:05:04,688: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 13:05:04,689: WARNING/ForkPoolWorker-1] Device set to use cuda:0
+[2026-04-15 13:05:04,689: WARNING/ForkPoolWorker-1] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 13:05:04,689: INFO/ForkPoolWorker-1] Transcribing with transformers Whisper...
+[2026-04-15 13:05:07,682: INFO/ForkPoolWorker-1] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 13:05:07,695: INFO/ForkPoolWorker-1] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 13:05:19,640: INFO/ForkPoolWorker-1] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 13:05:19,640: INFO/ForkPoolWorker-1] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 13:05:23,559: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
