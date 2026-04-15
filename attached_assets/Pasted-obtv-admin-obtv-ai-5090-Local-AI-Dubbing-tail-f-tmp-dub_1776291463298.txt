@@ -1,0 +1,37 @@
+obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing$ tail -f /tmp/dubbing-celery.log
+[2026-04-15 15:11:17,815: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[fd862472-6c77-44df-817b-972e5d0af9ff] received
+[2026-04-15 15:11:17,817: INFO/MainProcess] Starting pipeline for job 3d2f3231-f7e4-413c-a721-378104006bbc
+[2026-04-15 15:11:17,919: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/3d2f3231-f7e4-413c-a721-378104006bbc.mp4
+[2026-04-15 15:11:20,752: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 15:11:22,852: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 15:11:22,852: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 15:11:22,853: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 15:11:22,853: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 15:11:25,849: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 15:11:25,863: INFO/MainProcess] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 15:11:38,082: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 15:11:38,082: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 15:11:42,112: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 15:13:28,877: INFO/MainProcess] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 15:13:28,877: INFO/MainProcess] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 15:13:29,030: INFO/MainProcess] Pipeline complete: 45 segments, 8 speakers, lang=en
+[2026-04-15 15:13:29,193: INFO/MainProcess] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 15:13:30,069: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 15:13:32,108: INFO/MainProcess] MADLAD-400 loaded on cuda:1
+[2026-04-15 15:13:47,805: INFO/MainProcess] Translated 45 segments from en to es
+[2026-04-15 15:13:47,837: INFO/MainProcess] Translation model unloaded.
+[2026-04-15 15:13:48,043: INFO/MainProcess] Extracted 26.7s voice sample for SPEAKER_08
+[2026-04-15 15:13:48,193: INFO/MainProcess] Extracted 35.1s voice sample for SPEAKER_04
+[2026-04-15 15:13:48,352: INFO/MainProcess] Extracted 31.4s voice sample for SPEAKER_07
+[2026-04-15 15:13:48,487: INFO/MainProcess] Extracted 40.2s voice sample for SPEAKER_02
+[2026-04-15 15:13:48,607: INFO/MainProcess] Extracted 14.2s voice sample for SPEAKER_01
+[2026-04-15 15:13:48,738: INFO/MainProcess] Extracted 12.1s voice sample for SPEAKER_03
+[2026-04-15 15:13:48,832: INFO/MainProcess] Extracted 13.6s voice sample for SPEAKER_00
+[2026-04-15 15:13:48,999: INFO/MainProcess] Extracted 16.6s voice sample for SPEAKER_06
+[2026-04-15 15:13:48,999: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/3d2f3231-f7e4-413c-a721-378104006bbc/3d2f3231-f7e4-413c-a721-378104006bbc_original_en.srt (45 entries)
+[2026-04-15 15:13:49,000: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/3d2f3231-f7e4-413c-a721-378104006bbc/3d2f3231-f7e4-413c-a721-378104006bbc_translated_es.srt (45 entries)
+[2026-04-15 15:13:49,028: INFO/MainProcess] Synthesizing 45 segments in batches of 8 (~6 subprocess calls)
+[2026-04-15 15:13:49,028: INFO/MainProcess] Batch 1/6: segments [0, 1, 2, 3, 4, 5, 6, 7]
+[2026-04-15 15:13:49,029: INFO/MainProcess] Launching TTS worker: 8 segments, timeout=480s, gpu=0

@@ -65,11 +65,12 @@ class TTSService:
 
         timeout = max(120, len(batch) * timeout_per_segment)
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False, dir=output_dir
-        ) as f:
+        input_path = os.path.join(output_dir, f"_worker_input_{os.getpid()}.json")
+        output_json_path = os.path.join(output_dir, f"_worker_output_{os.getpid()}.json")
+        worker_input["output_json_path"] = output_json_path
+
+        with open(input_path, "w") as f:
             json.dump(worker_input, f)
-            input_path = f.name
 
         try:
             python_cmd = self._get_python_cmd()
@@ -85,10 +86,14 @@ class TTSService:
                 f"Launching TTS worker: {len(batch)} segments, "
                 f"timeout={timeout}s, gpu={self.config.primary_gpu_id}"
             )
+            logger.info(f"Worker script: {WORKER_SCRIPT}")
+            logger.info(f"Python: {python_cmd}")
+            logger.info(f"PYTHONPATH: {env.get('PYTHONPATH', '(not set)')}")
 
             result = subprocess.run(
                 [python_cmd, str(WORKER_SCRIPT), input_path],
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=None,
                 text=True,
                 timeout=timeout,
                 env=env,
@@ -97,22 +102,24 @@ class TTSService:
 
             if result.returncode != 0:
                 logger.error(f"TTS worker failed (rc={result.returncode})")
-                logger.error(f"stderr: {result.stderr[-2000:]}")
+                if result.stdout:
+                    logger.error(f"stdout: {result.stdout[-2000:]}")
                 return [
                     {"index": item["index"], "success": False,
                      "error": f"Worker exit code {result.returncode}"}
                     for item in batch
                 ]
 
-            if result.stderr:
-                for line in result.stderr.strip().split("\n")[-30:]:
-                    logger.info(f"[worker] {line}")
+            if os.path.exists(output_json_path):
+                with open(output_json_path) as f:
+                    results = json.load(f)
+                return results
 
             try:
                 results = json.loads(result.stdout)
-            except json.JSONDecodeError as e:
-                logger.error(f"Worker returned invalid JSON: {e}")
-                logger.error(f"stdout (last 500 chars): {result.stdout[-500:]}")
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.error(f"No output JSON file and stdout parse failed: {e}")
+                logger.error(f"stdout (last 500): {result.stdout[-500:]}")
                 return [
                     {"index": item["index"], "success": False,
                      "error": "Invalid worker output"}
@@ -128,10 +135,11 @@ class TTSService:
                 for item in batch
             ]
         finally:
-            try:
-                os.unlink(input_path)
-            except OSError:
-                pass
+            for p in [input_path, output_json_path]:
+                try:
+                    os.unlink(p)
+                except OSError:
+                    pass
 
     def synthesize_all_segments(
         self,

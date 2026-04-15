@@ -62,10 +62,10 @@ export default function App() {
               <div className="space-y-2">
                 {[
                   { label: "Audio Extraction", desc: "ffmpeg" },
-                  { label: "Speech Transcription", desc: "Whisper large-v3 (CUDA)" },
-                  { label: "Speaker Diarization", desc: "pyannote.audio 3.1" },
-                  { label: "Translation", desc: "NLLB-200 (Meta AI)" },
-                  { label: "Voice Cloning + TTS", desc: "XTTS v2 (Coqui)" },
+                  { label: "Speech Transcription", desc: "Whisper large-v3-turbo" },
+                  { label: "Speaker Diarization", desc: "pyannote community-1" },
+                  { label: "Translation", desc: "MADLAD-400 3B (Google)" },
+                  { label: "Voice Cloning + TTS", desc: "Fish Speech 1.5" },
                   { label: "Audio Mixing", desc: "ffmpeg + librosa" },
                 ].map((step, i) => (
                   <div key={i} className="flex items-center gap-3 text-xs">

@@ -29,7 +29,7 @@ export function UploadForm({ onJobCreated }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [sourceLang, setSourceLang] = useState("en");
   const [targetLang, setTargetLang] = useState("es");
-  const [voiceCloning, setVoiceCloning] = useState(true);
+  const [voiceCloning, setVoiceCloning] = useState(false);
   const [exportSrt, setExportSrt] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -230,7 +230,7 @@ export function UploadForm({ onJobCreated }: Props) {
         ) : (
           <>
             <Upload className="w-4 h-4" />
-            Start Dubbing
+            {voiceCloning ? "Start Dubbing" : "Generate Subtitles"}
           </>
         )}
       </button>

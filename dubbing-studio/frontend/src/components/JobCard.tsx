@@ -14,6 +14,7 @@ const STAGE_LABELS: Record<string, string> = {
   transcribing: "Transcribing Speech",
   diarizing: "Identifying Speakers",
   translating: "Translating",
+  exporting_subtitles: "Exporting Subtitles",
   cloning_voices: "Preparing Voice Clones",
   synthesizing: "Synthesizing Speech",
   mixing: "Mixing Audio",
@@ -156,23 +157,25 @@ export function JobCard({ job, onUpdate }: Props) {
           {/* Actions */}
           {job.status === "completed" && (
             <div className="flex flex-wrap gap-2 mt-2">
-              <a
-                href={getDownloadUrl(job.id, "video")}
-                download
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
-                           bg-brand-900/50 text-brand-300 border border-brand-700/30
-                           hover:bg-brand-800/50 transition-colors"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Dubbed Video
-              </a>
+              {job.output_video_path && (
+                <a
+                  href={getDownloadUrl(job.id, "video")}
+                  download
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
+                             bg-brand-900/50 text-brand-300 border border-brand-700/30
+                             hover:bg-brand-800/50 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Dubbed Video
+                </a>
+              )}
               {job.output_srt_path && (
                 <a
                   href={getDownloadUrl(job.id, "srt", "translated")}
                   download
                   className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
-                             bg-surface-700 text-slate-300 border border-surface-500
-                             hover:bg-surface-600 transition-colors"
+                             bg-brand-900/50 text-brand-300 border border-brand-700/30
+                             hover:bg-brand-800/50 transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />
                   SRT ({job.target_language.toUpperCase()})

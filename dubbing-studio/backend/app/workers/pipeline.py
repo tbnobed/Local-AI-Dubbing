@@ -1,13 +1,14 @@
 """
 Celery worker - orchestrates the full dubbing pipeline.
 
-Updated pipeline using WhisperX + MADLAD-400 + Fish Speech:
+Pipeline stages:
   1. Audio extraction (ffmpeg)
   2. Transcription + alignment + diarization (WhisperX — all-in-one)
   3. Translation (MADLAD-400 3B)
-  4. Voice sample extraction (ffmpeg)
-  5. Voice cloning TTS (Fish Speech 1.5)
-  6. Audio mixing + final video (ffmpeg + librosa)
+  4. SRT subtitle export
+  --- below only when voice cloning is enabled ---
+  5. Voice sample extraction + TTS (Fish Speech 1.5)
+  6. Audio mixing + final video (ffmpeg)
 """
 import logging
 import time
@@ -19,7 +20,14 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-STAGE_WEIGHTS = {
+STAGE_WEIGHTS_SUBTITLES = {
+    "extracting_audio": 0.05,
+    "transcribing": 0.55,
+    "translating": 0.30,
+    "exporting_subtitles": 0.10,
+}
+
+STAGE_WEIGHTS_FULL = {
     "extracting_audio": 0.05,
     "transcribing": 0.30,
     "translating": 0.15,
@@ -30,7 +38,6 @@ STAGE_WEIGHTS = {
 
 
 def update_job_sync(job_id: str, **kwargs):
-    """Synchronous DB update from Celery worker."""
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from app.models.job import Job
@@ -49,7 +56,6 @@ def update_job_sync(job_id: str, **kwargs):
 
 
 def push_ws_update(job_id: str, data: dict):
-    """Push WebSocket update from worker context via Redis pub/sub."""
     import redis
     import json
 
@@ -68,12 +74,32 @@ def run_dubbing_pipeline(self, job_id: str):
     temp_dir = settings.temp_dir / job_id
     temp_dir.mkdir(parents=True, exist_ok=True)
 
-    stage_keys = list(STAGE_WEIGHTS.keys())
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from app.models.job import Job, JobStatus
+
+    sync_url = settings.database_url.replace("+aiosqlite", "")
+    engine = create_engine(sync_url)
+    Session = sessionmaker(bind=engine)
+
+    with Session() as session:
+        job = session.get(Job, job_id)
+        if not job:
+            raise ValueError(f"Job {job_id} not found")
+        input_path = job.input_path
+        source_language = job.source_language
+        target_language = job.target_language
+        voice_cloning_enabled = bool(job.voice_cloning_enabled)
+        export_srt = bool(job.export_srt)
+        original_filename = job.original_filename
+
+    stage_weights = STAGE_WEIGHTS_FULL if voice_cloning_enabled else STAGE_WEIGHTS_SUBTITLES
+    stage_keys = list(stage_weights.keys())
 
     def update_progress(stage: str, stage_progress: float = 0.0):
         idx = stage_keys.index(stage) if stage in stage_keys else 0
-        base = sum(STAGE_WEIGHTS[k] for k in stage_keys[:idx])
-        weight = STAGE_WEIGHTS.get(stage, 0.0)
+        base = sum(stage_weights[k] for k in stage_keys[:idx])
+        weight = stage_weights.get(stage, 0.0)
         total_progress = (base + weight * stage_progress) * 100
 
         update_job_sync(job_id,
@@ -89,25 +115,6 @@ def run_dubbing_pipeline(self, job_id: str):
         })
 
     try:
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import sessionmaker
-        from app.models.job import Job, JobStatus
-
-        sync_url = settings.database_url.replace("+aiosqlite", "")
-        engine = create_engine(sync_url)
-        Session = sessionmaker(bind=engine)
-
-        with Session() as session:
-            job = session.get(Job, job_id)
-            if not job:
-                raise ValueError(f"Job {job_id} not found")
-            input_path = job.input_path
-            source_language = job.source_language
-            target_language = job.target_language
-            voice_cloning_enabled = bool(job.voice_cloning_enabled)
-            export_srt = bool(job.export_srt)
-            original_filename = job.original_filename
-
         output_dir = settings.outputs_dir / job_id
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -122,7 +129,7 @@ def run_dubbing_pipeline(self, job_id: str):
         total_duration = video_info.get("duration", 0.0)
         update_progress("extracting_audio", 1.0)
 
-        # ── Stage 2: Transcribe + align + diarize (WhisperX all-in-one) ──
+        # ── Stage 2: Transcribe + align + diarize ──
         update_progress("transcribing", 0.0)
         from app.services.transcription import TranscriptionService
         transcriber = TranscriptionService(settings)
@@ -142,14 +149,13 @@ def run_dubbing_pipeline(self, job_id: str):
 
         update_progress("transcribing", 1.0)
 
-        # Clean up transcriber from GPU 0 to free VRAM for TTS later
         del transcriber
         import gc, torch
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        # ── Stage 3: Translate (MADLAD-400) on GPU 1 ──
+        # ── Stage 3: Translate ──
         update_progress("translating", 0.0)
         from app.services.translation import TranslationService
         translator = TranslationService(settings)
@@ -163,9 +169,56 @@ def run_dubbing_pipeline(self, job_id: str):
         translator.unload()
         update_progress("translating", 1.0)
 
-        # ── Stage 4: Extract voice samples + generate SRTs ──
-        update_progress("cloning_voices", 0.0)
+        # ── Stage 4: Generate SRT files ──
+        original_srt = None
+        translated_srt = None
 
+        from app.services.subtitle_generator import generate_both_srts
+        if export_srt:
+            if voice_cloning_enabled:
+                update_progress("cloning_voices", 0.0)
+            else:
+                update_progress("exporting_subtitles", 0.0)
+
+            original_srt, translated_srt = generate_both_srts(
+                segments, str(output_dir), job_id, source_language, target_language,
+            )
+            logger.info(f"SRT files generated: original={original_srt}, translated={translated_srt}")
+
+        if not voice_cloning_enabled:
+            update_progress("exporting_subtitles", 1.0)
+
+            processing_time = time.time() - start_time
+
+            transcription_data = {
+                "language": transcription.language,
+                "segments_count": len(segments),
+                "duration": total_duration,
+            }
+
+            update_job_sync(job_id,
+                            status=JobStatus.COMPLETED,
+                            progress=100.0,
+                            current_stage="completed",
+                            output_video_path=None,
+                            output_srt_path=translated_srt,
+                            output_original_srt_path=original_srt,
+                            duration_seconds=total_duration,
+                            speakers_detected=speakers_detected,
+                            transcription_data=transcription_data,
+                            processing_time_seconds=processing_time)
+
+            push_ws_update(job_id, {
+                "job_id": job_id,
+                "status": "completed",
+                "progress": 100.0,
+                "stage": "completed",
+            })
+
+            logger.info(f"Subtitles-only pipeline complete for {job_id} in {processing_time:.1f}s")
+            return
+
+        # ── Stage 5: Voice cloning + TTS (only when enabled) ──
         from app.services.diarization import extract_speaker_voice_samples
         samples_dir = str(temp_dir / "speaker_samples")
         speaker_samples = extract_speaker_voice_samples(
@@ -175,36 +228,21 @@ def run_dubbing_pipeline(self, job_id: str):
         if not speaker_samples:
             speaker_samples = {"SPEAKER_00": audio_path}
 
-        from app.services.subtitle_generator import generate_both_srts
-        if export_srt:
-            original_srt, translated_srt = generate_both_srts(
-                segments, str(output_dir), job_id, source_language, target_language,
-            )
-        else:
-            original_srt = None
-            translated_srt = None
-
         update_progress("cloning_voices", 1.0)
 
-        # ── Stage 5: TTS synthesis with voice cloning (Fish Speech) ──
         update_progress("synthesizing", 0.0)
         synth_dir = str(temp_dir / "synthesized")
 
-        if voice_cloning_enabled:
-            from app.services.tts import TTSService
-            tts = TTSService(settings)
-            segments = tts.synthesize_all_segments(
-                segments,
-                speaker_samples,
-                target_language,
-                synth_dir,
-                progress_callback=lambda p: update_progress("synthesizing", p),
-            )
-            tts.unload()
-        else:
-            for seg in segments:
-                seg.synth_audio_path = None
-
+        from app.services.tts import TTSService
+        tts = TTSService(settings)
+        segments = tts.synthesize_all_segments(
+            segments,
+            speaker_samples,
+            target_language,
+            synth_dir,
+            progress_callback=lambda p: update_progress("synthesizing", p),
+        )
+        tts.unload()
         update_progress("synthesizing", 1.0)
 
         # ── Stage 6: Mix and produce final video ──
@@ -245,7 +283,7 @@ def run_dubbing_pipeline(self, job_id: str):
             "output_video_path": output_video_path,
         })
 
-        logger.info(f"Pipeline complete for {job_id} in {processing_time:.1f}s")
+        logger.info(f"Full dubbing pipeline complete for {job_id} in {processing_time:.1f}s")
 
     except Exception as e:
         logger.error(f"Pipeline failed for {job_id}: {e}", exc_info=True)

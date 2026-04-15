@@ -4,6 +4,7 @@ export type JobStatus =
   | "transcribing"
   | "diarizing"
   | "translating"
+  | "exporting_subtitles"
   | "cloning_voices"
   | "synthesizing"
   | "mixing"
