@@ -125,9 +125,9 @@ echo "────────────────────────�
 echo "  [2a] Installing WhisperX..."
 pip install whisperx -q
 
-# Pin PyTorch to correct CUDA build
-echo "  [2b] Pinning PyTorch with CUDA ($CUDA_INDEX)..."
-pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
+# Pin PyTorch to correct CUDA build — must match WhisperX's torch~=2.8.0 constraint
+echo "  [2b] Pinning PyTorch 2.8.0 with CUDA ($CUDA_INDEX)..."
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
 
 # CTranslate2 >= 4.5.0 required for Blackwell sm_120 support.
 # Without this, faster-whisper throws "unsupported device cuda:0"
@@ -191,8 +191,8 @@ echo "────────────────────────�
 cd "$BACKEND_DIR"
 source "$BACKEND_DIR/venv/bin/activate"
 
-echo "  [5a] Final PyTorch CUDA pin ($CUDA_INDEX)..."
-pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
+echo "  [5a] Final PyTorch 2.8.0 CUDA pin ($CUDA_INDEX)..."
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
 
 echo "  [5b] Final CTranslate2 pin (>= 4.5.0)..."
 pip install "ctranslate2>=4.5.0" -q
