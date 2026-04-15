@@ -117,22 +117,24 @@ pip install --upgrade pip setuptools wheel -q
 # ─────────────────────────────────────────────────
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 2: WhisperX + PyTorch CUDA + CTranslate2"
+echo "Step 2: PyTorch CUDA + WhisperX (alignment/diarization only)"
 echo "──────────────────────────────────────────"
 
-# WhisperX pulls in faster-whisper, pyannote, torch, ctranslate2, etc.
-# It may install CPU-only PyTorch — we fix that right after.
-echo "  [2a] Installing WhisperX..."
-pip install whisperx -q
+# Pin PyTorch FIRST so WhisperX doesn't pull in CPU-only builds
+echo "  [2a] Installing PyTorch 2.8.0 with CUDA ($CUDA_INDEX)..."
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
 
-# Pin PyTorch to correct CUDA build — must match WhisperX's torch~=2.8.0 constraint
-echo "  [2b] Pinning PyTorch 2.8.0 with CUDA ($CUDA_INDEX)..."
+# WhisperX is used ONLY for wav2vec2 alignment + pyannote diarization.
+# Transcription uses pure PyTorch Whisper (transformers) because
+# CTranslate2/faster-whisper does NOT support Blackwell sm_120 GPUs.
+echo "  [2b] Installing WhisperX (for alignment + diarization)..."
+pip install whisperx -q --no-deps 2>/dev/null || pip install whisperx -q
+# WhisperX deps we actually need (pyannote, etc.)
+pip install pyannote.audio faster-whisper -q 2>/dev/null || true
+
+# Re-pin PyTorch CUDA (WhisperX may have overwritten with CPU builds)
+echo "  [2c] Re-pinning PyTorch 2.8.0 CUDA ($CUDA_INDEX)..."
 pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
-
-# CTranslate2 >= 4.5.0 required for Blackwell sm_120 support.
-# Without this, faster-whisper throws "unsupported device cuda:0"
-echo "  [2c] Pinning CTranslate2 >= 4.5.0 (Blackwell support)..."
-pip install "ctranslate2>=4.5.0" -q
 
 # onnxruntime-gpu for GPU-accelerated speaker diarization
 echo "  [2d] Installing onnxruntime-gpu..."
@@ -185,8 +187,8 @@ echo "────────────────────────�
 echo "Step 5: Lock down final package versions"
 echo "──────────────────────────────────────────"
 
-# Fish Speech may have overwritten PyTorch and/or CTranslate2.
-# This final step guarantees the correct versions are in place.
+# Fish Speech may have overwritten PyTorch.
+# This final step guarantees the correct CUDA version is in place.
 
 cd "$BACKEND_DIR"
 source "$BACKEND_DIR/venv/bin/activate"
@@ -194,8 +196,8 @@ source "$BACKEND_DIR/venv/bin/activate"
 echo "  [5a] Final PyTorch 2.8.0 CUDA pin ($CUDA_INDEX)..."
 pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" --force-reinstall -q
 
-echo "  [5b] Final CTranslate2 pin (>= 4.5.0)..."
-pip install "ctranslate2>=4.5.0" -q
+echo "  [5b] Installing accelerate (required for transformers Whisper)..."
+pip install "accelerate>=1.2.0" -q
 
 # ─────────────────────────────────────────────────
 echo ""
@@ -244,14 +246,14 @@ if torch.cuda.is_available():
         mem = torch.cuda.get_device_properties(i).total_mem / 1024**3
         print(f"  GPU {i}: {name} (sm_{cap[0]}{cap[1]}, {mem:.0f} GB)")
 
-# CTranslate2
-check("CTranslate2", lambda: __import__('ctranslate2').__version__)
-
-# WhisperX
-check("WhisperX", lambda: (__import__('whisperx'), "OK")[1])
-
-# Transformers
+# Transformers (used for Whisper transcription — pure PyTorch, Blackwell-safe)
 check("Transformers", lambda: __import__('transformers').__version__)
+
+# Accelerate (required by transformers for model loading)
+check("Accelerate", lambda: __import__('accelerate').__version__)
+
+# WhisperX (used for alignment + diarization only)
+check("WhisperX", lambda: (__import__('whisperx'), "OK")[1])
 
 # Fish Speech
 try:

@@ -1,17 +1,19 @@
 """
-Transcription + word alignment + speaker diarization using WhisperX.
+Transcription + word alignment + speaker diarization.
 
-WhisperX combines:
-  - faster-whisper (CTranslate2) for fast transcription
-  - wav2vec2 forced alignment for word-level timestamps
-  - pyannote community-1 for speaker diarization
+Uses pure PyTorch Whisper (via transformers) for transcription — this works on
+ALL GPUs including Blackwell sm_120, unlike CTranslate2/faster-whisper.
 
-This replaces the separate faster-whisper + pyannote pipeline.
+Then uses WhisperX for:
+  - wav2vec2 forced alignment (word-level timestamps)
+  - pyannote community-1 speaker diarization
 """
 import gc
 import logging
 from dataclasses import dataclass, field
 from typing import Optional
+
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,8 @@ class Segment:
     text: str
     words: list[WordSegment] = field(default_factory=list)
     speaker: Optional[str] = None
+    translated_text: Optional[str] = None
+    synth_audio_path: Optional[str] = None
 
 
 @dataclass
@@ -45,11 +49,90 @@ class TranscriptionResult:
 
 class TranscriptionService:
     """
-    All-in-one service: transcribe → align → diarize using WhisperX.
+    Transcription pipeline:
+      1. Whisper via transformers (pure PyTorch — Blackwell-safe)
+      2. WhisperX alignment (wav2vec2)
+      3. WhisperX diarization (pyannote)
     """
 
     def __init__(self, config):
         self.config = config
+
+    def _get_device(self) -> str:
+        if self.config.use_gpu and torch.cuda.is_available():
+            return f"cuda:{self.config.primary_gpu_id}"
+        return "cpu"
+
+    def _transcribe_with_transformers(
+        self, audio_path: str, source_language: Optional[str] = None
+    ) -> tuple[list[dict], str]:
+        """Transcribe using HuggingFace transformers Whisper (pure PyTorch)."""
+        from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
+        device = self._get_device()
+        torch_dtype = torch.float16 if "cuda" in device else torch.float32
+
+        model_id = "openai/whisper-large-v3-turbo"
+        logger.info(f"Loading transformers Whisper '{model_id}' on {device} ({torch_dtype})")
+
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            model_id,
+            torch_dtype=torch_dtype,
+            low_cpu_mem_usage=True,
+            cache_dir=str(self.config.models_dir / "whisper-hf"),
+        ).to(device)
+
+        processor = AutoProcessor.from_pretrained(
+            model_id,
+            cache_dir=str(self.config.models_dir / "whisper-hf"),
+        )
+
+        generate_kwargs = {}
+        if source_language:
+            generate_kwargs["language"] = source_language
+
+        pipe = pipeline(
+            "automatic-speech-recognition",
+            model=model,
+            tokenizer=processor.tokenizer,
+            feature_extractor=processor.feature_extractor,
+            torch_dtype=torch_dtype,
+            device=device,
+            chunk_length_s=30,
+            batch_size=self.config.whisper_batch_size,
+            return_timestamps=True,
+        )
+
+        logger.info("Transcribing with transformers Whisper...")
+        result = pipe(audio_path, generate_kwargs=generate_kwargs)
+
+        detected_lang = source_language or "en"
+
+        segments = []
+        if "chunks" in result:
+            for chunk in result["chunks"]:
+                ts = chunk.get("timestamp", (0.0, 0.0))
+                start = ts[0] if ts[0] is not None else 0.0
+                end = ts[1] if ts[1] is not None else start + 1.0
+                segments.append({
+                    "start": start,
+                    "end": end,
+                    "text": chunk.get("text", "").strip(),
+                })
+        elif "text" in result:
+            segments.append({
+                "start": 0.0,
+                "end": 0.0,
+                "text": result["text"].strip(),
+            })
+
+        del pipe, model, processor
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        logger.info(f"Transcription complete: {len(segments)} raw segments, lang={detected_lang}")
+        return segments, detected_lang
 
     def transcribe_and_diarize(
         self,
@@ -58,65 +141,57 @@ class TranscriptionService:
         progress_callback=None,
     ) -> TranscriptionResult:
         import whisperx
-        import torch
 
-        device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
+        device = self._get_device()
         hf_token = self.config.hf_token
 
-        # --- Stage 1: Transcribe ---
+        # --- Stage 1: Transcribe (pure PyTorch — works on Blackwell) ---
         if progress_callback:
             progress_callback(0.0, "transcribing")
 
-        logger.info(f"Loading WhisperX model '{self.config.whisper_model_size}' on {device}")
-        model = whisperx.load_model(
-            self.config.whisper_model_size,
-            device,
-            compute_type=self.config.whisper_compute_type,
-            download_root=str(self.config.models_dir / "whisperx"),
+        raw_segments, detected_lang = self._transcribe_with_transformers(
+            audio_path, source_language
         )
-
-        audio = whisperx.load_audio(audio_path)
-        duration = len(audio) / 16000.0
-
-        logger.info("Transcribing...")
-        result = model.transcribe(
-            audio,
-            batch_size=self.config.whisper_batch_size,
-            language=source_language if source_language else None,
-        )
-        detected_lang = result.get("language", source_language or "en")
-
-        del model
-        gc.collect()
-        torch.cuda.empty_cache()
 
         if progress_callback:
             progress_callback(0.35, "aligning")
 
-        # --- Stage 2: Word-level alignment ---
-        logger.info(f"Aligning words (lang={detected_lang})...")
-        model_a, metadata = whisperx.load_align_model(
-            language_code=detected_lang,
-            device=device,
-        )
-        result = whisperx.align(
-            result["segments"],
-            model_a,
-            metadata,
-            audio,
-            device,
-            return_char_alignments=False,
-        )
+        # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
+        logger.info(f"Aligning words with WhisperX (lang={detected_lang})...")
+        audio = whisperx.load_audio(audio_path)
+        duration = len(audio) / 16000.0
 
-        del model_a
-        gc.collect()
-        torch.cuda.empty_cache()
+        try:
+            model_a, metadata = whisperx.load_align_model(
+                language_code=detected_lang,
+                device=device,
+            )
+            aligned = whisperx.align(
+                raw_segments,
+                model_a,
+                metadata,
+                audio,
+                device,
+                return_char_alignments=False,
+            )
+
+            del model_a
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+            aligned_segments = aligned.get("segments", raw_segments)
+        except Exception as e:
+            logger.warning(f"Alignment failed (using raw timestamps): {e}")
+            aligned_segments = raw_segments
 
         if progress_callback:
             progress_callback(0.55, "diarizing")
 
-        # --- Stage 3: Speaker diarization ---
+        # --- Stage 3: Speaker diarization (pyannote via WhisperX) ---
         num_speakers = 1
+        result_data = {"segments": aligned_segments}
+
         if hf_token:
             try:
                 logger.info("Running speaker diarization (pyannote community-1)...")
@@ -125,17 +200,18 @@ class TranscriptionService:
                     device=device,
                 )
                 diarize_segments = diarize_model(audio)
-                result = whisperx.assign_word_speakers(diarize_segments, result)
+                result_data = whisperx.assign_word_speakers(diarize_segments, result_data)
 
                 speakers = set()
-                for seg in result["segments"]:
+                for seg in result_data["segments"]:
                     if "speaker" in seg:
                         speakers.add(seg["speaker"])
                 num_speakers = len(speakers) if speakers else 1
 
                 del diarize_model
                 gc.collect()
-                torch.cuda.empty_cache()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
 
             except Exception as e:
                 logger.warning(f"Diarization failed (continuing without it): {e}")
@@ -147,7 +223,7 @@ class TranscriptionService:
 
         # --- Build structured output ---
         segments = []
-        for i, seg in enumerate(result["segments"]):
+        for i, seg in enumerate(result_data["segments"]):
             words = []
             for w in seg.get("words", []):
                 if "start" in w and "end" in w:
@@ -168,7 +244,7 @@ class TranscriptionService:
                 speaker=seg.get("speaker", "SPEAKER_00"),
             ))
 
-        logger.info(f"WhisperX complete: {len(segments)} segments, {num_speakers} speakers, lang={detected_lang}")
+        logger.info(f"Pipeline complete: {len(segments)} segments, {num_speakers} speakers, lang={detected_lang}")
 
         if progress_callback:
             progress_callback(1.0, "done")

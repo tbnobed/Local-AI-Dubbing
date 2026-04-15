@@ -52,12 +52,14 @@ A standalone local AI video dubbing system. Runs entirely on local GPU hardware.
 - `dubbing-studio/scripts/` — setup.sh, start.sh, stop.sh
 
 ### Models Used (2025 Upgrade)
-- **WhisperX** large-v3-turbo (transcription + word alignment + VAD, via faster-whisper + CTranslate2)
-- **pyannote community-1** (speaker diarization, integrated into WhisperX, requires HF token)
+- **Whisper large-v3-turbo via transformers** (transcription — pure PyTorch, Blackwell-safe)
+- **WhisperX** (word-level alignment via wav2vec2 + speaker diarization via pyannote)
+- **pyannote community-1** (speaker diarization, requires HF token)
 - **MADLAD-400 3B** by Google (translation, Apache 2.0 license, 400+ languages)
 - **Fish Speech 1.5** (voice cloning TTS, 80+ languages, CUDA 12.x native)
 
 ### GPU Setup
-- Designed for dual-GPU: RTX 5090 (primary) + RTX 4500 Blackwell (secondary)
-- RTX 50xx requires CUDA 12.8+ for sm_120 compute capability
+- Designed for dual-GPU: RTX 5090 (primary) + RTX PRO 4500 Blackwell (secondary)
+- Both GPUs are Blackwell sm_120 — requires PyTorch cu128
+- **CTranslate2/faster-whisper DO NOT support sm_120** — that's why we use transformers Whisper instead
 - Models are loaded/unloaded sequentially to minimize peak VRAM
