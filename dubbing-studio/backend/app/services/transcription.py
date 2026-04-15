@@ -226,20 +226,48 @@ class TranscriptionService:
                     else:
                         diarize_segments = diarize_model(audio)
 
-                    # Convert pyannote DiarizeOutput to DataFrame for whisperx
+                    # Convert pyannote output to DataFrame for whisperx
                     import pandas as pd
                     if not isinstance(diarize_segments, pd.DataFrame):
                         try:
                             rows = []
-                            for turn, _, speaker in diarize_segments.itertracks(yield_label=True):
-                                rows.append({
-                                    "start": turn.start,
-                                    "end": turn.end,
-                                    "speaker": speaker,
-                                })
-                            diarize_segments = pd.DataFrame(rows)
-                            logger.info(f"Converted diarization: {len(rows)} turns, "
-                                        f"{diarize_segments['speaker'].nunique()} speakers")
+                            # Try pyannote Annotation.itertracks
+                            if hasattr(diarize_segments, "itertracks"):
+                                for turn, _, speaker in diarize_segments.itertracks(yield_label=True):
+                                    rows.append({
+                                        "start": turn.start,
+                                        "end": turn.end,
+                                        "speaker": speaker,
+                                    })
+                            # Try .to_annotation() (some wrappers)
+                            elif hasattr(diarize_segments, "to_annotation"):
+                                ann = diarize_segments.to_annotation()
+                                for turn, _, speaker in ann.itertracks(yield_label=True):
+                                    rows.append({
+                                        "start": turn.start,
+                                        "end": turn.end,
+                                        "speaker": speaker,
+                                    })
+                            # Try iterating directly (tuple of (segment, track, label))
+                            elif hasattr(diarize_segments, "__iter__"):
+                                for item in diarize_segments:
+                                    if hasattr(item, "__len__") and len(item) == 3:
+                                        turn, _, speaker = item
+                                        rows.append({
+                                            "start": getattr(turn, "start", 0),
+                                            "end": getattr(turn, "end", 0),
+                                            "speaker": speaker,
+                                        })
+
+                            if rows:
+                                diarize_segments = pd.DataFrame(rows)
+                                logger.info(f"Converted diarization: {len(rows)} turns, "
+                                            f"{diarize_segments['speaker'].nunique()} speakers")
+                            else:
+                                logger.warning(f"Diarization returned empty result "
+                                               f"(type: {type(diarize_segments).__name__}, "
+                                               f"attrs: {[a for a in dir(diarize_segments) if not a.startswith('_')]})")
+                                diarize_segments = pd.DataFrame()
                         except Exception as conv_err:
                             logger.warning(f"Could not convert diarization output: {conv_err}")
                             diarize_segments = pd.DataFrame()

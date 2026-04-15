@@ -142,6 +142,13 @@ def run_dubbing_pipeline(self, job_id: str):
 
         update_progress("transcribing", 1.0)
 
+        # Clean up GPU memory before loading translation model
+        del transcriber
+        import gc
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
         # ── Stage 3: Translate (MADLAD-400) ──
         update_progress("translating", 0.0)
         from app.services.translation import TranslationService
