@@ -1,0 +1,895 @@
+[2026-04-15 14:39:52,080: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 14:39:52,083: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[f37b9028-2e77-4b1a-819a-4dbb5b72c57d] received
+[2026-04-15 14:39:52,084: INFO/MainProcess] Starting pipeline for job 3d2f3231-f7e4-413c-a721-378104006bbc
+[2026-04-15 14:39:52,203: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/3d2f3231-f7e4-413c-a721-378104006bbc.mp4
+[2026-04-15 14:39:54,975: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 14:39:57,070: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:39:57,070: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 14:39:57,070: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 14:39:57,070: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 14:40:00,054: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 14:40:00,081: INFO/MainProcess] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 14:40:12,527: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 14:40:12,527: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 14:40:16,485: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 14:40:44,562: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-04-15 14:40:44,562: INFO/MainProcess] mingle: searching for neighbors
+[2026-04-15 14:40:45,568: INFO/MainProcess] mingle: all alone
+[2026-04-15 14:40:45,586: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 14:40:45,589: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[77e05a06-e202-46de-9de6-7b9b6df5f4b4] received
+[2026-04-15 14:40:45,590: INFO/MainProcess] Starting pipeline for job 068ddc5a-aab2-42d9-af4d-6a8299776023
+[2026-04-15 14:40:45,688: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/068ddc5a-aab2-42d9-af4d-6a8299776023.mp4
+[2026-04-15 14:40:48,475: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 14:40:50,589: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:40:50,589: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 14:40:50,589: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 14:40:50,589: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 14:40:53,609: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 14:40:53,624: INFO/MainProcess] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 14:41:06,815: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 14:41:06,815: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 14:41:11,240: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 14:43:01,403: INFO/MainProcess] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 14:43:01,404: INFO/MainProcess] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 14:43:01,552: INFO/MainProcess] Pipeline complete: 45 segments, 8 speakers, lang=en
+[2026-04-15 14:43:01,715: INFO/MainProcess] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 14:43:02,585: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:43:04,819: INFO/MainProcess] MADLAD-400 loaded on cuda:1
+[2026-04-15 14:45:55,824: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-04-15 14:45:55,824: INFO/MainProcess] mingle: searching for neighbors
+[2026-04-15 14:45:56,831: INFO/MainProcess] mingle: all alone
+[2026-04-15 14:45:56,848: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 14:45:56,851: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[c6bb22fa-195b-487e-ab26-9e37c7d5878e] received
+[2026-04-15 14:45:56,853: INFO/MainProcess] Starting pipeline for job 068ddc5a-aab2-42d9-af4d-6a8299776023
+[2026-04-15 14:45:56,984: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/068ddc5a-aab2-42d9-af4d-6a8299776023.mp4
+[2026-04-15 14:45:59,860: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 14:46:01,991: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:46:01,991: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 14:46:01,992: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 14:46:01,992: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 14:46:05,004: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 14:46:05,018: INFO/MainProcess] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 14:46:17,131: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 14:46:17,131: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 14:46:21,055: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 14:48:08,118: INFO/MainProcess] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 14:48:08,118: INFO/MainProcess] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 14:48:08,255: INFO/MainProcess] Pipeline complete: 45 segments, 8 speakers, lang=en
+[2026-04-15 14:48:08,410: INFO/MainProcess] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 14:48:09,294: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 14:48:11,296: INFO/MainProcess] MADLAD-400 loaded on cuda:1
+[2026-04-15 14:48:27,070: INFO/MainProcess] Translated 45 segments from en to es
+[2026-04-15 14:48:27,102: INFO/MainProcess] Translation model unloaded.
+[2026-04-15 14:48:27,321: INFO/MainProcess] Extracted 26.7s voice sample for SPEAKER_08
+[2026-04-15 14:48:27,466: INFO/MainProcess] Extracted 35.1s voice sample for SPEAKER_04
+[2026-04-15 14:48:27,555: INFO/MainProcess] Extracted 31.4s voice sample for SPEAKER_07
+[2026-04-15 14:48:27,711: INFO/MainProcess] Extracted 40.2s voice sample for SPEAKER_02
+[2026-04-15 14:48:27,848: INFO/MainProcess] Extracted 14.2s voice sample for SPEAKER_01
+[2026-04-15 14:48:27,972: INFO/MainProcess] Extracted 12.1s voice sample for SPEAKER_03
+[2026-04-15 14:48:28,071: INFO/MainProcess] Extracted 13.6s voice sample for SPEAKER_00
+[2026-04-15 14:48:28,225: INFO/MainProcess] Extracted 16.6s voice sample for SPEAKER_06
+[2026-04-15 14:48:28,225: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/068ddc5a-aab2-42d9-af4d-6a8299776023_original_en.srt (45 entries)
+[2026-04-15 14:48:28,225: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/068ddc5a-aab2-42d9-af4d-6a8299776023_translated_es.srt (45 entries)
+[2026-04-15 14:48:28,241: INFO/MainProcess] Synthesizing segment 0/45: speaker=SPEAKER_08, text='Anteriormente en God With Us....'
+[2026-04-15 14:48:28,242: INFO/MainProcess] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 14:48:28,344: INFO/MainProcess] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth on cuda:0
+[2026-04-15 14:48:28,534: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:48:28,534: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:48:28,542: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/finite_scalar_quantization.py:147: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:48:28,542: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/lookup_free_quantization.py:209: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 14:48:28,668: WARNING/MainProcess] 2026-04-15 14:48:28.668 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 14:48:28,668: INFO/MainProcess] Loading Fish Speech 1.5 LLM on cuda:0...
+[2026-04-15 14:48:28,730: INFO/MainProcess] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 14:48:31,649: INFO/MainProcess] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 14:48:31,753: WARNING/MainProcess] 2026-04-15 14:48:31.753 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 14:48:31,753: WARNING/MainProcess] 2026-04-15 14:48:31.753 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 14:48:31,754: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 14:48:31,754: INFO/MainProcess] Fish Speech 1.5 engine loaded on cuda:0
+[2026-04-15 14:48:31,756: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:48:31,757: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:48:31,757: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:48:31,764: WARNING/MainProcess] 2026-04-15 14:48:31.764 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:48:31,776: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:48:31,780: WARNING/MainProcess] 2026-04-15 14:48:31.780 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:48:31,791: WARNING/MainProcess] 2026-04-15 14:48:31.791 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Anteriormente en God With Us.
+[2026-04-15 14:48:31,792: WARNING/MainProcess] 2026-04-15 14:48:31.792 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:48:31,855: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 54.16it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.04it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.33it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.50it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.48it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.66it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.74it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.79it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.86it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.85it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.90it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.84it/s]
+ 25%|##5       | 75/299 [00:01<00:04, 54.95it/s]
+[2026-04-15 14:48:33,220: WARNING/MainProcess] 2026-04-15 14:48:33.220 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 77 tokens in 1.43 seconds, 53.90 tokens/sec
+[2026-04-15 14:48:33,220: WARNING/MainProcess] 2026-04-15 14:48:33.220 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 34.39 GB/s
+[2026-04-15 14:48:33,220: WARNING/MainProcess] 2026-04-15 14:48:33.220 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:48:33,221: WARNING/MainProcess] 2026-04-15 14:48:33.221 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 76])
+[2026-04-15 14:48:33,459: INFO/MainProcess] Got audio chunk: shape=(155648,), sr=44100
+[2026-04-15 14:48:33,469: INFO/MainProcess] Segment 0 synthesized: 3.5s audio
+[2026-04-15 14:48:33,470: INFO/MainProcess] Time-stretching 3.5s -> 1.6s (rate=2.00)
+[2026-04-15 14:48:33,502: INFO/MainProcess] Segment 0 stretched to fit 1.6s slot
+[2026-04-15 14:48:33,513: INFO/MainProcess] Synthesizing segment 1/45: speaker=SPEAKER_08, text='Se supone que el mundo se pone peor y peor, pero luego justo...'
+[2026-04-15 14:48:33,514: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:48:33,515: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:48:33,515: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:48:33,524: WARNING/MainProcess] 2026-04-15 14:48:33.524 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:48:33,528: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:48:33,530: WARNING/MainProcess] 2026-04-15 14:48:33.530 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:48:33,543: WARNING/MainProcess] 2026-04-15 14:48:33.542 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Se supone que el mundo se pone peor y peor, pero luego justo en el último momento, como es súper oscuro, Jesús va a volver y poner todo bien.
+[2026-04-15 14:48:33,543: WARNING/MainProcess] 2026-04-15 14:48:33.543 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:48:33,575: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.63it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.79it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.74it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.68it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.66it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.66it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.68it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.68it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.75it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.74it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.53it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.58it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.60it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.63it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.63it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.62it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.61it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.64it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.64it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.63it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 55.63it/s]
+ 44%|####4     | 132/299 [00:02<00:03, 55.65it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.64it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.63it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 55.63it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 55.62it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.62it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.64it/s]
+ 58%|#####8    | 174/299 [00:03<00:02, 55.66it/s]
+ 60%|######    | 180/299 [00:03<00:02, 55.67it/s]
+ 62%|######2   | 186/299 [00:03<00:02, 55.65it/s]
+ 64%|######4   | 192/299 [00:03<00:01, 55.64it/s]
+ 66%|######6   | 198/299 [00:03<00:01, 55.63it/s]
+ 68%|######8   | 204/299 [00:03<00:01, 55.63it/s]
+ 70%|#######   | 210/299 [00:03<00:01, 55.68it/s]
+ 71%|#######   | 211/299 [00:03<00:01, 55.38it/s]
+[2026-04-15 14:48:37,385: WARNING/MainProcess] 2026-04-15 14:48:37.385 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 213 tokens in 3.84 seconds, 55.44 tokens/sec
+[2026-04-15 14:48:37,385: WARNING/MainProcess] 2026-04-15 14:48:37.385 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.37 GB/s
+[2026-04-15 14:48:37,385: WARNING/MainProcess] 2026-04-15 14:48:37.385 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:48:37,385: WARNING/MainProcess] 2026-04-15 14:48:37.385 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 212])
+[2026-04-15 14:48:37,572: INFO/MainProcess] Got audio chunk: shape=(434176,), sr=44100
+[2026-04-15 14:48:37,583: INFO/MainProcess] Segment 1 synthesized: 9.8s audio
+[2026-04-15 14:48:37,583: INFO/MainProcess] Time-stretching 9.8s -> 9.3s (rate=1.06)
+[2026-04-15 14:48:37,647: INFO/MainProcess] Segment 1 stretched to fit 9.3s slot
+[2026-04-15 14:48:37,657: INFO/MainProcess] Synthesizing segment 2/45: speaker=SPEAKER_04, text='Esta falsa promesa de que de alguna manera íbamos a ser atra...'
+[2026-04-15 14:48:37,659: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:48:37,661: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:48:37,661: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:48:37,670: WARNING/MainProcess] 2026-04-15 14:48:37.670 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:48:37,673: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:48:37,675: WARNING/MainProcess] 2026-04-15 14:48:37.675 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:48:37,687: WARNING/MainProcess] 2026-04-15 14:48:37.687 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Esta falsa promesa de que de alguna manera íbamos a ser atrapados, y luego el mundo iba a ir al infierno en una canasta de mano.
+[2026-04-15 14:48:37,687: WARNING/MainProcess] 2026-04-15 14:48:37.687 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:48:37,717: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.58it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.59it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.63it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.40it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.44it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.53it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.56it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.58it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.59it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.58it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.58it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.53it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.49it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.51it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.47it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.48it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.52it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.52it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.53it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.54it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 55.38it/s]
+ 44%|####4     | 132/299 [00:02<00:03, 55.39it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.43it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.48it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 55.51it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 55.54it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.57it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.56it/s]
+ 57%|#####7    | 171/299 [00:03<00:02, 55.20it/s]
+[2026-04-15 14:48:40,815: WARNING/MainProcess] 2026-04-15 14:48:40.815 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 173 tokens in 3.13 seconds, 55.30 tokens/sec
+[2026-04-15 14:48:40,815: WARNING/MainProcess] 2026-04-15 14:48:40.815 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.28 GB/s
+[2026-04-15 14:48:40,815: WARNING/MainProcess] 2026-04-15 14:48:40.815 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:48:40,816: WARNING/MainProcess] 2026-04-15 14:48:40.816 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 172])
+[2026-04-15 14:48:41,000: INFO/MainProcess] Got audio chunk: shape=(352256,), sr=44100
+[2026-04-15 14:48:41,012: INFO/MainProcess] Segment 2 synthesized: 8.0s audio
+[2026-04-15 14:48:41,012: INFO/MainProcess] Time-stretching 8.0s -> 7.8s (rate=1.02)
+[2026-04-15 14:48:41,076: INFO/MainProcess] Segment 2 stretched to fit 7.8s slot
+[2026-04-15 14:48:41,084: INFO/MainProcess] Reloading Fish Speech engine to reset CUDA state...
+[2026-04-15 14:48:41,732: INFO/MainProcess] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 14:48:41,733: INFO/MainProcess] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth on cuda:0
+[2026-04-15 14:48:42,018: WARNING/MainProcess] 2026-04-15 14:48:42.017 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 14:48:42,018: INFO/MainProcess] Loading Fish Speech 1.5 LLM on cuda:0...
+[2026-04-15 14:48:42,079: INFO/MainProcess] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 14:48:44,961: INFO/MainProcess] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 14:48:45,065: WARNING/MainProcess] 2026-04-15 14:48:45.065 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 14:48:45,065: WARNING/MainProcess] 2026-04-15 14:48:45.065 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 14:48:45,066: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 14:48:45,066: INFO/MainProcess] Fish Speech 1.5 engine loaded on cuda:0
+[2026-04-15 14:48:45,066: INFO/MainProcess] Fish Speech engine reloaded successfully
+[2026-04-15 14:48:45,066: INFO/MainProcess] Synthesizing segment 3/45: speaker=SPEAKER_07, text='Y simplemente no está en la Escritura....'
+[2026-04-15 14:48:45,067: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:48:45,068: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:48:45,068: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:48:45,076: WARNING/MainProcess] 2026-04-15 14:48:45.075 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:48:45,078: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:48:45,080: WARNING/MainProcess] 2026-04-15 14:48:45.080 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:48:45,090: WARNING/MainProcess] 2026-04-15 14:48:45.090 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y simplemente no está en la Escritura.
+[2026-04-15 14:48:45,090: WARNING/MainProcess] 2026-04-15 14:48:45.090 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:48:45,120: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 54.95it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.28it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.40it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.44it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.52it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.59it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.63it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.55it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.61it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.59it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.62it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.65it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.66it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.68it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.69it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.67it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.66it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.69it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.69it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.61it/s]
+ 41%|####      | 122/299 [00:02<00:03, 55.14it/s]
+[2026-04-15 14:48:47,333: WARNING/MainProcess] 2026-04-15 14:48:47.333 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 124 tokens in 2.24 seconds, 55.30 tokens/sec
+[2026-04-15 14:48:47,333: WARNING/MainProcess] 2026-04-15 14:48:47.333 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.28 GB/s
+[2026-04-15 14:48:47,333: WARNING/MainProcess] 2026-04-15 14:48:47.333 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:48:47,333: WARNING/MainProcess] 2026-04-15 14:48:47.333 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 123])
+[2026-04-15 14:48:47,520: INFO/MainProcess] Got audio chunk: shape=(251904,), sr=44100
+[2026-04-15 14:48:47,547: INFO/MainProcess] Segment 3 synthesized: 5.7s audio
+[2026-04-15 14:48:47,547: INFO/MainProcess] Time-stretching 5.7s -> 1.6s (rate=2.00)
+[2026-04-15 14:48:47,611: INFO/MainProcess] Segment 3 stretched to fit 1.6s slot
+[2026-04-15 14:48:47,623: INFO/MainProcess] Synthesizing segment 4/45: speaker=SPEAKER_07, text='¿Cómo es que solo estos últimos 150 años esto se ha converti...'
+[2026-04-15 14:48:47,624: WARNING/MainProcess] Truncating long text (369 chars) to 300 chars for TTS
+[2026-04-15 14:48:47,628: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:48:47,632: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:48:47,632: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:48:47,643: WARNING/MainProcess] 2026-04-15 14:48:47.643 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:48:47,646: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:48:47,648: WARNING/MainProcess] 2026-04-15 14:48:47.648 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:48:47,659: WARNING/MainProcess] 2026-04-15 14:48:47.659 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: ¿Cómo es que solo estos últimos 150 años esto se ha convertido en la visión dominante y de alguna manera hemos perdido el contacto creo con todo mi corazón que esa no es la historia que su
+[2026-04-15 14:48:47,666: WARNING/MainProcess] 2026-04-15 14:48:47.666 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: biblia está diciendo la nueva era ha sido inaugurada el reino de dios ha comenzado en la tierra como en el ciel
+[2026-04-15 14:48:47,667: WARNING/MainProcess] 2026-04-15 14:48:47.667 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/2 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:48:47,699: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.33it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.31it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.27it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.02it/s]
+ 10%|#         | 30/299 [00:00<00:04, 54.97it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.01it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.07it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.11it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.16it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.08it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.10it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.12it/s]
+ 26%|##6       | 78/299 [00:01<00:04, 55.13it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.13it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.14it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.16it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.21it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.22it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.19it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.21it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 55.22it/s]
+ 44%|####4     | 132/299 [00:02<00:03, 55.23it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.24it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.27it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 55.33it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 55.16it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.22it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.29it/s]
+ 58%|#####8    | 174/299 [00:03<00:02, 55.36it/s]
+ 60%|######    | 180/299 [00:03<00:02, 55.38it/s]
+ 62%|######2   | 186/299 [00:03<00:02, 55.39it/s]
+ 64%|######4   | 192/299 [00:03<00:01, 55.38it/s]
+ 66%|######6   | 198/299 [00:03<00:01, 55.37it/s]
+ 68%|######8   | 204/299 [00:03<00:01, 55.42it/s]
+ 70%|#######   | 210/299 [00:03<00:01, 55.41it/s]
+ 72%|#######2  | 216/299 [00:03<00:01, 55.42it/s]
+ 74%|#######4  | 222/299 [00:04<00:01, 55.40it/s]
+ 76%|#######6  | 228/299 [00:04<00:01, 55.43it/s]
+ 78%|#######8  | 234/299 [00:04<00:01, 55.46it/s]
+ 80%|########  | 240/299 [00:04<00:01, 55.49it/s]
+ 82%|########2 | 246/299 [00:04<00:00, 55.26it/s]
+ 84%|########4 | 252/299 [00:04<00:00, 55.32it/s]
+ 86%|########6 | 258/299 [00:04<00:00, 55.32it/s]
+ 88%|########8 | 264/299 [00:04<00:00, 55.36it/s]
+ 90%|######### | 270/299 [00:04<00:00, 55.36it/s]
+ 92%|#########2| 276/299 [00:04<00:00, 55.39it/s]
+ 94%|#########4| 282/299 [00:05<00:00, 55.42it/s]
+ 96%|#########6| 288/299 [00:05<00:00, 55.43it/s]
+ 98%|#########8| 294/299 [00:05<00:00, 55.42it/s]
+100%|##########| 299/299 [00:05<00:00, 55.28it/s]
+[2026-04-15 14:48:53,108: WARNING/MainProcess] 2026-04-15 14:48:53.108 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 300 tokens in 5.44 seconds, 55.13 tokens/sec
+[2026-04-15 14:48:53,108: WARNING/MainProcess] 2026-04-15 14:48:53.108 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.17 GB/s
+[2026-04-15 14:48:53,109: WARNING/MainProcess] 2026-04-15 14:48:53.109 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:48:53,109: WARNING/MainProcess] 2026-04-15 14:48:53.109 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 2/2 of sample 1/1
+[2026-04-15 14:48:53,109: WARNING/MainProcess] 2026-04-15 14:48:53.109 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 299])
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+  2%|2         | 6/299 [00:00<00:05, 56.03it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.88it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.95it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.60it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.69it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.71it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.68it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.67it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.65it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.68it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.67it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.67it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.66it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.66it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.68it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.65it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.65it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.61it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.57it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.59it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 55.55it/s]
+ 44%|####4     | 132/299 [00:02<00:03, 55.60it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.61it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.44it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 55.46it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 55.51it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.60it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.63it/s]
+ 58%|#####8    | 174/299 [00:03<00:02, 55.64it/s]
+ 60%|######    | 180/299 [00:03<00:02, 55.59it/s]
+ 62%|######2   | 186/299 [00:03<00:02, 55.58it/s]
+ 64%|######3   | 190/299 [00:03<00:01, 55.34it/s]
+[2026-04-15 14:48:56,605: WARNING/MainProcess] 2026-04-15 14:48:56.605 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 192 tokens in 3.50 seconds, 54.92 tokens/sec
+[2026-04-15 14:48:56,605: WARNING/MainProcess] 2026-04-15 14:48:56.605 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.03 GB/s
+[2026-04-15 14:48:56,605: WARNING/MainProcess] 2026-04-15 14:48:56.605 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:48:56,606: WARNING/MainProcess] 2026-04-15 14:48:56.606 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 191])
+[2026-04-15 14:48:56,790: INFO/MainProcess] Got audio chunk: shape=(1003520,), sr=44100
+[2026-04-15 14:48:56,804: INFO/MainProcess] Segment 4 synthesized: 22.8s audio
+[2026-04-15 14:48:56,804: INFO/MainProcess] Time-stretching 22.8s -> 23.5s (rate=0.97)
+[2026-04-15 14:48:56,868: INFO/MainProcess] Segment 4 stretched to fit 23.5s slot
+[2026-04-15 14:48:56,874: INFO/MainProcess] Synthesizing segment 5/45: speaker=SPEAKER_04, text='Lo largo y lo corto de esto es que el Mesías vino en unos 49...'
+[2026-04-15 14:48:56,876: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:48:56,877: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:48:56,877: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:48:56,885: WARNING/MainProcess] 2026-04-15 14:48:56.885 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:48:56,888: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:48:56,890: WARNING/MainProcess] 2026-04-15 14:48:56.890 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:48:56,900: WARNING/MainProcess] 2026-04-15 14:48:56.900 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Lo largo y lo corto de esto es que el Mesías vino en unos 490 años, que es 70 veces 7, y ese Mesías fue Jesucristo.
+[2026-04-15 14:48:56,900: WARNING/MainProcess] 2026-04-15 14:48:56.900 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:48:56,930: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.58it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.66it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.65it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.65it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.64it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.62it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.65it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.69it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.69it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.64it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.58it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.42it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.47it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.52it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.53it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.56it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.49it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.53it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.50it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.42it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 55.46it/s]
+ 44%|####4     | 132/299 [00:02<00:03, 55.45it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.49it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.49it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 55.47it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 55.48it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.48it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.51it/s]
+ 58%|#####8    | 174/299 [00:03<00:02, 55.49it/s]
+ 60%|######    | 180/299 [00:03<00:02, 55.50it/s]
+ 62%|######2   | 186/299 [00:03<00:02, 55.54it/s]
+ 64%|######4   | 192/299 [00:03<00:01, 55.58it/s]
+ 66%|######6   | 198/299 [00:03<00:01, 55.57it/s]
+ 68%|######8   | 204/299 [00:03<00:01, 55.56it/s]
+ 70%|#######   | 210/299 [00:03<00:01, 55.52it/s]
+ 72%|#######2  | 216/299 [00:03<00:01, 55.51it/s]
+ 74%|#######4  | 222/299 [00:03<00:01, 55.54it/s]
+ 76%|#######6  | 228/299 [00:04<00:01, 55.41it/s]
+ 78%|#######8  | 234/299 [00:04<00:01, 55.43it/s]
+ 80%|########  | 240/299 [00:04<00:01, 55.47it/s]
+ 82%|########2 | 246/299 [00:04<00:00, 55.51it/s]
+ 84%|########4 | 252/299 [00:04<00:00, 55.54it/s]
+ 86%|########6 | 258/299 [00:04<00:00, 55.53it/s]
+ 88%|########8 | 264/299 [00:04<00:00, 55.55it/s]
+ 90%|######### | 270/299 [00:04<00:00, 55.55it/s]
+ 92%|#########2| 276/299 [00:04<00:00, 55.50it/s]
+ 94%|#########4| 282/299 [00:05<00:00, 55.58it/s]
+ 96%|#########6| 288/299 [00:05<00:00, 55.62it/s]
+ 98%|#########8| 294/299 [00:05<00:00, 55.70it/s]
+100%|##########| 299/299 [00:05<00:00, 55.54it/s]
+[2026-04-15 14:49:02,313: WARNING/MainProcess] 2026-04-15 14:49:02.313 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 300 tokens in 5.41 seconds, 55.42 tokens/sec
+[2026-04-15 14:49:02,313: WARNING/MainProcess] 2026-04-15 14:49:02.313 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.36 GB/s
+[2026-04-15 14:49:02,313: WARNING/MainProcess] 2026-04-15 14:49:02.313 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:49:02,314: WARNING/MainProcess] 2026-04-15 14:49:02.313 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 299])
+[2026-04-15 14:49:02,482: INFO/MainProcess] Got audio chunk: shape=(612352,), sr=44100
+[2026-04-15 14:49:02,494: INFO/MainProcess] Segment 5 synthesized: 13.9s audio
+[2026-04-15 14:49:02,494: INFO/MainProcess] Time-stretching 13.9s -> 8.7s (rate=1.60)
+[2026-04-15 14:49:02,559: INFO/MainProcess] Segment 5 stretched to fit 8.7s slot
+[2026-04-15 14:49:02,569: INFO/MainProcess] Reloading Fish Speech engine to reset CUDA state...
+[2026-04-15 14:49:03,222: INFO/MainProcess] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 14:49:03,223: INFO/MainProcess] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth on cuda:0
+[2026-04-15 14:49:03,508: WARNING/MainProcess] 2026-04-15 14:49:03.508 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 14:49:03,508: INFO/MainProcess] Loading Fish Speech 1.5 LLM on cuda:0...
+[2026-04-15 14:49:03,570: INFO/MainProcess] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 14:49:06,431: INFO/MainProcess] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 14:49:06,535: WARNING/MainProcess] 2026-04-15 14:49:06.535 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 14:49:06,535: WARNING/MainProcess] 2026-04-15 14:49:06.535 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 14:49:06,536: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 14:49:06,536: INFO/MainProcess] Fish Speech 1.5 engine loaded on cuda:0
+[2026-04-15 14:49:06,536: INFO/MainProcess] Fish Speech engine reloaded successfully
+[2026-04-15 14:49:06,537: INFO/MainProcess] Synthesizing segment 6/45: speaker=SPEAKER_04, text='Ese es el mensaje de Daniel 9....'
+[2026-04-15 14:49:06,538: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:06,539: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:06,539: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:06,547: WARNING/MainProcess] 2026-04-15 14:49:06.547 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:06,549: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:06,551: WARNING/MainProcess] 2026-04-15 14:49:06.551 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:06,561: WARNING/MainProcess] 2026-04-15 14:49:06.561 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Ese es el mensaje de Daniel 9.
+[2026-04-15 14:49:06,561: WARNING/MainProcess] 2026-04-15 14:49:06.561 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:06,591: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.72it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.76it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.72it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.78it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.82it/s]
+ 11%|#1        | 33/299 [00:00<00:04, 54.14it/s]
+[2026-04-15 14:49:07,200: WARNING/MainProcess] 2026-04-15 14:49:07.200 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 35 tokens in 0.64 seconds, 54.74 tokens/sec
+[2026-04-15 14:49:07,200: WARNING/MainProcess] 2026-04-15 14:49:07.200 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 34.92 GB/s
+[2026-04-15 14:49:07,200: WARNING/MainProcess] 2026-04-15 14:49:07.200 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:49:07,201: WARNING/MainProcess] 2026-04-15 14:49:07.201 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 34])
+[2026-04-15 14:49:07,390: INFO/MainProcess] Got audio chunk: shape=(69632,), sr=44100
+[2026-04-15 14:49:07,401: INFO/MainProcess] Segment 6 synthesized: 1.6s audio
+[2026-04-15 14:49:07,401: INFO/MainProcess] Time-stretching 1.6s -> 2.5s (rate=0.63)
+[2026-04-15 14:49:07,433: INFO/MainProcess] Segment 6 stretched to fit 2.5s slot
+[2026-04-15 14:49:07,442: INFO/MainProcess] Synthesizing segment 7/45: speaker=SPEAKER_08, text='Mateo 24, en la popular visión dominante de los tiempos, es ...'
+[2026-04-15 14:49:07,444: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:07,446: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:07,446: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:07,454: WARNING/MainProcess] 2026-04-15 14:49:07.454 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:07,457: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:07,459: WARNING/MainProcess] 2026-04-15 14:49:07.459 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:07,469: WARNING/MainProcess] 2026-04-15 14:49:07.469 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Mateo 24, en la popular visión dominante de los tiempos, es visto casi más que cualquier otro capítulo.
+[2026-04-15 14:49:07,469: WARNING/MainProcess] 2026-04-15 14:49:07.469 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:07,499: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.68it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.81it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.71it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.74it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.76it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.56it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.55it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.62it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.61it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.62it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.70it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.71it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.74it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.73it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.70it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.73it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.65it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.65it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.70it/s]
+ 40%|####      | 120/299 [00:02<00:03, 55.69it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 55.67it/s]
+ 44%|####4     | 132/299 [00:02<00:03, 55.65it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.65it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.62it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 55.64it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 55.65it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.61it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.62it/s]
+ 58%|#####8    | 174/299 [00:03<00:02, 55.65it/s]
+ 60%|######    | 180/299 [00:03<00:02, 55.68it/s]
+ 62%|######2   | 186/299 [00:03<00:02, 55.67it/s]
+ 64%|######4   | 192/299 [00:03<00:01, 55.65it/s]
+ 66%|######6   | 198/299 [00:03<00:01, 55.65it/s]
+ 68%|######8   | 204/299 [00:03<00:01, 55.65it/s]
+ 70%|#######   | 210/299 [00:03<00:01, 55.65it/s]
+ 72%|#######2  | 216/299 [00:03<00:01, 55.68it/s]
+ 74%|#######4  | 222/299 [00:03<00:01, 55.52it/s]
+ 76%|#######6  | 228/299 [00:04<00:01, 55.48it/s]
+ 78%|#######8  | 234/299 [00:04<00:01, 55.55it/s]
+ 80%|########  | 240/299 [00:04<00:01, 55.60it/s]
+ 82%|########2 | 246/299 [00:04<00:00, 55.62it/s]
+ 84%|########4 | 252/299 [00:04<00:00, 55.62it/s]
+ 86%|########6 | 258/299 [00:04<00:00, 55.67it/s]
+ 88%|########8 | 264/299 [00:04<00:00, 55.69it/s]
+ 90%|######### | 270/299 [00:04<00:00, 55.72it/s]
+ 92%|#########2| 276/299 [00:04<00:00, 55.68it/s]
+ 94%|#########4| 282/299 [00:05<00:00, 55.68it/s]
+ 96%|#########6| 288/299 [00:05<00:00, 55.69it/s]
+ 98%|#########8| 294/299 [00:05<00:00, 55.74it/s]
+100%|##########| 299/299 [00:05<00:00, 55.66it/s]
+[2026-04-15 14:49:12,871: WARNING/MainProcess] 2026-04-15 14:49:12.871 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 300 tokens in 5.40 seconds, 55.54 tokens/sec
+[2026-04-15 14:49:12,871: WARNING/MainProcess] 2026-04-15 14:49:12.871 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.43 GB/s
+[2026-04-15 14:49:12,871: WARNING/MainProcess] 2026-04-15 14:49:12.871 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:49:12,872: WARNING/MainProcess] 2026-04-15 14:49:12.872 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 299])
+[2026-04-15 14:49:13,040: INFO/MainProcess] Got audio chunk: shape=(612352,), sr=44100
+[2026-04-15 14:49:13,052: INFO/MainProcess] Segment 7 synthesized: 13.9s audio
+[2026-04-15 14:49:13,053: INFO/MainProcess] Time-stretching 13.9s -> 6.5s (rate=2.00)
+[2026-04-15 14:49:13,117: INFO/MainProcess] Segment 7 stretched to fit 6.5s slot
+[2026-04-15 14:49:13,127: INFO/MainProcess] Synthesizing segment 8/45: speaker=SPEAKER_07, text='Jesús dijo: Jerusalén será destruida....'
+[2026-04-15 14:49:13,132: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:13,135: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:13,135: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:13,145: WARNING/MainProcess] 2026-04-15 14:49:13.145 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:13,148: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:13,150: WARNING/MainProcess] 2026-04-15 14:49:13.150 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:13,161: WARNING/MainProcess] 2026-04-15 14:49:13.161 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Jesús dijo: Jerusalén será destruida.
+[2026-04-15 14:49:13,161: WARNING/MainProcess] 2026-04-15 14:49:13.161 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:13,191: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.95it/s]
+  4%|4         | 12/299 [00:00<00:05, 56.05it/s]
+  6%|6         | 18/299 [00:00<00:05, 56.02it/s]
+  8%|8         | 24/299 [00:00<00:04, 56.03it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.99it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.95it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.90it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.92it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.93it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.97it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.96it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.96it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.99it/s]
+ 27%|##7       | 81/299 [00:01<00:03, 55.28it/s]
+[2026-04-15 14:49:14,656: WARNING/MainProcess] 2026-04-15 14:49:14.656 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 83 tokens in 1.50 seconds, 55.51 tokens/sec
+[2026-04-15 14:49:14,656: WARNING/MainProcess] 2026-04-15 14:49:14.656 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.41 GB/s
+[2026-04-15 14:49:14,657: WARNING/MainProcess] 2026-04-15 14:49:14.657 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 5.35 GB
+[2026-04-15 14:49:14,657: WARNING/MainProcess] 2026-04-15 14:49:14.657 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 82])
+[2026-04-15 14:49:14,845: INFO/MainProcess] Got audio chunk: shape=(167936,), sr=44100
+[2026-04-15 14:49:14,856: INFO/MainProcess] Segment 8 synthesized: 3.8s audio
+[2026-04-15 14:49:14,856: INFO/MainProcess] Time-stretching 3.8s -> 3.7s (rate=1.03)
+[2026-04-15 14:49:14,888: INFO/MainProcess] Segment 8 stretched to fit 3.7s slot
+[2026-04-15 14:49:14,892: INFO/MainProcess] Reloading Fish Speech engine to reset CUDA state...
+[2026-04-15 14:49:15,538: INFO/MainProcess] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 14:49:15,539: INFO/MainProcess] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth on cuda:0
+[2026-04-15 14:49:15,820: WARNING/MainProcess] 2026-04-15 14:49:15.820 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 14:49:15,821: INFO/MainProcess] Loading Fish Speech 1.5 LLM on cuda:0...
+[2026-04-15 14:49:15,879: INFO/MainProcess] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 14:49:18,709: INFO/MainProcess] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 14:49:18,813: WARNING/MainProcess] 2026-04-15 14:49:18.813 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 14:49:18,813: WARNING/MainProcess] 2026-04-15 14:49:18.813 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 14:49:18,814: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 14:49:18,815: INFO/MainProcess] Fish Speech 1.5 engine loaded on cuda:0
+[2026-04-15 14:49:18,815: INFO/MainProcess] Fish Speech engine reloaded successfully
+[2026-04-15 14:49:18,815: INFO/MainProcess] Synthesizing segment 9/45: speaker=SPEAKER_07, text='En el año 70 d.C., tenemos la guerra judío-romana....'
+[2026-04-15 14:49:18,816: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:18,817: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:18,817: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:18,824: WARNING/MainProcess] 2026-04-15 14:49:18.824 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:18,827: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:18,829: WARNING/MainProcess] 2026-04-15 14:49:18.829 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:18,839: WARNING/MainProcess] 2026-04-15 14:49:18.839 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: En el año 70 d.C., tenemos la guerra judío-romana.
+[2026-04-15 14:49:18,839: WARNING/MainProcess] 2026-04-15 14:49:18.839 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:18,869: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.68it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.89it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.89it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.97it/s]
+ 10%|#         | 30/299 [00:00<00:04, 56.06it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 56.08it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 56.13it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 56.18it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 56.15it/s]
+ 20%|##        | 60/299 [00:01<00:04, 56.15it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 56.10it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 56.12it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 56.14it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 56.16it/s]
+ 30%|###       | 90/299 [00:01<00:03, 56.17it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 56.13it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 56.16it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 56.21it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 56.21it/s]
+ 40%|####      | 120/299 [00:02<00:03, 56.15it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 56.10it/s]
+ 44%|####4     | 132/299 [00:02<00:02, 56.14it/s]
+ 46%|####5     | 137/299 [00:02<00:02, 55.71it/s]
+[2026-04-15 14:49:21,328: WARNING/MainProcess] 2026-04-15 14:49:21.328 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 139 tokens in 2.49 seconds, 55.85 tokens/sec
+[2026-04-15 14:49:21,328: WARNING/MainProcess] 2026-04-15 14:49:21.328 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.63 GB/s
+[2026-04-15 14:49:21,328: WARNING/MainProcess] 2026-04-15 14:49:21.328 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 6.16 GB
+[2026-04-15 14:49:21,329: WARNING/MainProcess] 2026-04-15 14:49:21.329 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 138])
+[2026-04-15 14:49:21,520: INFO/MainProcess] Got audio chunk: shape=(282624,), sr=44100
+[2026-04-15 14:49:21,531: INFO/MainProcess] Segment 9 synthesized: 6.4s audio
+[2026-04-15 14:49:21,531: INFO/MainProcess] Time-stretching 6.4s -> 3.4s (rate=1.88)
+[2026-04-15 14:49:21,595: INFO/MainProcess] Segment 9 stretched to fit 3.4s slot
+[2026-04-15 14:49:21,607: INFO/MainProcess] Synthesizing segment 10/45: speaker=SPEAKER_07, text='Muchos cristianos nunca han oído hablar de esto antes, cuand...'
+[2026-04-15 14:49:21,612: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:21,615: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:21,615: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:21,626: WARNING/MainProcess] 2026-04-15 14:49:21.626 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:21,629: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:21,631: WARNING/MainProcess] 2026-04-15 14:49:21.631 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:21,643: WARNING/MainProcess] 2026-04-15 14:49:21.643 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Muchos cristianos nunca han oído hablar de esto antes, cuando el gobierno romano envió soldados para destruir la ciudad de Jerusalén.
+[2026-04-15 14:49:21,644: WARNING/MainProcess] 2026-04-15 14:49:21.643 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:21,675: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.86it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.93it/s]
+  6%|6         | 18/299 [00:00<00:05, 55.61it/s]
+  8%|8         | 24/299 [00:00<00:04, 55.74it/s]
+ 10%|#         | 30/299 [00:00<00:04, 55.89it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.96it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.97it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.97it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.94it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.93it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.92it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 55.93it/s]
+ 26%|##6       | 78/299 [00:01<00:03, 55.96it/s]
+ 28%|##8       | 84/299 [00:01<00:03, 55.83it/s]
+ 30%|###       | 90/299 [00:01<00:03, 55.85it/s]
+ 32%|###2      | 96/299 [00:01<00:03, 55.91it/s]
+ 34%|###4      | 102/299 [00:01<00:03, 55.96it/s]
+ 36%|###6      | 108/299 [00:01<00:03, 55.99it/s]
+ 38%|###8      | 114/299 [00:02<00:03, 55.98it/s]
+ 40%|####      | 120/299 [00:02<00:03, 56.00it/s]
+ 42%|####2     | 126/299 [00:02<00:03, 56.02it/s]
+ 44%|####4     | 132/299 [00:02<00:02, 56.04it/s]
+ 46%|####6     | 138/299 [00:02<00:02, 55.98it/s]
+ 48%|####8     | 144/299 [00:02<00:02, 55.96it/s]
+ 50%|#####     | 150/299 [00:02<00:02, 56.01it/s]
+ 52%|#####2    | 156/299 [00:02<00:02, 56.01it/s]
+ 54%|#####4    | 162/299 [00:02<00:02, 55.99it/s]
+ 56%|#####6    | 168/299 [00:03<00:02, 55.99it/s]
+ 58%|#####8    | 174/299 [00:03<00:02, 56.02it/s]
+ 60%|######    | 180/299 [00:03<00:02, 56.00it/s]
+ 62%|######2   | 186/299 [00:03<00:02, 56.01it/s]
+ 64%|######4   | 192/299 [00:03<00:01, 56.00it/s]
+ 66%|######6   | 198/299 [00:03<00:01, 55.96it/s]
+ 67%|######7   | 201/299 [00:03<00:01, 55.67it/s]
+[2026-04-15 14:49:25,285: WARNING/MainProcess] 2026-04-15 14:49:25.285 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 203 tokens in 3.64 seconds, 55.75 tokens/sec
+[2026-04-15 14:49:25,285: WARNING/MainProcess] 2026-04-15 14:49:25.285 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.56 GB/s
+[2026-04-15 14:49:25,285: WARNING/MainProcess] 2026-04-15 14:49:25.285 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 6.16 GB
+[2026-04-15 14:49:25,285: WARNING/MainProcess] 2026-04-15 14:49:25.285 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 202])
+[2026-04-15 14:49:25,480: INFO/MainProcess] Got audio chunk: shape=(413696,), sr=44100
+[2026-04-15 14:49:25,492: INFO/MainProcess] Segment 10 synthesized: 9.4s audio
+[2026-04-15 14:49:25,492: INFO/MainProcess] Time-stretching 9.4s -> 8.0s (rate=1.18)
+[2026-04-15 14:49:25,557: INFO/MainProcess] Segment 10 stretched to fit 8.0s slot
+[2026-04-15 14:49:25,570: INFO/MainProcess] Synthesizing segment 11/45: speaker=SPEAKER_07, text='Cuando usted habla de la gran tribulación, no en el futuro....'
+[2026-04-15 14:49:25,575: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:25,580: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:25,580: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:25,591: WARNING/MainProcess] 2026-04-15 14:49:25.591 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:25,594: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:25,596: WARNING/MainProcess] 2026-04-15 14:49:25.596 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:25,606: WARNING/MainProcess] 2026-04-15 14:49:25.606 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Cuando usted habla de la gran tribulación, no en el futuro.
+[2026-04-15 14:49:25,607: WARNING/MainProcess] 2026-04-15 14:49:25.607 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:25,636: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.81it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.95it/s]
+  6%|6         | 18/299 [00:00<00:05, 56.08it/s]
+  8%|8         | 24/299 [00:00<00:04, 56.17it/s]
+ 10%|#         | 30/299 [00:00<00:04, 56.15it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 56.17it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 56.21it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 56.19it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 56.18it/s]
+ 20%|##        | 60/299 [00:01<00:04, 56.13it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 56.11it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 56.15it/s]
+ 24%|##4       | 73/299 [00:01<00:04, 55.38it/s]
+[2026-04-15 14:49:26,955: WARNING/MainProcess] 2026-04-15 14:49:26.955 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 75 tokens in 1.35 seconds, 55.64 tokens/sec
+[2026-04-15 14:49:26,955: WARNING/MainProcess] 2026-04-15 14:49:26.955 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.49 GB/s
+[2026-04-15 14:49:26,955: WARNING/MainProcess] 2026-04-15 14:49:26.955 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 6.16 GB
+[2026-04-15 14:49:26,955: WARNING/MainProcess] 2026-04-15 14:49:26.955 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 74])
+[2026-04-15 14:49:27,148: INFO/MainProcess] Got audio chunk: shape=(151552,), sr=44100
+[2026-04-15 14:49:27,159: INFO/MainProcess] Segment 11 synthesized: 3.4s audio
+[2026-04-15 14:49:27,159: INFO/MainProcess] Time-stretching 3.4s -> 3.7s (rate=0.94)
+[2026-04-15 14:49:27,191: INFO/MainProcess] Segment 11 stretched to fit 3.7s slot
+[2026-04-15 14:49:27,209: INFO/MainProcess] Reloading Fish Speech engine to reset CUDA state...
+[2026-04-15 14:49:27,864: INFO/MainProcess] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 14:49:27,865: INFO/MainProcess] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth on cuda:0
+[2026-04-15 14:49:28,168: WARNING/MainProcess] 2026-04-15 14:49:28.168 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 14:49:28,168: INFO/MainProcess] Loading Fish Speech 1.5 LLM on cuda:0...
+[2026-04-15 14:49:28,226: INFO/MainProcess] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 14:49:31,050: INFO/MainProcess] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 14:49:31,155: WARNING/MainProcess] 2026-04-15 14:49:31.155 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 14:49:31,155: WARNING/MainProcess] 2026-04-15 14:49:31.155 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 14:49:31,156: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 14:49:31,156: INFO/MainProcess] Fish Speech 1.5 engine loaded on cuda:0
+[2026-04-15 14:49:31,156: INFO/MainProcess] Fish Speech engine reloaded successfully
+[2026-04-15 14:49:31,156: INFO/MainProcess] Synthesizing segment 12/45: speaker=SPEAKER_08, text='Jesús dijo, en aquellos días habrá gran tribulación...'
+[2026-04-15 14:49:31,157: INFO/MainProcess] Trimmed reference audio to 10s (220500 samples)
+[2026-04-15 14:49:31,158: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 14:49:31,158: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 14:49:31,165: WARNING/MainProcess] 2026-04-15 14:49:31.165 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+[2026-04-15 14:49:31,168: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 14:49:31,170: WARNING/MainProcess] 2026-04-15 14:49:31.170 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+[2026-04-15 14:49:31,180: WARNING/MainProcess] 2026-04-15 14:49:31.180 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Jesús dijo, en aquellos días habrá gran tribulación
+[2026-04-15 14:49:31,180: WARNING/MainProcess] 2026-04-15 14:49:31.180 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/299 [00:00<?, ?it/s]rocess]
+[2026-04-15 14:49:31,210: WARNING/MainProcess] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|2         | 6/299 [00:00<00:05, 55.85it/s]
+  4%|4         | 12/299 [00:00<00:05, 55.97it/s]
+  6%|6         | 18/299 [00:00<00:05, 56.06it/s]
+  8%|8         | 24/299 [00:00<00:04, 56.05it/s]
+ 10%|#         | 30/299 [00:00<00:04, 56.12it/s]
+ 12%|#2        | 36/299 [00:00<00:04, 55.59it/s]
+ 14%|#4        | 42/299 [00:00<00:04, 55.48it/s]
+ 16%|#6        | 48/299 [00:00<00:04, 55.41it/s]
+ 18%|#8        | 54/299 [00:00<00:04, 55.42it/s]
+ 20%|##        | 60/299 [00:01<00:04, 55.42it/s]
+ 22%|##2       | 66/299 [00:01<00:04, 55.40it/s]
+ 24%|##4       | 72/299 [00:01<00:04, 54.88it/s]
+ 26%|##6       | 78/299 [00:01<00:04, 49.92it/s]
+ 28%|##8       | 84/299 [00:01<00:04, 51.67it/s]
+ 30%|###       | 90/299 [00:01<00:03, 52.94it/s]

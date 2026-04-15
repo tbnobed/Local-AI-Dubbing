@@ -73,6 +73,7 @@ fi
 echo -e "${YELLOW}Starting Celery worker...${NC}"
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 CUDA_DEVICE_ORDER=PCI_BUS_ID \
+PYTHONPATH="$ROOT_DIR/fish-speech:${PYTHONPATH:-}" \
 celery -A app.core.celery_app worker \
     -Q dubbing \
     --pool=solo \

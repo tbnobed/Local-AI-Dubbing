@@ -12,6 +12,7 @@ source venv/bin/activate
 # Configure GPU memory for Blackwell GPUs
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
+export PYTHONPATH="$ROOT_DIR/fish-speech:${PYTHONPATH:-}"
 
 celery -A app.core.celery_app worker \
     -Q dubbing \

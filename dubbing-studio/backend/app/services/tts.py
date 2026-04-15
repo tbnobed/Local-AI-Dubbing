@@ -9,7 +9,9 @@ Pipeline:
   2. Generate semantic tokens from text + voice prompt
   3. Decode tokens → waveform
 """
+import json
 import logging
+import multiprocessing
 import os
 import subprocess
 import tempfile
@@ -20,6 +22,259 @@ import numpy as np
 import soundfile as sf
 
 logger = logging.getLogger(__name__)
+
+
+def _tts_subprocess_worker(args: dict) -> list:
+    """Run a batch of TTS segments in an isolated subprocess.
+    This function runs in a spawned process with its own CUDA context.
+    When it returns, the process exits and ALL GPU memory is freed by the OS.
+    """
+    import os
+    import sys
+    import logging as _logging
+    _logging.basicConfig(level=_logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    _log = _logging.getLogger("tts_subprocess")
+
+    batch = args["batch"]
+    output_dir = args["output_dir"]
+    config_dict = args["config_dict"]
+
+    fish_speech_dir = config_dict.get("fish_speech_dir")
+    if fish_speech_dir and fish_speech_dir not in sys.path:
+        sys.path.insert(0, fish_speech_dir)
+
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
+    max_ref_seconds = args.get("max_ref_seconds", 10)
+    max_text_chars = args.get("max_text_chars", 300)
+    max_new_tokens = args.get("max_new_tokens", 300)
+
+    results = []
+
+    try:
+        import torch
+        import soundfile as _sf
+        import numpy as _np
+        import io
+        import subprocess as _sp
+        import shutil
+
+        models_dir = Path(config_dict["models_dir"])
+        gpu_id = config_dict["primary_gpu_id"]
+        device = f"cuda:{gpu_id}"
+
+        checkpoint_candidates = [
+            models_dir / "fish-speech" / "fish-speech-1.5",
+            models_dir / "fish-speech",
+        ]
+        checkpoint_path = None
+        for p in checkpoint_candidates:
+            if p.exists() and (p / "config.json").exists():
+                checkpoint_path = str(p)
+                break
+        if not checkpoint_path:
+            raise FileNotFoundError("Fish Speech checkpoint not found")
+
+        _log.info(f"Subprocess loading Fish Speech on {device}, checkpoint={checkpoint_path}")
+
+        from fish_speech.inference_engine import TTSInferenceEngine
+        from fish_speech.models.text2semantic.inference import launch_thread_safe_queue
+        from fish_speech.models.vqgan.inference import load_model as load_decoder_model
+        from fish_speech.utils.schema import ServeTTSRequest, ServeReferenceAudio
+
+        decoder_ckpt = None
+        for name in ["firefly-gan-vq-fsq-8x1024-21hz-generator.pth", "codec.pth"]:
+            p = Path(checkpoint_path) / name
+            if p.exists():
+                decoder_ckpt = str(p)
+                break
+        if not decoder_ckpt:
+            raise FileNotFoundError(f"No decoder checkpoint in {checkpoint_path}")
+
+        precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+
+        decoder_model = load_decoder_model(
+            config_name="firefly_gan_vq",
+            checkpoint_path=decoder_ckpt,
+            device=device,
+        )
+
+        llama_queue = launch_thread_safe_queue(
+            checkpoint_path=checkpoint_path,
+            device=device,
+            precision=precision,
+            compile=False,
+        )
+
+        engine = TTSInferenceEngine(
+            llama_queue=llama_queue,
+            decoder_model=decoder_model,
+            precision=precision,
+            compile=False,
+        )
+
+        _log.info(f"Fish Speech engine ready, processing {len(batch)} segments")
+
+        for item in batch:
+            idx = item["index"]
+            text = item["text"]
+            speaker_wav = item["speaker_wav"]
+            original_duration = item["original_duration"]
+
+            raw_path = str(Path(output_dir) / f"seg_{idx:04d}_raw.wav")
+            stretched_path = str(Path(output_dir) / f"seg_{idx:04d}.wav")
+
+            try:
+                if len(text) > max_text_chars:
+                    _log.warning(f"Truncating text ({len(text)} chars) to {max_text_chars}")
+                    text = text[:max_text_chars]
+
+                data, sr = _sf.read(speaker_wav)
+                max_samples = int(max_ref_seconds * sr)
+                if len(data) > max_samples:
+                    data = data[:max_samples]
+                    _log.info(f"Trimmed reference audio to {max_ref_seconds}s")
+                buf = io.BytesIO()
+                _sf.write(buf, data, sr, format="wav")
+                ref_bytes = buf.getvalue()
+
+                request = ServeTTSRequest(
+                    text=text,
+                    references=[ServeReferenceAudio(audio=ref_bytes, text="")],
+                    format="wav",
+                    streaming=False,
+                    max_new_tokens=max_new_tokens,
+                )
+
+                all_audio = []
+                sample_rate = 44100
+                for result in engine.inference(request):
+                    if hasattr(result, "error") and result.error:
+                        continue
+                    if hasattr(result, "sample_rate") and result.sample_rate:
+                        sample_rate = result.sample_rate
+                    audio = getattr(result, "audio", None)
+                    if audio is None:
+                        continue
+                    if isinstance(audio, tuple) and len(audio) == 2:
+                        sample_rate, audio = audio
+                    if hasattr(audio, "cpu"):
+                        audio = audio.cpu().numpy()
+                    if isinstance(audio, _np.ndarray):
+                        if audio.ndim > 1:
+                            audio = audio.squeeze()
+                        if audio.size > 0:
+                            all_audio.append(audio)
+
+                if not all_audio:
+                    raise RuntimeError("No audio output")
+
+                combined = _np.concatenate(all_audio) if len(all_audio) > 1 else all_audio[0]
+                _sf.write(raw_path, combined, sample_rate)
+                synth_duration = len(combined) / sample_rate
+
+                info = _sf.info(raw_path)
+                current_dur = info.duration
+                if current_dur > 0 and abs(current_dur / original_duration - 1.0) > 0.02:
+                    rate = current_dur / original_duration
+                    rate = max(0.5, min(2.0, rate))
+                    atempo_filters = []
+                    r = rate
+                    while r > 2.0:
+                        atempo_filters.append("atempo=2.0")
+                        r /= 2.0
+                    while r < 0.5:
+                        atempo_filters.append("atempo=0.5")
+                        r *= 2.0
+                    atempo_filters.append(f"atempo={r:.4f}")
+                    filter_str = ",".join(atempo_filters)
+                    _sp.run([
+                        "ffmpeg", "-y", "-i", raw_path,
+                        "-filter:a", filter_str, "-loglevel", "error", stretched_path,
+                    ], check=True, timeout=30)
+                else:
+                    shutil.copy2(raw_path, stretched_path)
+
+                results.append({
+                    "index": idx,
+                    "success": True,
+                    "stretched_path": stretched_path,
+                    "synth_duration": synth_duration,
+                    "original_duration": original_duration,
+                })
+                _log.info(f"Segment {idx} done: {synth_duration:.1f}s synth -> {original_duration:.1f}s slot")
+
+            except Exception as e:
+                _log.error(f"Segment {idx} failed: {e}")
+                results.append({"index": idx, "success": False, "error": str(e)})
+
+        del engine, llama_queue, decoder_model
+        import gc
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    except Exception as e:
+        import traceback
+        _log.error(f"Subprocess init failed: {e}\n{traceback.format_exc()}")
+        for item in batch:
+            if not any(r["index"] == item["index"] for r in results):
+                results.append({"index": item["index"], "success": False, "error": str(e)})
+
+    return results
+
+
+def _run_tts_batch_subprocess(
+    config,
+    batch: list,
+    output_dir: str,
+    target_language: str,
+    max_ref_seconds: float = 10,
+    max_text_chars: int = 300,
+    max_new_tokens: int = 300,
+    timeout: int = 300,
+) -> list:
+    """Launch a spawned subprocess to process a batch of TTS segments.
+    The subprocess gets its own CUDA context; when it exits the OS
+    reclaims all GPU memory. No stale threads, no CUDA state leaks.
+    """
+    fish_speech_dir = None
+    for candidate in [
+        Path(config.base_dir) / "fish-speech",
+        Path(config.base_dir).parent / "fish-speech",
+    ]:
+        if candidate.exists() and (candidate / "fish_speech").exists():
+            fish_speech_dir = str(candidate)
+            break
+
+    config_dict = {
+        "base_dir": str(config.base_dir),
+        "models_dir": str(config.models_dir),
+        "primary_gpu_id": config.primary_gpu_id,
+        "use_gpu": config.use_gpu,
+        "fish_speech_dir": fish_speech_dir,
+    }
+
+    worker_args = {
+        "batch": batch,
+        "output_dir": output_dir,
+        "target_language": target_language,
+        "config_dict": config_dict,
+        "max_ref_seconds": max_ref_seconds,
+        "max_text_chars": max_text_chars,
+        "max_new_tokens": max_new_tokens,
+    }
+
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Pool(1) as pool:
+        async_result = pool.apply_async(_tts_subprocess_worker, (worker_args,))
+        try:
+            results = async_result.get(timeout=timeout)
+        except multiprocessing.TimeoutError:
+            logger.error(f"TTS subprocess timed out after {timeout}s, terminating")
+            pool.terminate()
+            results = [{"index": item["index"], "success": False, "error": "timeout"} for item in batch]
+
+    return results
 
 
 class TTSService:
@@ -382,21 +637,6 @@ class TTSService:
         subprocess.run(cmd, check=True, timeout=30)
         return output_path
 
-    def _reload_engine(self):
-        """Fully unload and reload the Fish Speech engine to reset CUDA state."""
-        import torch, gc
-        logger.info("Reloading Fish Speech engine to reset CUDA state...")
-        if self._engine is not None and self._engine != "cli":
-            del self._engine
-        self._engine = None
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        import time as _t
-        _t.sleep(0.5)
-        self._load_engine()
-        logger.info("Fish Speech engine reloaded successfully")
-
     def synthesize_all_segments(
         self,
         segments: list,
@@ -404,26 +644,22 @@ class TTSService:
         target_language: str,
         output_dir: str,
         progress_callback=None,
-        reload_every: int = 3,
+        batch_size: int = 3,
     ) -> list:
         """Synthesize all translated segments with voice cloning.
-        Reloads the engine every `reload_every` segments to prevent GPU hangs on Blackwell.
+        Runs each batch in a subprocess to prevent GPU hangs on Blackwell GPUs.
         """
-        output_dir = Path(output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir_path = Path(output_dir)
+        output_dir_path.mkdir(parents=True, exist_ok=True)
 
         default_speaker = list(speaker_samples.values())[0] if speaker_samples else None
 
-        total = len(segments)
-        segments_since_reload = 0
-
+        batch_items = []
         for i, seg in enumerate(segments):
             translated_text = getattr(seg, "translated_text", seg.text)
             if not translated_text.strip():
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
-                if progress_callback:
-                    progress_callback((i + 1) / total)
                 continue
 
             speaker_id = getattr(seg, "speaker", "SPEAKER_00")
@@ -433,47 +669,53 @@ class TTSService:
                 logger.warning(f"No voice sample for speaker {speaker_id}, skipping segment {i}")
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
-                if progress_callback:
-                    progress_callback((i + 1) / total)
                 continue
 
-            if segments_since_reload >= reload_every:
-                self._reload_engine()
-                segments_since_reload = 0
+            original_duration = seg.end - seg.start
+            batch_items.append({
+                "index": i,
+                "text": translated_text,
+                "speaker_wav": speaker_wav,
+                "original_duration": original_duration,
+            })
 
-            raw_path = str(output_dir / f"seg_{i:04d}_raw.wav")
-            stretched_path = str(output_dir / f"seg_{i:04d}.wav")
+        total = len(segments)
 
-            try:
-                logger.info(f"Synthesizing segment {i}/{total}: speaker={speaker_id}, text='{translated_text[:60]}...'")
-                synth_duration = self.synthesize_segment(
-                    text=translated_text,
-                    speaker_wav=speaker_wav,
-                    language=target_language,
-                    output_path=raw_path,
-                )
-                logger.info(f"Segment {i} synthesized: {synth_duration:.1f}s audio")
+        for batch_start in range(0, len(batch_items), batch_size):
+            batch = batch_items[batch_start:batch_start + batch_size]
+            batch_indices = [b["index"] for b in batch]
+            logger.info(f"Processing TTS batch: segments {batch_indices} ({batch_start+1}-{min(batch_start+batch_size, len(batch_items))}/{len(batch_items)})")
 
-                original_duration = seg.end - seg.start
-                self.time_stretch_audio(
-                    audio_path=raw_path,
-                    output_path=stretched_path,
-                    target_duration=original_duration,
-                )
-                logger.info(f"Segment {i} stretched to fit {original_duration:.1f}s slot")
+            results = _run_tts_batch_subprocess(
+                config=self.config,
+                batch=batch,
+                output_dir=output_dir,
+                target_language=target_language,
+                max_ref_seconds=10,
+                max_text_chars=300,
+                max_new_tokens=300,
+            )
 
-                seg.synth_audio_path = stretched_path
-                seg.synth_duration = synth_duration
-
-            except Exception as e:
-                logger.error(f"Failed to synthesize segment {i}: {e}", exc_info=True)
-                seg.synth_audio_path = None
-                seg.synth_duration = 0.0
-
-            segments_since_reload += 1
+            for result in results:
+                idx = result["index"]
+                seg = segments[idx]
+                if result.get("success"):
+                    seg.synth_audio_path = result["stretched_path"]
+                    seg.synth_duration = result.get("synth_duration", 0.0)
+                    logger.info(f"Segment {idx} done: {result.get('synth_duration', 0):.1f}s audio -> {result.get('original_duration', 0):.1f}s slot")
+                else:
+                    seg.synth_audio_path = None
+                    seg.synth_duration = 0.0
+                    logger.error(f"Segment {idx} failed: {result.get('error', 'unknown')}")
 
             if progress_callback:
-                progress_callback((i + 1) / total)
+                done_count = batch_start + len(batch)
+                progress_callback(done_count / len(batch_items) if batch_items else 1.0)
+
+        for seg in segments:
+            if not hasattr(seg, "synth_audio_path"):
+                seg.synth_audio_path = None
+                seg.synth_duration = 0.0
 
         return segments
 
