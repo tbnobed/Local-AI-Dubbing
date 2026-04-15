@@ -286,8 +286,10 @@ class TranscriptionService:
 
         if hf_token:
             try:
-                diarize_device = torch.device(f"cuda:{self.config.secondary_gpu_id}") if self.config.use_gpu and torch.cuda.is_available() else torch.device("cpu")
-                logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
+                # pyannote hangs on Blackwell (sm_120) GPUs — use CPU
+                # Diarization is fast on CPU; the bottleneck was alignment (now handled by Whisper)
+                diarize_device = torch.device("cpu")
+                logger.info(f"Running speaker diarization (pyannote) on CPU...")
 
                 diarize_model = None
                 try:
