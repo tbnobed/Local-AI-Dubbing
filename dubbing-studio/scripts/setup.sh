@@ -183,6 +183,10 @@ source "$BACKEND_DIR/venv/bin/activate"
 
 cd "$FISH_SPEECH_DIR"
 echo "  [4b] Installing Fish Speech (editable)..."
+
+# Clear any corrupted pip wheel cache (pyaudio is a common offender)
+pip cache remove pyaudio 2>/dev/null || true
+
 # Try with CUDA extra first, then bare install, then no-build-isolation
 FISH_INSTALLED=false
 for attempt in ".[${CUDA_INDEX}]" "." ". --no-build-isolation"; do
