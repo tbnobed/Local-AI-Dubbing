@@ -323,9 +323,6 @@ class TTSService:
                     if chunk:
                         all_bytes += chunk
 
-            if _torch.cuda.is_available():
-                _torch.cuda.synchronize()
-
             if all_audio:
                 combined = np.concatenate(all_audio) if len(all_audio) > 1 else all_audio[0]
                 sf.write(output_path, combined, sample_rate)
@@ -445,10 +442,8 @@ class TTSService:
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
 
-            import torch as _torch
-            if _torch.cuda.is_available():
-                _torch.cuda.synchronize()
-                _torch.cuda.empty_cache()
+            import time as _time
+            _time.sleep(0.1)
 
             if progress_callback:
                 progress_callback((i + 1) / total)

@@ -9,8 +9,8 @@ BACKEND_DIR="$ROOT_DIR/backend"
 cd "$BACKEND_DIR"
 source venv/bin/activate
 
-# Configure GPU memory for multiple models
-export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+# Configure GPU memory for Blackwell GPUs
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
 
 celery -A app.core.celery_app worker \
