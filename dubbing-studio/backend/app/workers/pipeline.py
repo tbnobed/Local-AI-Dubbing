@@ -129,7 +129,7 @@ def run_dubbing_pipeline(self, job_id: str):
         total_duration = video_info.get("duration", 0.0)
         update_progress("extracting_audio", 1.0)
 
-        # ── Stage 2: Transcribe + align + diarize ──
+        # ── Stage 2: Transcribe (+ align + diarize if voice cloning) ──
         update_progress("transcribing", 0.0)
         from app.services.transcription import TranscriptionService
         transcriber = TranscriptionService(settings)
@@ -139,11 +139,19 @@ def run_dubbing_pipeline(self, job_id: str):
         def transcription_progress(pct, sub_stage):
             update_progress("transcribing", pct)
 
-        transcription = transcriber.transcribe_and_diarize(
-            audio_path,
-            source_language=whisper_lang,
-            progress_callback=transcription_progress,
-        )
+        if voice_cloning_enabled:
+            transcription = transcriber.transcribe_and_diarize(
+                audio_path,
+                source_language=whisper_lang,
+                progress_callback=transcription_progress,
+            )
+        else:
+            transcription = transcriber.transcribe_only(
+                audio_path,
+                source_language=whisper_lang,
+                progress_callback=transcription_progress,
+            )
+
         segments = transcription.segments
         speakers_detected = transcription.num_speakers
 

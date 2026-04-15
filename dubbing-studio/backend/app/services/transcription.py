@@ -134,6 +134,53 @@ class TranscriptionService:
         logger.info(f"Transcription complete: {len(segments)} raw segments, lang={detected_lang}")
         return segments, detected_lang
 
+    def transcribe_only(
+        self,
+        audio_path: str,
+        source_language: Optional[str] = None,
+        progress_callback=None,
+    ) -> TranscriptionResult:
+        """Fast path: transcription only, no alignment or diarization.
+        Used for subtitle-only jobs where we just need segment timestamps.
+        """
+        import whisperx
+
+        if progress_callback:
+            progress_callback(0.0, "transcribing")
+
+        raw_segments, detected_lang = self._transcribe_with_transformers(
+            audio_path, source_language
+        )
+
+        audio = whisperx.load_audio(audio_path)
+        duration = len(audio) / 16000.0
+
+        if progress_callback:
+            progress_callback(0.8, "finalizing")
+
+        segments = []
+        for i, seg in enumerate(raw_segments):
+            segments.append(Segment(
+                id=i,
+                start=seg.get("start", 0.0),
+                end=seg.get("end", 0.0),
+                text=seg.get("text", "").strip(),
+                words=[],
+                speaker="SPEAKER_00",
+            ))
+
+        logger.info(f"Transcription complete (fast): {len(segments)} segments, lang={detected_lang}")
+
+        if progress_callback:
+            progress_callback(1.0, "done")
+
+        return TranscriptionResult(
+            language=detected_lang,
+            segments=segments,
+            duration=duration,
+            num_speakers=0,
+        )
+
     def transcribe_and_diarize(
         self,
         audio_path: str,
