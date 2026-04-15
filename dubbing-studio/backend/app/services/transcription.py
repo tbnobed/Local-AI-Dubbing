@@ -231,33 +231,23 @@ class TranscriptionService:
                     if not isinstance(diarize_segments, pd.DataFrame):
                         try:
                             rows = []
-                            # Try pyannote Annotation.itertracks
-                            if hasattr(diarize_segments, "itertracks"):
-                                for turn, _, speaker in diarize_segments.itertracks(yield_label=True):
-                                    rows.append({
-                                        "start": turn.start,
-                                        "end": turn.end,
-                                        "speaker": speaker,
-                                    })
-                            # Try .to_annotation() (some wrappers)
+                            # DiarizeOutput wrapper — extract the Annotation from .speaker_diarization
+                            annotation = None
+                            if hasattr(diarize_segments, "speaker_diarization"):
+                                annotation = diarize_segments.speaker_diarization
+                                logger.info(f"Extracted speaker_diarization (type: {type(annotation).__name__})")
+                            elif hasattr(diarize_segments, "itertracks"):
+                                annotation = diarize_segments
                             elif hasattr(diarize_segments, "to_annotation"):
-                                ann = diarize_segments.to_annotation()
-                                for turn, _, speaker in ann.itertracks(yield_label=True):
+                                annotation = diarize_segments.to_annotation()
+
+                            if annotation is not None and hasattr(annotation, "itertracks"):
+                                for turn, _, speaker in annotation.itertracks(yield_label=True):
                                     rows.append({
                                         "start": turn.start,
                                         "end": turn.end,
                                         "speaker": speaker,
                                     })
-                            # Try iterating directly (tuple of (segment, track, label))
-                            elif hasattr(diarize_segments, "__iter__"):
-                                for item in diarize_segments:
-                                    if hasattr(item, "__len__") and len(item) == 3:
-                                        turn, _, speaker = item
-                                        rows.append({
-                                            "start": getattr(turn, "start", 0),
-                                            "end": getattr(turn, "end", 0),
-                                            "speaker": speaker,
-                                        })
 
                             if rows:
                                 diarize_segments = pd.DataFrame(rows)

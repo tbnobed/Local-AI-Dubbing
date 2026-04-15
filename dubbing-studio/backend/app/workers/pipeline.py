@@ -144,7 +144,7 @@ def run_dubbing_pipeline(self, job_id: str):
 
         # Clean up GPU memory before loading translation model
         del transcriber
-        import gc
+        import gc, torch
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
