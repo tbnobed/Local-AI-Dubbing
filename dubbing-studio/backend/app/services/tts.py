@@ -382,6 +382,21 @@ class TTSService:
         subprocess.run(cmd, check=True, timeout=30)
         return output_path
 
+    def _reload_engine(self):
+        """Fully unload and reload the Fish Speech engine to reset CUDA state."""
+        import torch, gc
+        logger.info("Reloading Fish Speech engine to reset CUDA state...")
+        if self._engine is not None and self._engine != "cli":
+            del self._engine
+        self._engine = None
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        import time as _t
+        _t.sleep(0.5)
+        self._load_engine()
+        logger.info("Fish Speech engine reloaded successfully")
+
     def synthesize_all_segments(
         self,
         segments: list,
@@ -389,19 +404,26 @@ class TTSService:
         target_language: str,
         output_dir: str,
         progress_callback=None,
+        reload_every: int = 3,
     ) -> list:
-        """Synthesize all translated segments with voice cloning."""
+        """Synthesize all translated segments with voice cloning.
+        Reloads the engine every `reload_every` segments to prevent GPU hangs on Blackwell.
+        """
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
         default_speaker = list(speaker_samples.values())[0] if speaker_samples else None
 
         total = len(segments)
+        segments_since_reload = 0
+
         for i, seg in enumerate(segments):
             translated_text = getattr(seg, "translated_text", seg.text)
             if not translated_text.strip():
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
+                if progress_callback:
+                    progress_callback((i + 1) / total)
                 continue
 
             speaker_id = getattr(seg, "speaker", "SPEAKER_00")
@@ -411,7 +433,13 @@ class TTSService:
                 logger.warning(f"No voice sample for speaker {speaker_id}, skipping segment {i}")
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
+                if progress_callback:
+                    progress_callback((i + 1) / total)
                 continue
+
+            if segments_since_reload >= reload_every:
+                self._reload_engine()
+                segments_since_reload = 0
 
             raw_path = str(output_dir / f"seg_{i:04d}_raw.wav")
             stretched_path = str(output_dir / f"seg_{i:04d}.wav")
@@ -442,8 +470,7 @@ class TTSService:
                 seg.synth_audio_path = None
                 seg.synth_duration = 0.0
 
-            import time as _time
-            _time.sleep(0.1)
+            segments_since_reload += 1
 
             if progress_callback:
                 progress_callback((i + 1) / total)
