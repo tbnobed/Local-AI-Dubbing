@@ -64,14 +64,22 @@ if ! command -v ffmpeg &>/dev/null; then
 fi
 echo "ffmpeg: $(ffmpeg -version 2>&1 | head -1)"
 
-# Check Redis
+# Check / install Redis
 if ! command -v redis-server &>/dev/null; then
     echo ""
-    echo "WARNING: Redis not found. Install for job queuing:"
-    echo "  sudo apt install redis-server   (Ubuntu/Debian)"
-    echo "  brew install redis              (macOS)"
-    echo ""
+    echo "Redis not found — required for job queuing."
+    if command -v apt &>/dev/null; then
+        echo "Installing Redis via apt..."
+        sudo apt install -y redis-server
+    elif command -v brew &>/dev/null; then
+        echo "Installing Redis via Homebrew..."
+        brew install redis
+    else
+        echo "ERROR: Cannot auto-install Redis. Please install manually."
+        exit 1
+    fi
 fi
+echo "Redis: $(redis-server --version 2>&1 | head -1)"
 
 echo ""
 echo "──────────────────────────────────────────"
