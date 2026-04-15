@@ -43,7 +43,8 @@ A standalone local AI video dubbing system. Runs entirely on local GPU hardware.
 - `dubbing-studio/README.md` — full setup and usage guide
 - `dubbing-studio/backend/app/services/transcription.py` — WhisperX transcription + alignment + diarization
 - `dubbing-studio/backend/app/services/translation.py` — MADLAD-400 translation
-- `dubbing-studio/backend/app/services/tts.py` — Fish Speech voice cloning TTS
+- `dubbing-studio/backend/app/services/tts.py` — Fish Speech TTS orchestrator (batches segments, launches worker subprocess)
+- `dubbing-studio/backend/app/services/tts_worker.py` — Standalone TTS subprocess (loads Fish Speech, processes batch, exits cleanly)
 - `dubbing-studio/backend/app/services/diarization.py` — Speaker voice sample extraction
 - `dubbing-studio/backend/app/services/audio_mixer.py` — Audio mixing + video assembly
 - `dubbing-studio/backend/app/workers/pipeline.py` — Celery pipeline orchestrator
