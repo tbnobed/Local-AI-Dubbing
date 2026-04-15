@@ -236,11 +236,32 @@ class TranscriptionService:
                     else:
                         diarize_segments = diarize_model(audio)
 
+                    # Convert pyannote DiarizeOutput to DataFrame for whisperx
+                    import pandas as pd
+                    if not isinstance(diarize_segments, pd.DataFrame):
+                        try:
+                            rows = []
+                            for turn, _, speaker in diarize_segments.itertracks(yield_label=True):
+                                rows.append({
+                                    "start": turn.start,
+                                    "end": turn.end,
+                                    "speaker": speaker,
+                                })
+                            diarize_segments = pd.DataFrame(rows)
+                            logger.info(f"Converted diarization: {len(rows)} turns, "
+                                        f"{diarize_segments['speaker'].nunique()} speakers")
+                        except Exception as conv_err:
+                            logger.warning(f"Could not convert diarization output: {conv_err}")
+                            diarize_segments = pd.DataFrame()
+
                     try:
-                        result_data = whisperx.assign_word_speakers(diarize_segments, result_data)
-                    except (AttributeError, Exception) as assign_err:
+                        if not diarize_segments.empty:
+                            result_data = whisperx.assign_word_speakers(diarize_segments, result_data)
+                        else:
+                            for seg in result_data["segments"]:
+                                seg["speaker"] = "SPEAKER_00"
+                    except Exception as assign_err:
                         logger.warning(f"Speaker assignment failed: {assign_err}")
-                        # Manual speaker assignment from diarization turns
                         for seg in result_data["segments"]:
                             seg["speaker"] = "SPEAKER_00"
 
