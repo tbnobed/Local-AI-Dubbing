@@ -1,0 +1,515 @@
+[2026-04-15 13:20:46,615: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 13:20:59,077: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[b175c2a0-5273-4aa2-96b9-643e344e5084] received
+[2026-04-15 13:20:59,079: INFO/ForkPoolWorker-1] Starting pipeline for job 068ddc5a-aab2-42d9-af4d-6a8299776023
+[2026-04-15 13:20:59,165: INFO/ForkPoolWorker-1] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/068ddc5a-aab2-42d9-af4d-6a8299776023.mp4
+[2026-04-15 13:21:01,776: INFO/ForkPoolWorker-1] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 13:21:03,884: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 13:21:03,884: WARNING/ForkPoolWorker-1] Device set to use cuda:0
+[2026-04-15 13:21:03,884: WARNING/ForkPoolWorker-1] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 13:21:03,884: INFO/ForkPoolWorker-1] Transcribing with transformers Whisper...
+[2026-04-15 13:21:06,875: INFO/ForkPoolWorker-1] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 13:21:06,889: INFO/ForkPoolWorker-1] Aligning words with WhisperX (lang=en) on CPU...
+[2026-04-15 13:21:18,802: INFO/ForkPoolWorker-1] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 13:21:18,802: INFO/ForkPoolWorker-1] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 13:21:22,683: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 13:23:09,222: INFO/ForkPoolWorker-1] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 13:23:09,222: INFO/ForkPoolWorker-1] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 13:23:09,373: INFO/ForkPoolWorker-1] Pipeline complete: 45 segments, 8 speakers, lang=en
+[2026-04-15 13:23:09,534: INFO/ForkPoolWorker-1] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 13:23:10,438: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 13:23:11,934: INFO/ForkPoolWorker-1] MADLAD-400 loaded on cuda:0
+[2026-04-15 13:23:26,624: INFO/ForkPoolWorker-1] Translated 45 segments from en to es
+[2026-04-15 13:23:26,653: INFO/ForkPoolWorker-1] Translation model unloaded.
+[2026-04-15 13:23:26,856: INFO/ForkPoolWorker-1] Extracted 26.7s voice sample for SPEAKER_08
+[2026-04-15 13:23:26,988: INFO/ForkPoolWorker-1] Extracted 35.1s voice sample for SPEAKER_04
+[2026-04-15 13:23:27,085: INFO/ForkPoolWorker-1] Extracted 31.4s voice sample for SPEAKER_07
+[2026-04-15 13:23:27,239: INFO/ForkPoolWorker-1] Extracted 40.2s voice sample for SPEAKER_02
+[2026-04-15 13:23:27,357: INFO/ForkPoolWorker-1] Extracted 14.2s voice sample for SPEAKER_01
+[2026-04-15 13:23:27,486: INFO/ForkPoolWorker-1] Extracted 12.1s voice sample for SPEAKER_03
+[2026-04-15 13:23:27,599: INFO/ForkPoolWorker-1] Extracted 13.6s voice sample for SPEAKER_00
+[2026-04-15 13:23:27,753: INFO/ForkPoolWorker-1] Extracted 16.6s voice sample for SPEAKER_06
+[2026-04-15 13:23:27,753: INFO/ForkPoolWorker-1] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/068ddc5a-aab2-42d9-af4d-6a8299776023_original_en.srt (45 entries)
+[2026-04-15 13:23:27,753: INFO/ForkPoolWorker-1] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/068ddc5a-aab2-42d9-af4d-6a8299776023/068ddc5a-aab2-42d9-af4d-6a8299776023_translated_es.srt (45 entries)
+[2026-04-15 13:23:27,775: INFO/ForkPoolWorker-1] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 13:23:27,879: INFO/ForkPoolWorker-1] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth
+[2026-04-15 13:23:28,069: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 13:23:28,069: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 13:23:28,077: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/finite_scalar_quantization.py:147: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 13:23:28,077: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/lookup_free_quantization.py:209: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 13:23:28,192: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:28.192 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 13:23:28,192: INFO/ForkPoolWorker-1] Loading Fish Speech 1.5 LLM...
+[2026-04-15 13:23:28,254: INFO/ForkPoolWorker-1] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 13:23:31,200: INFO/ForkPoolWorker-1] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 13:23:31,305: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:31.305 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 13:23:31,305: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:31.305 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 13:23:31,307: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech/fish_speech/inference_engine/reference_loader.py:35: UserWarning: torchaudio._backend.list_audio_backends has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  backends = torchaudio.list_audio_backends()
+
+[2026-04-15 13:23:31,307: INFO/ForkPoolWorker-1] Fish Speech 1.5 engine loaded on cuda:0
+[2026-04-15 13:23:31,307: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+
+[2026-04-15 13:23:31,308: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+
+[2026-04-15 13:23:31,317: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:31.317 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 13:23:31,328: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+
+[2026-04-15 13:23:31,333: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:31.333 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 13:23:31,346: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:31.346 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Anteriormente en God With Us.
+[2026-04-15 13:23:31,346: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:31.346 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/1023 [00:00<?, ?it/s]olWorker-1]
+[2026-04-15 13:23:31,412: WARNING/ForkPoolWorker-1] /usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  1%|          | 6/1023 [00:00<00:18, 54.29it/s]-1]
+  1%|1         | 12/1023 [00:00<00:18, 55.04it/s]1]
+  2%|1         | 18/1023 [00:00<00:18, 55.35it/s]1]
+  2%|2         | 24/1023 [00:00<00:18, 55.41it/s]1]
+  3%|2         | 30/1023 [00:00<00:17, 55.49it/s]1]
+  4%|3         | 36/1023 [00:00<00:17, 55.57it/s]1]
+  4%|4         | 42/1023 [00:00<00:17, 55.62it/s]1]
+  5%|4         | 48/1023 [00:00<00:17, 55.70it/s]1]
+  5%|5         | 54/1023 [00:00<00:17, 55.74it/s]1]
+  6%|5         | 60/1023 [00:01<00:17, 55.74it/s]1]
+  6%|6         | 66/1023 [00:01<00:17, 55.75it/s]1]
+  7%|7         | 72/1023 [00:01<00:17, 55.75it/s]1]
+  8%|7         | 78/1023 [00:01<00:16, 55.72it/s]1]
+  8%|8         | 84/1023 [00:01<00:16, 55.77it/s]1]
+  9%|8         | 90/1023 [00:01<00:16, 55.84it/s]1]
+  9%|9         | 96/1023 [00:01<00:16, 55.85it/s]1]
+ 10%|9         | 102/1023 [00:01<00:16, 55.70it/s]]
+ 11%|#         | 108/1023 [00:01<00:16, 55.68it/s]]
+ 11%|#1        | 114/1023 [00:02<00:16, 55.69it/s]]
+ 12%|#1        | 120/1023 [00:02<00:16, 55.77it/s]]
+ 12%|#2        | 126/1023 [00:02<00:16, 55.77it/s]]
+ 13%|#2        | 132/1023 [00:02<00:15, 55.79it/s]]
+ 13%|#3        | 138/1023 [00:02<00:15, 55.79it/s]]
+ 14%|#4        | 144/1023 [00:02<00:15, 55.78it/s]]
+ 15%|#4        | 150/1023 [00:02<00:15, 55.80it/s]]
+ 15%|#5        | 156/1023 [00:02<00:15, 55.58it/s]]
+ 16%|#5        | 162/1023 [00:02<00:15, 55.66it/s]]
+ 16%|#6        | 168/1023 [00:03<00:15, 55.68it/s]]
+ 17%|#7        | 174/1023 [00:03<00:15, 55.69it/s]]
+ 18%|#7        | 180/1023 [00:03<00:15, 55.71it/s]]
+ 18%|#8        | 186/1023 [00:03<00:15, 55.76it/s]]
+ 19%|#8        | 192/1023 [00:03<00:14, 55.75it/s]]
+ 19%|#9        | 198/1023 [00:03<00:14, 55.70it/s]]
+ 20%|#9        | 204/1023 [00:03<00:14, 55.73it/s]]
+ 21%|##        | 210/1023 [00:03<00:14, 55.72it/s]]
+ 21%|##1       | 216/1023 [00:03<00:14, 55.71it/s]]
+ 22%|##1       | 222/1023 [00:03<00:14, 55.74it/s]]
+ 22%|##2       | 228/1023 [00:04<00:14, 55.77it/s]]
+ 23%|##2       | 234/1023 [00:04<00:14, 55.78it/s]]
+ 23%|##3       | 240/1023 [00:04<00:14, 55.76it/s]]
+ 24%|##4       | 246/1023 [00:04<00:13, 55.79it/s]]
+ 25%|##4       | 252/1023 [00:04<00:13, 55.73it/s]]
+ 25%|##5       | 256/1023 [00:04<00:13, 55.48it/s]]
+[2026-04-15 13:23:36,026: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.026 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 258 tokens in 4.68 seconds, 55.13 tokens/sec
+[2026-04-15 13:23:36,026: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.026 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.17 GB/s
+[2026-04-15 13:23:36,026: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.026 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 7.34 GB
+[2026-04-15 13:23:36,027: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.027 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 257])
+[2026-04-15 13:23:36,267: INFO/ForkPoolWorker-1] Inference result: type=InferenceResult, attrs=['audio', 'code', 'error']
+[2026-04-15 13:23:36,267: INFO/ForkPoolWorker-1] Result has .code: shape=N/A
+[2026-04-15 13:23:36,267: ERROR/ForkPoolWorker-1] Failed to synthesize segment 0: Fish Speech inference produced no audio output
+[2026-04-15 13:23:36,296: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.296 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 26.68 seconds
+[2026-04-15 13:23:36,300: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.300 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 575])
+[2026-04-15 13:23:36,314: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.314 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Se supone que el mundo se pone peor y peor, pero luego justo en el último momento, como es súper oscuro, Jesús va a volver y poner todo bien.
+[2026-04-15 13:23:36,314: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:36.314 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/1023 [00:00<?, ?it/s]olWorker-1]
+  1%|          | 6/1023 [00:00<00:18, 55.30it/s]-1]
+  1%|1         | 12/1023 [00:00<00:18, 55.40it/s]1]
+  2%|1         | 18/1023 [00:00<00:18, 55.43it/s]1]
+  2%|2         | 24/1023 [00:00<00:18, 55.38it/s]1]
+  3%|2         | 30/1023 [00:00<00:17, 55.42it/s]1]
+  4%|3         | 36/1023 [00:00<00:17, 55.37it/s]1]
+  4%|4         | 42/1023 [00:00<00:17, 55.39it/s]1]
+  5%|4         | 48/1023 [00:00<00:17, 55.41it/s]1]
+  5%|5         | 54/1023 [00:00<00:17, 55.40it/s]1]
+  6%|5         | 60/1023 [00:01<00:17, 55.38it/s]1]
+  6%|6         | 66/1023 [00:01<00:17, 55.38it/s]1]
+  7%|7         | 72/1023 [00:01<00:17, 55.38it/s]1]
+  8%|7         | 78/1023 [00:01<00:17, 55.38it/s]1]
+  8%|8         | 84/1023 [00:01<00:16, 55.40it/s]1]
+  9%|8         | 90/1023 [00:01<00:16, 55.41it/s]1]
+  9%|9         | 96/1023 [00:01<00:16, 55.34it/s]1]
+ 10%|9         | 102/1023 [00:01<00:16, 55.07it/s]]
+ 11%|#         | 108/1023 [00:01<00:16, 55.14it/s]]
+ 11%|#1        | 114/1023 [00:02<00:16, 55.22it/s]]
+ 12%|#1        | 120/1023 [00:02<00:16, 54.94it/s]]
+ 12%|#2        | 126/1023 [00:02<00:16, 55.05it/s]]
+ 13%|#2        | 132/1023 [00:02<00:16, 55.16it/s]]
+ 13%|#3        | 138/1023 [00:02<00:16, 55.20it/s]]
+ 14%|#4        | 144/1023 [00:02<00:15, 55.25it/s]]
+ 15%|#4        | 150/1023 [00:02<00:15, 55.31it/s]]
+ 15%|#5        | 156/1023 [00:02<00:15, 55.35it/s]]
+ 16%|#5        | 162/1023 [00:02<00:15, 55.33it/s]]
+ 16%|#6        | 168/1023 [00:03<00:15, 55.35it/s]]
+ 17%|#7        | 174/1023 [00:03<00:15, 55.37it/s]]
+ 18%|#7        | 180/1023 [00:03<00:15, 55.39it/s]]
+ 18%|#8        | 186/1023 [00:03<00:15, 55.40it/s]]
+ 19%|#8        | 192/1023 [00:03<00:15, 55.39it/s]]
+ 19%|#9        | 198/1023 [00:03<00:14, 55.35it/s]]
+ 20%|#9        | 204/1023 [00:03<00:14, 55.37it/s]]
+ 21%|##        | 210/1023 [00:03<00:14, 55.35it/s]]
+ 21%|##1       | 216/1023 [00:03<00:14, 55.35it/s]]
+ 22%|##1       | 222/1023 [00:04<00:14, 55.37it/s]]
+ 22%|##2       | 228/1023 [00:04<00:14, 55.34it/s]]
+ 23%|##2       | 234/1023 [00:04<00:14, 55.23it/s]]
+ 23%|##3       | 240/1023 [00:04<00:14, 55.22it/s]]
+ 24%|##4       | 246/1023 [00:04<00:14, 55.29it/s]]
+ 25%|##4       | 252/1023 [00:04<00:13, 55.30it/s]]
+ 25%|##5       | 258/1023 [00:04<00:13, 55.34it/s]]
+ 26%|##5       | 264/1023 [00:04<00:13, 55.35it/s]]
+ 26%|##6       | 270/1023 [00:04<00:13, 55.37it/s]]
+ 27%|##6       | 276/1023 [00:04<00:13, 55.37it/s]]
+ 28%|##7       | 282/1023 [00:05<00:13, 55.42it/s]]
+ 28%|##8       | 288/1023 [00:05<00:13, 55.39it/s]]
+ 29%|##8       | 294/1023 [00:05<00:13, 55.37it/s]]
+ 29%|##9       | 300/1023 [00:05<00:13, 55.41it/s]]
+ 30%|##9       | 306/1023 [00:05<00:12, 55.45it/s]]
+ 30%|###       | 312/1023 [00:05<00:12, 55.46it/s]]
+ 31%|###1      | 318/1023 [00:05<00:12, 55.46it/s]]
+ 32%|###1      | 324/1023 [00:05<00:12, 55.48it/s]]
+ 32%|###2      | 330/1023 [00:05<00:12, 55.51it/s]]
+ 33%|###2      | 336/1023 [00:06<00:12, 55.46it/s]]
+ 33%|###3      | 342/1023 [00:06<00:12, 55.47it/s]]
+ 34%|###4      | 348/1023 [00:06<00:12, 55.44it/s]]
+ 35%|###4      | 354/1023 [00:06<00:12, 55.46it/s]]
+ 35%|###5      | 360/1023 [00:06<00:11, 55.44it/s]]
+ 36%|###5      | 366/1023 [00:06<00:11, 55.40it/s]]
+ 36%|###6      | 372/1023 [00:06<00:11, 55.47it/s]]
+ 37%|###6      | 378/1023 [00:06<00:11, 55.46it/s]]
+ 38%|###7      | 384/1023 [00:06<00:11, 55.45it/s]]
+ 38%|###8      | 390/1023 [00:07<00:11, 55.46it/s]]
+ 39%|###8      | 396/1023 [00:07<00:11, 55.51it/s]]
+ 39%|###9      | 402/1023 [00:07<00:11, 55.49it/s]]
+ 40%|###9      | 408/1023 [00:07<00:11, 55.35it/s]]
+ 40%|####      | 414/1023 [00:07<00:11, 55.32it/s]]
+ 41%|####1     | 420/1023 [00:07<00:10, 55.34it/s]]
+ 42%|####1     | 426/1023 [00:07<00:10, 55.40it/s]]
+ 42%|####2     | 432/1023 [00:07<00:10, 55.43it/s]]
+ 43%|####2     | 438/1023 [00:07<00:10, 55.39it/s]]
+ 43%|####3     | 444/1023 [00:08<00:10, 55.43it/s]]
+ 44%|####3     | 450/1023 [00:08<00:10, 55.43it/s]]
+ 45%|####4     | 456/1023 [00:08<00:10, 55.41it/s]]
+ 45%|####5     | 462/1023 [00:08<00:10, 55.40it/s]]
+ 46%|####5     | 468/1023 [00:08<00:10, 55.42it/s]]
+ 46%|####6     | 474/1023 [00:08<00:09, 55.45it/s]]
+ 47%|####6     | 480/1023 [00:08<00:09, 55.47it/s]]
+ 48%|####7     | 486/1023 [00:08<00:09, 55.46it/s]]
+ 48%|####8     | 492/1023 [00:08<00:09, 55.47it/s]]
+ 49%|####8     | 498/1023 [00:08<00:09, 55.46it/s]]
+ 49%|####9     | 504/1023 [00:09<00:09, 55.47it/s]]
+ 50%|####9     | 510/1023 [00:09<00:09, 55.51it/s]]
+ 50%|#####     | 516/1023 [00:09<00:09, 55.49it/s]]
+ 51%|#####1    | 522/1023 [00:09<00:09, 55.48it/s]]
+ 52%|#####1    | 528/1023 [00:09<00:08, 55.50it/s]]
+ 52%|#####2    | 534/1023 [00:09<00:08, 55.52it/s]]
+ 53%|#####2    | 540/1023 [00:09<00:08, 55.54it/s]]
+ 53%|#####3    | 546/1023 [00:09<00:08, 55.51it/s]]
+ 54%|#####3    | 552/1023 [00:09<00:08, 55.52it/s]]
+ 55%|#####4    | 558/1023 [00:10<00:08, 55.54it/s]]
+ 55%|#####5    | 564/1023 [00:10<00:08, 55.55it/s]]
+ 56%|#####5    | 570/1023 [00:10<00:08, 55.54it/s]]
+ 56%|#####6    | 576/1023 [00:10<00:08, 55.54it/s]]
+ 57%|#####6    | 582/1023 [00:10<00:07, 55.50it/s]]
+ 57%|#####7    | 588/1023 [00:10<00:07, 55.51it/s]]
+ 58%|#####8    | 594/1023 [00:10<00:07, 55.53it/s]]
+ 59%|#####8    | 600/1023 [00:10<00:07, 55.52it/s]]
+ 59%|#####9    | 606/1023 [00:10<00:07, 55.51it/s]]
+ 60%|#####9    | 612/1023 [00:11<00:07, 55.52it/s]]
+ 60%|######    | 618/1023 [00:11<00:07, 55.50it/s]]
+ 61%|######    | 624/1023 [00:11<00:07, 55.54it/s]]
+ 62%|######1   | 630/1023 [00:11<00:07, 55.52it/s]]
+ 62%|######2   | 636/1023 [00:11<00:06, 55.51it/s]]
+ 63%|######2   | 642/1023 [00:11<00:06, 55.51it/s]]
+ 63%|######3   | 648/1023 [00:11<00:06, 55.52it/s]]
+ 64%|######3   | 654/1023 [00:11<00:06, 55.42it/s]]
+ 65%|######4   | 660/1023 [00:11<00:06, 55.30it/s]]
+ 65%|######5   | 666/1023 [00:12<00:06, 55.36it/s]]
+ 66%|######5   | 672/1023 [00:12<00:06, 55.38it/s]]
+ 66%|######6   | 678/1023 [00:12<00:06, 55.40it/s]]
+ 67%|######6   | 684/1023 [00:12<00:06, 55.42it/s]]
+ 67%|######7   | 690/1023 [00:12<00:06, 55.40it/s]]
+ 68%|######8   | 696/1023 [00:12<00:05, 55.49it/s]]
+ 69%|######8   | 702/1023 [00:12<00:05, 55.33it/s]]
+ 69%|######9   | 708/1023 [00:12<00:05, 55.34it/s]]
+ 70%|######9   | 714/1023 [00:12<00:05, 55.33it/s]]
+ 70%|#######   | 720/1023 [00:12<00:05, 55.36it/s]]
+ 71%|#######   | 726/1023 [00:13<00:05, 55.41it/s]]
+ 72%|#######1  | 732/1023 [00:13<00:05, 55.45it/s]]
+ 72%|#######2  | 738/1023 [00:13<00:05, 55.49it/s]]
+ 73%|#######2  | 744/1023 [00:13<00:05, 55.50it/s]]
+ 73%|#######3  | 750/1023 [00:13<00:04, 55.52it/s]]
+ 74%|#######3  | 756/1023 [00:13<00:04, 55.53it/s]]
+ 74%|#######4  | 762/1023 [00:13<00:04, 55.53it/s]]
+ 75%|#######5  | 768/1023 [00:13<00:04, 55.57it/s]]
+ 76%|#######5  | 774/1023 [00:13<00:04, 55.53it/s]]
+ 76%|#######6  | 780/1023 [00:14<00:04, 55.52it/s]]
+ 77%|#######6  | 786/1023 [00:14<00:04, 55.52it/s]]
+ 77%|#######7  | 792/1023 [00:14<00:04, 55.53it/s]]
+ 78%|#######8  | 798/1023 [00:14<00:04, 55.52it/s]]
+ 79%|#######8  | 804/1023 [00:14<00:03, 55.47it/s]]
+ 79%|#######9  | 810/1023 [00:14<00:03, 55.46it/s]]
+ 80%|#######9  | 816/1023 [00:14<00:03, 55.50it/s]]
+ 80%|########  | 822/1023 [00:14<00:03, 55.48it/s]]
+ 81%|########  | 828/1023 [00:14<00:03, 55.51it/s]]
+ 82%|########1 | 834/1023 [00:15<00:03, 55.52it/s]]
+ 82%|########2 | 840/1023 [00:15<00:03, 55.50it/s]]
+ 83%|########2 | 846/1023 [00:15<00:03, 55.52it/s]]
+ 83%|########3 | 852/1023 [00:15<00:03, 55.50it/s]]
+ 84%|########3 | 858/1023 [00:15<00:02, 55.50it/s]]
+ 84%|########4 | 864/1023 [00:15<00:02, 55.50it/s]]
+ 85%|########5 | 870/1023 [00:15<00:02, 55.23it/s]]
+ 86%|########5 | 876/1023 [00:15<00:02, 55.30it/s]]
+ 86%|########6 | 882/1023 [00:15<00:02, 55.36it/s]]
+ 87%|########6 | 888/1023 [00:16<00:02, 55.39it/s]]
+ 87%|########7 | 894/1023 [00:16<00:02, 55.43it/s]]
+ 88%|########7 | 900/1023 [00:16<00:02, 55.46it/s]]
+ 89%|########8 | 906/1023 [00:16<00:02, 55.47it/s]]
+ 89%|########9 | 912/1023 [00:16<00:02, 55.46it/s]]
+ 90%|########9 | 918/1023 [00:16<00:01, 55.50it/s]]
+ 90%|######### | 924/1023 [00:16<00:01, 55.53it/s]]
+ 91%|######### | 930/1023 [00:16<00:01, 55.50it/s]]
+ 91%|#########1| 936/1023 [00:16<00:01, 55.51it/s]]
+ 92%|#########2| 942/1023 [00:16<00:01, 55.54it/s]]
+ 93%|#########2| 948/1023 [00:17<00:01, 55.54it/s]]
+ 93%|#########3| 954/1023 [00:17<00:01, 55.53it/s]]
+ 94%|#########3| 960/1023 [00:17<00:01, 55.56it/s]]
+ 94%|#########4| 966/1023 [00:17<00:01, 55.58it/s]]
+ 95%|#########5| 972/1023 [00:17<00:00, 55.60it/s]]
+ 96%|#########5| 978/1023 [00:17<00:00, 55.59it/s]]
+ 96%|#########6| 984/1023 [00:17<00:00, 55.57it/s]]
+ 97%|#########6| 990/1023 [00:17<00:00, 55.44it/s]]
+ 97%|#########7| 996/1023 [00:17<00:00, 55.38it/s]]
+ 98%|#########7| 1002/1023 [00:18<00:00, 55.44it/s]
+ 99%|#########8| 1008/1023 [00:18<00:00, 55.46it/s]
+ 99%|#########9| 1014/1023 [00:18<00:00, 55.51it/s]
+100%|#########9| 1020/1023 [00:18<00:00, 55.53it/s]
+100%|##########| 1023/1023 [00:18<00:00, 55.43it/s]
+[2026-04-15 13:23:54,802: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:54.802 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 1024 tokens in 18.49 seconds, 55.39 tokens/sec
+[2026-04-15 13:23:54,802: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:54.802 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.33 GB/s
+[2026-04-15 13:23:54,802: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:54.802 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 7.34 GB
+[2026-04-15 13:23:54,802: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:54.802 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 1023])
+[2026-04-15 13:23:55,038: INFO/ForkPoolWorker-1] Inference result: type=InferenceResult, attrs=['audio', 'code', 'error']
+[2026-04-15 13:23:55,038: INFO/ForkPoolWorker-1] Result has .code: shape=N/A
+[2026-04-15 13:23:55,038: ERROR/ForkPoolWorker-1] Failed to synthesize segment 1: Fish Speech inference produced no audio output
+[2026-04-15 13:23:55,071: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:55.071 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 35.05 seconds
+[2026-04-15 13:23:55,078: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:55.078 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 755])
+[2026-04-15 13:23:55,092: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:55.092 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Esta falsa promesa de que de alguna manera íbamos a ser atrapados, y luego el mundo iba a ir al infierno en una canasta de mano.
+[2026-04-15 13:23:55,092: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:55.092 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/1023 [00:00<?, ?it/s]olWorker-1]
+  1%|          | 6/1023 [00:00<00:18, 55.33it/s]-1]
+  1%|1         | 12/1023 [00:00<00:18, 55.44it/s]1]
+  2%|1         | 18/1023 [00:00<00:18, 55.49it/s]1]
+  2%|2         | 24/1023 [00:00<00:17, 55.55it/s]1]
+  3%|2         | 30/1023 [00:00<00:17, 55.56it/s]1]
+  4%|3         | 36/1023 [00:00<00:17, 55.60it/s]1]
+  4%|4         | 42/1023 [00:00<00:17, 55.50it/s]1]
+  5%|4         | 48/1023 [00:00<00:17, 55.48it/s]1]
+  5%|5         | 54/1023 [00:00<00:17, 55.49it/s]1]
+  6%|5         | 60/1023 [00:01<00:17, 55.54it/s]1]
+  6%|6         | 66/1023 [00:01<00:17, 55.54it/s]1]
+  7%|7         | 72/1023 [00:01<00:17, 55.54it/s]1]
+  8%|7         | 78/1023 [00:01<00:17, 55.57it/s]1]
+  8%|8         | 84/1023 [00:01<00:16, 55.54it/s]1]
+  9%|8         | 90/1023 [00:01<00:16, 55.57it/s]1]
+  9%|9         | 96/1023 [00:01<00:16, 55.52it/s]1]
+ 10%|9         | 102/1023 [00:01<00:16, 55.48it/s]]
+ 11%|#         | 108/1023 [00:01<00:16, 55.53it/s]]
+ 11%|#1        | 114/1023 [00:02<00:16, 55.53it/s]]
+ 12%|#1        | 120/1023 [00:02<00:16, 55.52it/s]]
+ 12%|#2        | 126/1023 [00:02<00:16, 55.51it/s]]
+ 13%|#2        | 132/1023 [00:02<00:16, 55.51it/s]]
+ 13%|#3        | 138/1023 [00:02<00:15, 55.52it/s]]
+ 14%|#4        | 144/1023 [00:02<00:15, 55.54it/s]]
+ 15%|#4        | 150/1023 [00:02<00:15, 55.53it/s]]
+ 15%|#5        | 156/1023 [00:02<00:15, 55.55it/s]]
+ 16%|#5        | 162/1023 [00:02<00:15, 55.58it/s]]
+ 16%|#6        | 168/1023 [00:03<00:15, 55.32it/s]]
+ 17%|#7        | 174/1023 [00:03<00:15, 55.32it/s]]
+ 18%|#7        | 180/1023 [00:03<00:15, 55.39it/s]]
+ 18%|#8        | 186/1023 [00:03<00:15, 55.46it/s]]
+ 19%|#8        | 192/1023 [00:03<00:14, 55.49it/s]]
+ 19%|#9        | 198/1023 [00:03<00:14, 55.52it/s]]
+ 20%|#9        | 204/1023 [00:03<00:14, 55.55it/s]]
+ 21%|##        | 210/1023 [00:03<00:14, 55.51it/s]]
+ 21%|##1       | 216/1023 [00:03<00:14, 55.50it/s]]
+ 22%|##1       | 222/1023 [00:03<00:14, 55.47it/s]]
+ 22%|##2       | 228/1023 [00:04<00:14, 55.46it/s]]
+ 23%|##2       | 234/1023 [00:04<00:14, 55.50it/s]]
+ 23%|##3       | 240/1023 [00:04<00:14, 55.39it/s]]
+ 24%|##4       | 246/1023 [00:04<00:14, 55.35it/s]]
+ 25%|##4       | 252/1023 [00:04<00:13, 55.44it/s]]
+ 25%|##5       | 258/1023 [00:04<00:13, 55.49it/s]]
+ 25%|##5       | 258/1023 [00:04<00:13, 55.28it/s]]
+[2026-04-15 13:23:59,797: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:59.797 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 260 tokens in 4.70 seconds, 55.26 tokens/sec
+[2026-04-15 13:23:59,797: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:59.797 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.25 GB/s
+[2026-04-15 13:23:59,797: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:59.797 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 7.34 GB
+[2026-04-15 13:23:59,797: WARNING/ForkPoolWorker-1] 2026-04-15 13:23:59.797 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 259])
+[2026-04-15 13:23:59,978: INFO/ForkPoolWorker-1] Inference result: type=InferenceResult, attrs=['audio', 'code', 'error']
+[2026-04-15 13:23:59,978: INFO/ForkPoolWorker-1] Result has .code: shape=N/A
+[2026-04-15 13:23:59,978: ERROR/ForkPoolWorker-1] Failed to synthesize segment 2: Fish Speech inference produced no audio output
+[2026-04-15 13:24:00,003: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:00.003 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 13:24:00,011: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:00.011 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 13:24:00,024: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:00.024 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Y simplemente no está en la Escritura.
+[2026-04-15 13:24:00,024: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:00.024 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+  0%|          | 0/1023 [00:00<?, ?it/s]olWorker-1]
+  1%|          | 6/1023 [00:00<00:18, 55.36it/s]-1]
+  1%|1         | 12/1023 [00:00<00:18, 55.52it/s]1]
+  2%|1         | 18/1023 [00:00<00:18, 55.65it/s]1]
+  2%|2         | 24/1023 [00:00<00:17, 55.67it/s]1]
+  3%|2         | 30/1023 [00:00<00:17, 55.65it/s]1]
+  4%|3         | 36/1023 [00:00<00:17, 55.67it/s]1]
+  4%|4         | 42/1023 [00:00<00:17, 55.69it/s]1]
+  5%|4         | 48/1023 [00:00<00:17, 55.62it/s]1]
+  5%|5         | 54/1023 [00:00<00:17, 55.58it/s]1]
+  6%|5         | 60/1023 [00:01<00:17, 55.55it/s]1]
+  6%|6         | 66/1023 [00:01<00:17, 55.60it/s]1]
+  7%|7         | 72/1023 [00:01<00:17, 55.61it/s]1]
+  8%|7         | 78/1023 [00:01<00:16, 55.60it/s]1]
+  8%|8         | 84/1023 [00:01<00:16, 55.58it/s]1]
+  9%|8         | 90/1023 [00:01<00:16, 55.67it/s]1]
+  9%|9         | 96/1023 [00:01<00:16, 55.69it/s]1]
+ 10%|9         | 102/1023 [00:01<00:16, 55.71it/s]]
+ 11%|#         | 108/1023 [00:01<00:16, 55.70it/s]]
+ 11%|#1        | 114/1023 [00:02<00:16, 55.68it/s]]
+ 11%|#1        | 116/1023 [00:02<00:16, 55.16it/s]]
+[2026-04-15 13:24:02,164: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.164 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 118 tokens in 2.14 seconds, 55.13 tokens/sec
+[2026-04-15 13:24:02,164: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.164 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.17 GB/s
+[2026-04-15 13:24:02,165: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.165 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 7.34 GB
+[2026-04-15 13:24:02,165: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.165 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 117])
+[2026-04-15 13:24:02,351: INFO/ForkPoolWorker-1] Inference result: type=InferenceResult, attrs=['audio', 'code', 'error']
+[2026-04-15 13:24:02,351: INFO/ForkPoolWorker-1] Result has .code: shape=N/A
+[2026-04-15 13:24:02,351: ERROR/ForkPoolWorker-1] Failed to synthesize segment 3: Fish Speech inference produced no audio output
+[2026-04-15 13:24:02,382: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.382 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 31.45 seconds
+[2026-04-15 13:24:02,386: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.386 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 677])
+[2026-04-15 13:24:02,400: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.400 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: ¿Cómo es que solo estos últimos 150 años esto se ha convertido en la visión dominante y de alguna manera hemos perdido el contacto creo con todo mi corazón que esa no es la historia que su
+[2026-04-15 13:24:02,403: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.403 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: biblia está diciendo la nueva era ha sido inaugurada el reino de dios ha comenzado en la tierra como en el cielo y llegamos a ser parte de ella Daniel 9 es un oráculo muy complejo.
+[2026-04-15 13:24:02,403: WARNING/ForkPoolWorker-1] 2026-04-15 13:24:02.403 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/2 of sample 1/1
+  0%|          | 0/1023 [00:00<?, ?it/s]olWorker-1]
+  1%|          | 6/1023 [00:00<00:18, 55.65it/s]-1]
+  1%|1         | 12/1023 [00:00<00:18, 55.81it/s]1]
+  2%|1         | 18/1023 [00:00<00:17, 55.88it/s]1]
+  2%|2         | 24/1023 [00:00<00:17, 55.86it/s]1]
+  3%|2         | 30/1023 [00:00<00:17, 55.87it/s]1]
+  4%|3         | 36/1023 [00:00<00:17, 55.82it/s]1]
+  4%|4         | 42/1023 [00:00<00:17, 55.78it/s]1]
+  5%|4         | 48/1023 [00:00<00:17, 55.78it/s]1]
+  5%|5         | 54/1023 [00:00<00:17, 55.83it/s]1]
+  6%|5         | 60/1023 [00:01<00:17, 55.86it/s]1]
+  6%|6         | 66/1023 [00:01<00:17, 55.80it/s]1]
+  7%|7         | 72/1023 [00:01<00:17, 55.87it/s]1]
+  8%|7         | 78/1023 [00:01<00:16, 55.92it/s]1]
+  8%|8         | 84/1023 [00:01<00:16, 55.91it/s]1]
+  9%|8         | 90/1023 [00:01<00:16, 55.89it/s]1]
+  9%|9         | 96/1023 [00:01<00:16, 55.93it/s]1]
+ 10%|9         | 102/1023 [00:01<00:16, 55.96it/s]]
+ 11%|#         | 108/1023 [00:01<00:16, 56.02it/s]]
+ 11%|#1        | 114/1023 [00:02<00:16, 56.03it/s]]
+ 12%|#1        | 120/1023 [00:02<00:16, 56.02it/s]]
+ 12%|#2        | 126/1023 [00:02<00:16, 55.96it/s]]
+ 13%|#2        | 132/1023 [00:02<00:15, 55.85it/s]]
+ 13%|#3        | 138/1023 [00:02<00:15, 55.89it/s]]
+ 14%|#4        | 144/1023 [00:02<00:15, 55.88it/s]]
+ 15%|#4        | 150/1023 [00:02<00:15, 55.87it/s]]
+ 15%|#5        | 156/1023 [00:02<00:15, 55.93it/s]]
+ 16%|#5        | 162/1023 [00:02<00:15, 55.93it/s]]
+ 16%|#6        | 168/1023 [00:03<00:15, 55.95it/s]]
+ 17%|#7        | 174/1023 [00:03<00:15, 55.97it/s]]
+ 18%|#7        | 180/1023 [00:03<00:15, 55.99it/s]]
+ 18%|#8        | 186/1023 [00:03<00:14, 56.06it/s]]
+ 19%|#8        | 192/1023 [00:03<00:14, 56.03it/s]]
+ 19%|#9        | 198/1023 [00:03<00:14, 56.01it/s]]
+ 20%|#9        | 204/1023 [00:03<00:14, 56.00it/s]]
+ 21%|##        | 210/1023 [00:03<00:14, 56.07it/s]]
+ 21%|##1       | 216/1023 [00:03<00:14, 56.03it/s]]
+ 22%|##1       | 222/1023 [00:03<00:14, 56.05it/s]]
+ 22%|##2       | 228/1023 [00:04<00:14, 56.07it/s]]
+ 23%|##2       | 234/1023 [00:04<00:14, 56.06it/s]]
+ 23%|##3       | 240/1023 [00:04<00:13, 56.02it/s]]
+ 24%|##4       | 246/1023 [00:04<00:13, 56.02it/s]]
+ 25%|##4       | 252/1023 [00:04<00:13, 55.96it/s]]
+ 25%|##5       | 258/1023 [00:04<00:13, 55.98it/s]]
+ 26%|##5       | 264/1023 [00:04<00:13, 55.99it/s]]
+ 26%|##6       | 270/1023 [00:04<00:13, 55.99it/s]]
+ 27%|##6       | 276/1023 [00:04<00:13, 56.02it/s]]
+ 28%|##7       | 282/1023 [00:05<00:13, 56.01it/s]]
+ 28%|##8       | 288/1023 [00:05<00:13, 56.04it/s]]
+ 29%|##8       | 294/1023 [00:05<00:13, 56.05it/s]]
+ 29%|##9       | 300/1023 [00:05<00:12, 56.04it/s]]
+ 30%|##9       | 306/1023 [00:05<00:12, 56.02it/s]]
+ 30%|###       | 312/1023 [00:05<00:12, 56.04it/s]]
+ 31%|###1      | 318/1023 [00:05<00:12, 55.86it/s]]
+ 32%|###1      | 324/1023 [00:05<00:12, 55.68it/s]]
+ 32%|###2      | 330/1023 [00:05<00:12, 55.77it/s]]
+ 33%|###2      | 336/1023 [00:06<00:12, 55.82it/s]]
+ 33%|###3      | 342/1023 [00:06<00:12, 55.90it/s]]
+ 34%|###4      | 348/1023 [00:06<00:12, 55.94it/s]]
+ 35%|###4      | 354/1023 [00:06<00:11, 55.98it/s]]
+ 35%|###5      | 360/1023 [00:06<00:11, 55.99it/s]]
+ 36%|###5      | 366/1023 [00:06<00:11, 55.99it/s]]
+ 36%|###6      | 372/1023 [00:06<00:11, 56.03it/s]]
+ 37%|###6      | 378/1023 [00:06<00:11, 56.01it/s]]
+ 38%|###7      | 384/1023 [00:06<00:11, 55.98it/s]]
+ 38%|###8      | 390/1023 [00:06<00:11, 55.99it/s]]
+ 39%|###8      | 396/1023 [00:07<00:11, 55.99it/s]]
+ 39%|###9      | 402/1023 [00:07<00:11, 55.96it/s]]
+ 40%|###9      | 408/1023 [00:07<00:10, 56.00it/s]]
+ 40%|####      | 414/1023 [00:07<00:10, 55.97it/s]]
+ 41%|####1     | 420/1023 [00:07<00:10, 55.86it/s]]
+ 42%|####1     | 426/1023 [00:07<00:10, 55.73it/s]]
+ 42%|####2     | 432/1023 [00:07<00:10, 55.83it/s]]
+ 43%|####2     | 438/1023 [00:07<00:10, 55.88it/s]]
+ 43%|####3     | 444/1023 [00:07<00:10, 55.93it/s]]
+ 44%|####3     | 450/1023 [00:08<00:10, 55.97it/s]]
+ 45%|####4     | 456/1023 [00:08<00:10, 56.01it/s]]
+ 45%|####5     | 462/1023 [00:08<00:10, 56.00it/s]]
+ 46%|####5     | 468/1023 [00:08<00:09, 56.05it/s]]
+ 46%|####6     | 474/1023 [00:08<00:09, 56.09it/s]]
+ 47%|####6     | 480/1023 [00:08<00:09, 56.09it/s]]
+ 48%|####7     | 486/1023 [00:08<00:09, 56.11it/s]]
+ 48%|####8     | 492/1023 [00:08<00:09, 56.06it/s]]
+ 49%|####8     | 498/1023 [00:08<00:09, 56.03it/s]]
+ 49%|####9     | 504/1023 [00:09<00:09, 56.02it/s]]
+ 50%|####9     | 510/1023 [00:09<00:09, 56.05it/s]]
+ 50%|#####     | 516/1023 [00:09<00:09, 55.99it/s]]
+ 51%|#####1    | 522/1023 [00:09<00:08, 55.94it/s]]
+ 52%|#####1    | 528/1023 [00:09<00:08, 55.85it/s]]
+ 52%|#####2    | 534/1023 [00:09<00:08, 55.83it/s]]
+ 53%|#####2    | 540/1023 [00:09<00:08, 55.83it/s]]
+ 53%|#####3    | 546/1023 [00:09<00:08, 55.80it/s]]
+ 54%|#####3    | 552/1023 [00:09<00:08, 55.74it/s]]
+ 55%|#####4    | 558/1023 [00:09<00:08, 55.73it/s]]
+ 55%|#####5    | 564/1023 [00:10<00:08, 55.72it/s]]
+ 56%|#####5    | 570/1023 [00:10<00:08, 55.75it/s]]
+ 56%|#####6    | 576/1023 [00:10<00:08, 55.75it/s]]
+ 57%|#####6    | 582/1023 [00:10<00:07, 55.74it/s]]
+ 57%|#####7    | 588/1023 [00:10<00:07, 55.72it/s]]
+ 58%|#####8    | 594/1023 [00:10<00:07, 55.73it/s]]
+ 59%|#####8    | 600/1023 [00:10<00:07, 55.71it/s]]
+ 59%|#####9    | 606/1023 [00:10<00:07, 55.69it/s]]
+[2026-04-15 13:24:16,663: ERROR/MainProcess] Process 'ForkPoolWorker-1' pid:19072 exited with 'signal 11 (SIGSEGV)'
+[2026-04-15 13:24:16,678: ERROR/MainProcess] Task handler raised error: WorkerLostError('Worker exited prematurely: signal 11 (SIGSEGV) Job: 0.')
+Traceback (most recent call last):
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/billiard/pool.py", line 1265, in mark_as_worker_lost
+    raise WorkerLostError(
+billiard.einfo.ExceptionWithTraceback:
+"""
+Traceback (most recent call last):
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/billiard/pool.py", line 1265, in mark_as_worker_lost
+    raise WorkerLostError(
+billiard.exceptions.WorkerLostError: Worker exited prematurely: signal 11 (SIGSEGV) Job: 0.
+"""

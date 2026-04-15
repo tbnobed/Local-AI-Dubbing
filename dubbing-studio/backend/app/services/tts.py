@@ -275,13 +275,18 @@ class TTSService:
             sample_rate = 44100
 
             for result in engine.inference(request):
-                result_type = type(result).__name__
-                result_attrs = [a for a in dir(result) if not a.startswith("_")]
-                logger.info(f"Inference result: type={result_type}, attrs={result_attrs}")
+                if hasattr(result, "error") and result.error:
+                    logger.warning(f"Inference error: {result.error}")
+                    continue
 
-                if hasattr(result, "audio") and hasattr(result, "sample_rate"):
+                if hasattr(result, "sample_rate") and result.sample_rate:
                     sample_rate = result.sample_rate
+
+                if hasattr(result, "audio"):
                     audio = result.audio
+                    if audio is None:
+                        logger.warning("result.audio is None, skipping")
+                        continue
                     if hasattr(audio, "cpu"):
                         audio = audio.cpu().numpy()
                     if isinstance(audio, np.ndarray):
@@ -289,17 +294,12 @@ class TTSService:
                             audio = audio.squeeze()
                         if audio.size > 0:
                             all_audio.append(audio)
-                            logger.info(f"Got numpy audio chunk: shape={audio.shape}, sr={sample_rate}")
+                            logger.info(f"Got audio chunk: shape={audio.shape}, dtype={audio.dtype}, sr={sample_rate}")
                     elif isinstance(audio, bytes) and len(audio) > 0:
                         all_bytes += audio
-                elif hasattr(result, "code"):
-                    logger.info(f"Result has .code: shape={getattr(result.code, 'shape', 'N/A')}")
+                        logger.info(f"Got audio bytes: {len(audio)} bytes")
                 elif isinstance(result, bytes):
                     all_bytes += result
-                elif hasattr(result, "read"):
-                    chunk = result.read()
-                    if chunk:
-                        all_bytes += chunk
 
             if all_audio:
                 combined = np.concatenate(all_audio) if len(all_audio) > 1 else all_audio[0]
