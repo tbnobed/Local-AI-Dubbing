@@ -271,9 +271,14 @@ class TTSService:
             )
 
             all_audio = []
+            all_bytes = b""
             sample_rate = 44100
 
             for result in engine.inference(request):
+                result_type = type(result).__name__
+                result_attrs = [a for a in dir(result) if not a.startswith("_")]
+                logger.info(f"Inference result: type={result_type}, attrs={result_attrs}")
+
                 if hasattr(result, "audio") and hasattr(result, "sample_rate"):
                     sample_rate = result.sample_rate
                     audio = result.audio
@@ -282,21 +287,26 @@ class TTSService:
                     if isinstance(audio, np.ndarray):
                         if audio.ndim > 1:
                             audio = audio.squeeze()
-                        all_audio.append(audio)
-                    elif isinstance(audio, bytes):
-                        with open(output_path, "wb") as f:
-                            f.write(audio)
-                        info = sf.info(output_path)
-                        return info.duration
+                        if audio.size > 0:
+                            all_audio.append(audio)
+                            logger.info(f"Got numpy audio chunk: shape={audio.shape}, sr={sample_rate}")
+                    elif isinstance(audio, bytes) and len(audio) > 0:
+                        all_bytes += audio
+                elif hasattr(result, "code"):
+                    logger.info(f"Result has .code: shape={getattr(result.code, 'shape', 'N/A')}")
                 elif isinstance(result, bytes):
-                    with open(output_path, "wb") as f:
-                        f.write(result)
-                    info = sf.info(output_path)
-                    return info.duration
+                    all_bytes += result
+                elif hasattr(result, "read"):
+                    chunk = result.read()
+                    if chunk:
+                        all_bytes += chunk
 
             if all_audio:
                 combined = np.concatenate(all_audio) if len(all_audio) > 1 else all_audio[0]
                 sf.write(output_path, combined, sample_rate)
+            elif all_bytes:
+                with open(output_path, "wb") as f:
+                    f.write(all_bytes)
             else:
                 raise RuntimeError("Fish Speech inference produced no audio output")
 
