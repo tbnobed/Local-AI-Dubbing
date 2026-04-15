@@ -1,6 +1,14 @@
 """
-Text-to-Speech with voice cloning using Coqui XTTS v2.
-Clones each detected speaker's voice and synthesizes translated speech.
+Text-to-Speech with voice cloning using Fish Speech 1.5.
+
+Fish Speech advantages over Coqui XTTS v2:
+  - Actively maintained (XTTS/Coqui is discontinued)
+  - State-of-the-art zero-shot voice cloning quality
+  - 80+ languages supported
+  - Python 3.12 native, CUDA 12.x compatible
+  - ~15x real-time on RTX 4090 class GPUs
+
+Uses a Dual-AR architecture (4B slow + 400M fast) for high-fidelity synthesis.
 """
 import logging
 import os
@@ -11,29 +19,43 @@ import soundfile as sf
 
 logger = logging.getLogger(__name__)
 
-SAMPLE_RATE = 24000
-
 
 class TTSService:
     def __init__(self, config):
         self.config = config
         self._tts = None
+        self._sample_rate = None
 
     def _load_model(self):
         if self._tts is None:
-            from TTS.api import TTS
-            import torch
+            try:
+                from fish_speech_lib.inference import FishSpeech
+                logger.info("Loading Fish Speech model via fish-speech-lib...")
+                device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
+                self._tts = FishSpeech(device=device)
+                self._sample_rate = 44100
+                logger.info("Fish Speech loaded via fish-speech-lib.")
+            except ImportError:
+                logger.info("fish-speech-lib not available, trying fish-speech-rs...")
+                try:
+                    from fish_speech import FireflyCodec, LM
+                    from huggingface_hub import snapshot_download
 
-            logger.info(f"Loading XTTS v2 model...")
-            gpu = torch.cuda.is_available() and self.config.use_gpu
-
-            os.environ["COQUI_TOS_AGREED"] = "1"
-            self._tts = TTS(
-                model_name=self.config.xtts_model,
-                progress_bar=False,
-                gpu=gpu,
-            )
-            logger.info("XTTS v2 loaded.")
+                    model_dir = snapshot_download(
+                        self.config.fish_speech_model,
+                        cache_dir=str(self.config.models_dir / "fish-speech"),
+                    )
+                    codec = FireflyCodec(model_dir, version="1.5", device="cuda")
+                    lm = LM(model_dir, version="1.5", device="cuda", dtype="bf16")
+                    self._tts = {"codec": codec, "lm": lm, "type": "native"}
+                    self._sample_rate = codec.sample_rate
+                    logger.info("Fish Speech loaded via fish-speech-rs.")
+                except ImportError:
+                    logger.error(
+                        "Neither fish-speech-lib nor fish-speech-rs found. "
+                        "Install one: pip install fish-speech-lib OR pip install fish-speech-rs"
+                    )
+                    raise RuntimeError("No Fish Speech backend available")
 
         return self._tts
 
@@ -50,29 +72,37 @@ class TTSService:
         """
         tts = self._load_model()
 
-        lang_map = {
-            "es": "es",
-            "fr": "fr",
-            "en": "en",
-            "de": "de",
-            "it": "it",
-            "pt": "pt",
-            "ja": "ja",
-            "zh": "zh-cn",
-            "ko": "ko",
-            "ar": "ar",
-            "ru": "ru",
-            "hi": "hi",
-        }
-        xtts_lang = lang_map.get(language, language)
+        if isinstance(tts, dict) and tts.get("type") == "native":
+            # fish-speech-rs native API
+            codec = tts["codec"]
+            lm = tts["lm"]
 
-        tts.tts_to_file(
-            text=text,
-            speaker_wav=speaker_wav,
-            language=xtts_lang,
-            file_path=output_path,
-            speed=1.0,
-        )
+            ref_audio, ref_sr = sf.read(speaker_wav, dtype="float32")
+            if ref_audio.ndim > 1:
+                ref_audio = ref_audio.mean(axis=1)
+            ref_audio = ref_audio.reshape(1, -1)
+
+            codes = codec.encode(ref_audio, ref_sr)
+            speaker_prompt = lm.get_speaker_prompt(
+                [{"text": "", "codes": codes}],
+                sysprompt="Speak out the provided text.",
+            )
+            generated_codes = lm.generate([text], speaker_prompt=speaker_prompt)
+            pcm = codec.decode(generated_codes)
+
+            sf.write(output_path, pcm.flatten(), self._sample_rate)
+        else:
+            # fish-speech-lib simple API
+            # Read reference text from the first few seconds (empty is OK for zero-shot)
+            sample_rate, audio = tts(
+                text=text,
+                reference_audio=speaker_wav,
+                reference_audio_text="",
+                max_new_tokens=2048,
+                chunk_length=1000,
+            )
+            sf.write(output_path, audio, sample_rate, format="WAV")
+            self._sample_rate = sample_rate
 
         info = sf.info(output_path)
         return info.duration
@@ -118,7 +148,6 @@ class TTSService:
     ) -> list:
         """
         Synthesize all translated segments with voice cloning.
-        Adds 'synth_audio_path' and 'synth_duration' to each segment.
         """
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

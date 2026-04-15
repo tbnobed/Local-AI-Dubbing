@@ -36,17 +36,28 @@ A standalone local AI video dubbing system. Runs entirely on local GPU hardware.
 ### Architecture
 - **Backend**: Python + FastAPI + Celery + Redis
 - **Frontend**: React + Vite + Tailwind CSS
-- **Pipeline**: faster-whisper → pyannote → NLLB-200 → XTTS v2 → ffmpeg
+- **Pipeline**: WhisperX → MADLAD-400 → Fish Speech 1.5 → ffmpeg
 - **DB**: SQLite (local jobs tracking)
 
 ### Key Files
 - `dubbing-studio/README.md` — full setup and usage guide
-- `dubbing-studio/backend/app/` — FastAPI app, services, workers
+- `dubbing-studio/backend/app/services/transcription.py` — WhisperX transcription + alignment + diarization
+- `dubbing-studio/backend/app/services/translation.py` — MADLAD-400 translation
+- `dubbing-studio/backend/app/services/tts.py` — Fish Speech voice cloning TTS
+- `dubbing-studio/backend/app/services/diarization.py` — Speaker voice sample extraction
+- `dubbing-studio/backend/app/services/audio_mixer.py` — Audio mixing + video assembly
+- `dubbing-studio/backend/app/workers/pipeline.py` — Celery pipeline orchestrator
+- `dubbing-studio/backend/app/config.py` — All model/GPU settings
 - `dubbing-studio/frontend/src/` — React UI
 - `dubbing-studio/scripts/` — setup.sh, start.sh, stop.sh
 
-### Models Used
-- Whisper large-v3 (transcription)
-- pyannote/speaker-diarization-3.1 (speaker detection)
-- facebook/nllb-200-distilled-600M (translation)
-- tts_models/multilingual/multi-dataset/xtts_v2 (voice cloning TTS)
+### Models Used (2025 Upgrade)
+- **WhisperX** large-v3-turbo (transcription + word alignment + VAD, via faster-whisper + CTranslate2)
+- **pyannote community-1** (speaker diarization, integrated into WhisperX, requires HF token)
+- **MADLAD-400 3B** by Google (translation, Apache 2.0 license, 400+ languages)
+- **Fish Speech 1.5** (voice cloning TTS, 80+ languages, CUDA 12.x native)
+
+### GPU Setup
+- Designed for dual-GPU: RTX 5090 (primary) + RTX 4500 Blackwell (secondary)
+- RTX 50xx requires CUDA 12.8+ for sm_120 compute capability
+- Models are loaded/unloaded sequentially to minimize peak VRAM

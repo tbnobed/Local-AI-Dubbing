@@ -4,18 +4,15 @@ python-multipart==0.0.20
 websockets==14.1
 celery==5.4.0
 redis==5.2.1
-faster-whisper==1.1.0
-TTS==0.22.0
+whisperx>=3.3.0
 transformers==4.47.1
 sentencepiece==0.2.0
-sacremoses==0.1.1
 torch>=2.5.1
 torchaudio>=2.5.1
 ffmpeg-python==0.2.0
 librosa==0.10.2
 pydub==0.25.1
-pyannote.audio==3.3.2
-numpy==1.26.4
+numpy<2.0
 scipy==1.14.1
 soundfile==0.12.1
 aiofiles==24.1.0
@@ -29,3 +26,4 @@ aiosqlite==0.20.0
 psutil==6.1.1
 gputil==1.4.0
 huggingface-hub==0.27.0
+fish-speech-lib>=0.1.0
