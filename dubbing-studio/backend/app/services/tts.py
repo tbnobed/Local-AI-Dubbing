@@ -61,6 +61,18 @@ class TTSService:
         )
         return path
 
+    def _trim_reference_audio(self, audio_path: str, max_seconds: float = 10) -> bytes:
+        """Trim reference audio to max_seconds and return as bytes."""
+        import io
+        data, sr = sf.read(audio_path)
+        max_samples = int(max_seconds * sr)
+        if len(data) > max_samples:
+            data = data[:max_samples]
+            logger.info(f"Trimmed reference audio to {max_seconds}s ({max_samples} samples)")
+        buf = io.BytesIO()
+        sf.write(buf, data, sr, format="wav")
+        return buf.getvalue()
+
     def _load_engine(self):
         """Load Fish Speech 1.5 engine — tries Python API, falls back to CLI."""
         if self._engine is not None:
@@ -260,7 +272,7 @@ class TTSService:
                 info = sf.info(output_path)
                 return info.duration
 
-            ref_audio_bytes = open(speaker_wav, "rb").read()
+            ref_audio_bytes = self._trim_reference_audio(speaker_wav, max_seconds=10)
 
             request = ServeTTSRequest(
                 text=text,
@@ -272,7 +284,7 @@ class TTSService:
                 ],
                 format="wav",
                 streaming=False,
-                max_new_tokens=512,
+                max_new_tokens=300,
             )
 
             import torch as _torch
@@ -436,8 +448,7 @@ class TTSService:
             import torch as _torch
             if _torch.cuda.is_available():
                 _torch.cuda.synchronize()
-                if i % 5 == 4:
-                    _torch.cuda.empty_cache()
+                _torch.cuda.empty_cache()
 
             if progress_callback:
                 progress_callback((i + 1) / total)
