@@ -1,16 +1,18 @@
 """
 Text-to-Speech with voice cloning using Fish Speech.
 
-Supports Fish Speech 1.5 and 2.0 APIs, with CLI fallback.
+Supports Fish Speech 2.0 (OpenAudio S1-mini) with DAC decoder,
+and Fish Speech 1.5 with VQGAN decoder.
 
-Three-stage pipeline:
-  1. Encode reference audio → VQ tokens (voice characteristics)
-  2. Generate semantic tokens from text (using voice prompt)
+Pipeline:
+  1. Encode reference audio → voice tokens
+  2. Generate semantic tokens from text + voice prompt
   3. Decode tokens → waveform
 """
 import logging
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -40,26 +42,36 @@ class TTSService:
         return candidates[0]
 
     def _find_checkpoint(self) -> str:
-        """Locate the Fish Speech checkpoint directory."""
-        candidates = [
+        """Locate or download the Fish Speech checkpoint directory."""
+        v2_candidates = [
+            self.config.models_dir / "fish-speech" / "openaudio-s1-mini",
+            self._get_fish_speech_dir() / "checkpoints" / "openaudio-s1-mini",
+        ]
+        for p in v2_candidates:
+            if p.exists() and (p / "config.json").exists():
+                logger.info(f"Found OpenAudio S1-mini checkpoint at {p}")
+                return str(p)
+
+        v15_candidates = [
             self.config.models_dir / "fish-speech" / "fish-speech-1.5",
             self.config.models_dir / "fish-speech",
             self._get_fish_speech_dir() / "checkpoints" / "fish-speech-1.5",
         ]
-        for p in candidates:
+        for p in v15_candidates:
             if p.exists() and (p / "config.json").exists():
+                logger.info(f"Found Fish Speech 1.5 checkpoint at {p}")
                 return str(p)
 
         from huggingface_hub import snapshot_download
-        logger.info("Downloading Fish Speech 1.5 checkpoint...")
+        logger.info("Downloading OpenAudio S1-mini checkpoint...")
         path = snapshot_download(
-            "fishaudio/fish-speech-1.5",
-            local_dir=str(self.config.models_dir / "fish-speech" / "fish-speech-1.5"),
+            "fishaudio/openaudio-s1-mini",
+            local_dir=str(self.config.models_dir / "fish-speech" / "openaudio-s1-mini"),
         )
         return path
 
     def _load_engine(self):
-        """Load Fish Speech engine — tries Python API (v2 then v1), falls back to CLI."""
+        """Load Fish Speech engine — tries Python API, falls back to CLI."""
         if self._engine is not None:
             return self._engine
 
@@ -68,68 +80,70 @@ class TTSService:
         checkpoint_path = self._find_checkpoint()
         self._checkpoint_path = checkpoint_path
         device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu else "cpu"
+        precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
-        # Try Fish Speech 2.0 API first
-        try:
-            from fish_speech.inference_engine import TTSInferenceEngine
-            logger.info(f"Loading Fish Speech 2.0 engine from {checkpoint_path} on {device}")
-
-            self._engine = TTSInferenceEngine(
-                checkpoint_path=checkpoint_path,
-                device=device,
-            )
-            logger.info("Fish Speech 2.0 engine loaded")
-            return self._engine
-        except (ImportError, TypeError) as e:
-            logger.info(f"Fish Speech 2.0 API not available: {e}")
-
-        # Try Fish Speech 1.5 API
+        # Try Fish Speech 2.0 API (DAC decoder)
         try:
             from fish_speech.inference_engine import TTSInferenceEngine
             from fish_speech.models.text2semantic.inference import launch_thread_safe_queue
-            from fish_speech.models.vqgan.inference import load_model as load_decoder_model
 
-            logger.info(f"Loading Fish Speech 1.5 engine from {checkpoint_path}")
-
+            decoder_model = None
             decoder_ckpt = None
-            for name in [
-                "firefly-gan-vq-fsq-8x1024-21hz-generator.pth",
-                "codec.pth",
-            ]:
+            for name in ["codec.pth", "firefly-gan-vq-fsq-8x1024-21hz-generator.pth"]:
                 p = Path(checkpoint_path) / name
                 if p.exists():
                     decoder_ckpt = str(p)
                     break
 
-            if not decoder_ckpt:
-                raise FileNotFoundError(f"No decoder checkpoint in {checkpoint_path}")
+            # Try DAC decoder (Fish Speech 2.0)
+            try:
+                from fish_speech.models.dac.inference import load_model as load_dac_model
+                decoder_model = load_dac_model(
+                    config_name="firefly_gan_vq",
+                    checkpoint_path=decoder_ckpt,
+                    device=device,
+                )
+                logger.info("Loaded DAC decoder (Fish Speech 2.0)")
+            except (ImportError, Exception) as e:
+                logger.info(f"DAC decoder not available: {e}")
+                # Try VQGAN decoder (Fish Speech 1.5)
+                try:
+                    from fish_speech.models.vqgan.inference import load_model as load_vqgan_model
+                    decoder_model = load_vqgan_model(
+                        config_name="firefly_gan_vq",
+                        checkpoint_path=decoder_ckpt,
+                        device=device,
+                    )
+                    logger.info("Loaded VQGAN decoder (Fish Speech 1.5)")
+                except (ImportError, Exception) as e2:
+                    logger.info(f"VQGAN decoder not available: {e2}")
 
-            decoder_model = load_decoder_model(
-                config_name="firefly_gan_vq",
-                checkpoint_path=decoder_ckpt,
-                device=device,
-            )
-            precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+            if decoder_model is None:
+                raise RuntimeError("No decoder model could be loaded")
+
             llm_queue = launch_thread_safe_queue(
                 checkpoint_path=checkpoint_path,
                 device=device,
                 precision=precision,
                 compile=False,
             )
+
             self._engine = TTSInferenceEngine(
                 llm_queue=llm_queue,
                 decoder_model=decoder_model,
                 precision=precision,
                 compile=False,
             )
-            logger.info(f"Fish Speech 1.5 engine loaded on {device}")
+            logger.info(f"Fish Speech engine loaded on {device}")
             return self._engine
 
         except (ImportError, Exception) as e:
             logger.info(f"Fish Speech Python API not available: {e}")
-            logger.info("Falling back to Fish Speech CLI")
-            self._engine = "cli"
-            return self._engine
+
+        # Fall back to CLI-based 3-step pipeline
+        logger.info("Falling back to Fish Speech CLI pipeline")
+        self._engine = "cli"
+        return self._engine
 
     def _synthesize_via_cli(
         self,
@@ -137,15 +151,9 @@ class TTSService:
         speaker_wav: str,
         output_path: str,
     ):
-        """Fallback: use Fish Speech CLI for synthesis."""
+        """Fallback: 3-step CLI pipeline using fish_speech scripts."""
         fish_speech_dir = self._get_fish_speech_dir()
         checkpoint_path = self._checkpoint_path or self._find_checkpoint()
-
-        if not fish_speech_dir.exists():
-            raise FileNotFoundError(
-                f"Fish Speech directory not found at {fish_speech_dir}. "
-                f"Run setup.sh to clone the repo."
-            )
 
         venv_python = Path(self.config.base_dir) / "backend" / "venv" / "bin" / "python3"
         python_cmd = str(venv_python) if venv_python.exists() else "python3"
@@ -153,57 +161,98 @@ class TTSService:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(fish_speech_dir)
 
-        try:
-            result = subprocess.run(
-                [
-                    python_cmd, "-c",
-                    f"""
-import sys
-sys.path.insert(0, '{fish_speech_dir}')
-import torch
-import soundfile as sf
-from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmpdir:
+            fake_npy = os.path.join(tmpdir, "fake.npy")
+            codes_npy = os.path.join(tmpdir, "codes_0.npy")
 
-checkpoint_path = '{checkpoint_path}'
-ref_audio = '{speaker_wav}'
-text = '''{text.replace("'", "\\'")}'''
-output = '{output_path}'
-device = 'cuda:{self.config.primary_gpu_id}'
+            # Determine which encoder/decoder script exists
+            dac_script = fish_speech_dir / "fish_speech" / "models" / "dac" / "inference.py"
+            vqgan_script = fish_speech_dir / "fish_speech" / "models" / "vqgan" / "inference.py"
 
-try:
-    from fish_speech.inference_engine import TTSInferenceEngine
-    engine = TTSInferenceEngine(checkpoint_path=checkpoint_path, device=device)
-    
-    from fish_speech.utils.schema import ServeTTSRequest, ServeReferenceAudio
-    ref_bytes = open(ref_audio, 'rb').read()
-    request = ServeTTSRequest(
-        text=text,
-        references=[ServeReferenceAudio(audio=ref_bytes, text='')],
-        format='wav',
-        streaming=False,
-    )
-    chunks = list(engine.inference(request))
-    audio_data = b''.join(chunks)
-    with open(output, 'wb') as f:
-        f.write(audio_data)
-    print('OK')
-except Exception as e:
-    print(f'FISH_ERROR: {{e}}', file=sys.stderr)
-    sys.exit(1)
-"""
-                ],
-                cwd=str(fish_speech_dir),
-                env=env,
-                capture_output=True,
-                text=True,
-                timeout=120,
+            if dac_script.exists():
+                codec_script = str(dac_script)
+            elif vqgan_script.exists():
+                codec_script = str(vqgan_script)
+            else:
+                raise FileNotFoundError(
+                    f"No codec inference script found in {fish_speech_dir}. "
+                    f"Expected dac/inference.py or vqgan/inference.py"
+                )
+
+            text2sem_script = str(
+                fish_speech_dir / "fish_speech" / "models" / "text2semantic" / "inference.py"
             )
+            if not Path(text2sem_script).exists():
+                raise FileNotFoundError(f"text2semantic inference script not found: {text2sem_script}")
 
-            if result.returncode != 0:
-                raise RuntimeError(f"Fish Speech CLI failed: {result.stderr[:500]}")
+            # Step 1: Encode reference audio → voice tokens
+            cmd1 = [
+                python_cmd, codec_script,
+                "-i", speaker_wav,
+                "--checkpoint-path", os.path.join(checkpoint_path, "codec.pth"),
+                "--output-path", tmpdir,
+            ]
+            # Also try with firefly checkpoint name
+            codec_ckpt = os.path.join(checkpoint_path, "codec.pth")
+            if not os.path.exists(codec_ckpt):
+                codec_ckpt = os.path.join(checkpoint_path, "firefly-gan-vq-fsq-8x1024-21hz-generator.pth")
+            cmd1 = [
+                python_cmd, codec_script,
+                "-i", speaker_wav,
+                "--checkpoint-path", codec_ckpt,
+                "--output-path", tmpdir,
+            ]
 
-        except subprocess.TimeoutExpired:
-            raise RuntimeError("Fish Speech TTS timed out after 120s")
+            r1 = subprocess.run(cmd1, cwd=str(fish_speech_dir), env=env,
+                                capture_output=True, text=True, timeout=60)
+            if r1.returncode != 0:
+                raise RuntimeError(f"Codec encode failed: {r1.stderr[:500]}")
+
+            # Find the generated npy file
+            npy_files = list(Path(tmpdir).glob("*.npy"))
+            if not npy_files:
+                raise RuntimeError("Codec encode produced no .npy files")
+            fake_npy = str(npy_files[0])
+
+            # Step 2: Generate semantic tokens from text + voice prompt
+            safe_text = text.replace("'", "\\'").replace('"', '\\"')
+            cmd2 = [
+                python_cmd, text2sem_script,
+                "--text", text,
+                "--prompt-tokens", fake_npy,
+                "--checkpoint-path", checkpoint_path,
+                "--output-path", tmpdir,
+                "--num-samples", "1",
+            ]
+            r2 = subprocess.run(cmd2, cwd=str(fish_speech_dir), env=env,
+                                capture_output=True, text=True, timeout=120)
+            if r2.returncode != 0:
+                raise RuntimeError(f"Text2semantic failed: {r2.stderr[:500]}")
+
+            # Find generated codes file
+            code_files = sorted(Path(tmpdir).glob("codes_*.npy"))
+            if not code_files:
+                raise RuntimeError("Text2semantic produced no codes files")
+
+            # Step 3: Decode semantic tokens → waveform
+            cmd3 = [
+                python_cmd, codec_script,
+                "-i", str(code_files[0]),
+                "--checkpoint-path", codec_ckpt,
+                "--output-path", tmpdir,
+            ]
+            r3 = subprocess.run(cmd3, cwd=str(fish_speech_dir), env=env,
+                                capture_output=True, text=True, timeout=60)
+            if r3.returncode != 0:
+                raise RuntimeError(f"Codec decode failed: {r3.stderr[:500]}")
+
+            # Find output wav
+            wav_files = list(Path(tmpdir).glob("*.wav"))
+            if not wav_files:
+                raise RuntimeError("Codec decode produced no .wav files")
+
+            import shutil
+            shutil.copy2(str(wav_files[0]), output_path)
 
     def synthesize_segment(
         self,

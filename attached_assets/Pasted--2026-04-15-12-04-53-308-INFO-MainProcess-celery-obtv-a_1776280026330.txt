@@ -1,0 +1,42 @@
+[2026-04-15 12:04:53,308: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 12:05:14,006: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[0bff8b6e-fc44-4feb-93ae-33f609cabe59] received
+[2026-04-15 12:05:14,008: INFO/ForkPoolWorker-1] Starting pipeline for job 3d2f3231-f7e4-413c-a721-378104006bbc
+[2026-04-15 12:05:14,104: INFO/ForkPoolWorker-1] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/3d2f3231-f7e4-413c-a721-378104006bbc.mp4
+[2026-04-15 12:05:16,727: INFO/ForkPoolWorker-1] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 12:05:18,864: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 12:05:18,864: WARNING/ForkPoolWorker-1] Device set to use cuda:0
+[2026-04-15 12:05:18,865: WARNING/ForkPoolWorker-1] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 12:05:18,865: INFO/ForkPoolWorker-1] Transcribing with transformers Whisper...
+[2026-04-15 12:05:21,842: INFO/ForkPoolWorker-1] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 12:05:21,860: INFO/ForkPoolWorker-1] Aligning words with WhisperX (lang=en) on cuda:1...
+[2026-04-15 12:05:24,566: INFO/ForkPoolWorker-1] Running speaker diarization (pyannote) on cuda:1...
+[2026-04-15 12:05:24,566: INFO/ForkPoolWorker-1] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 12:05:24,934: WARNING/ForkPoolWorker-1] Diarization failed (continuing without it): Pipeline.from_pretrained() got an unexpected keyword argument 'use_auth_token'
+[2026-04-15 12:05:24,943: INFO/ForkPoolWorker-1] Pipeline complete: 45 segments, 1 speakers, lang=en
+[2026-04-15 12:05:24,962: INFO/ForkPoolWorker-1] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 12:05:25,846: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 12:05:27,509: INFO/ForkPoolWorker-1] MADLAD-400 loaded on cuda:0
+[2026-04-15 12:05:41,829: INFO/ForkPoolWorker-1] Translated 45 segments from en to es
+[2026-04-15 12:05:41,893: INFO/ForkPoolWorker-1] Translation model unloaded.
+[2026-04-15 12:05:41,994: INFO/ForkPoolWorker-1] Extracted 42.0s voice sample for SPEAKER_00
+[2026-04-15 12:05:41,994: INFO/ForkPoolWorker-1] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/3d2f3231-f7e4-413c-a721-378104006bbc/3d2f3231-f7e4-413c-a721-378104006bbc_original_en.srt (45 entries)
+[2026-04-15 12:05:41,994: INFO/ForkPoolWorker-1] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/3d2f3231-f7e4-413c-a721-378104006bbc/3d2f3231-f7e4-413c-a721-378104006bbc_translated_es.srt (45 entries)
+[2026-04-15 12:05:42,142: INFO/ForkPoolWorker-1] Loading Fish Speech 2.0 engine from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5 on cuda:0
+[2026-04-15 12:05:42,142: INFO/ForkPoolWorker-1] Fish Speech 2.0 API not available: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+[2026-04-15 12:05:42,142: INFO/ForkPoolWorker-1] Fish Speech Python API not available: No module named 'fish_speech.models.vqgan'
+[2026-04-15 12:05:42,142: INFO/ForkPoolWorker-1] Falling back to Fish Speech CLI
+[2026-04-15 12:05:45,128: ERROR/ForkPoolWorker-1] Failed to synthesize segment 0: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:05:48,132: ERROR/ForkPoolWorker-1] Failed to synthesize segment 1: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:05:51,114: ERROR/ForkPoolWorker-1] Failed to synthesize segment 2: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:05:54,120: ERROR/ForkPoolWorker-1] Failed to synthesize segment 3: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:05:57,102: ERROR/ForkPoolWorker-1] Failed to synthesize segment 4: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:06:00,085: ERROR/ForkPoolWorker-1] Failed to synthesize segment 5: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:06:03,088: ERROR/ForkPoolWorker-1] Failed to synthesize segment 6: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'
+
+[2026-04-15 12:06:06,090: ERROR/ForkPoolWorker-1] Failed to synthesize segment 7: Fish Speech CLI failed: FISH_ERROR: TTSInferenceEngine.__init__() got an unexpected keyword argument 'checkpoint_path'

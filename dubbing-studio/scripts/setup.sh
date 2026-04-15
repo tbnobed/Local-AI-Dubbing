@@ -230,12 +230,12 @@ echo "Step 6: Download model weights"
 echo "──────────────────────────────────────────"
 
 mkdir -p data/models/fish-speech
-echo "  Downloading Fish Speech 1.5 (~3 GB)..."
+echo "  Downloading OpenAudio S1-mini (Fish Speech 2.0) (~3 GB)..."
 python3 -c "
 from huggingface_hub import snapshot_download
 path = snapshot_download(
-    'fishaudio/fish-speech-1.5',
-    local_dir='data/models/fish-speech/fish-speech-1.5',
+    'fishaudio/openaudio-s1-mini',
+    local_dir='data/models/fish-speech/openaudio-s1-mini',
 )
 print(f'  Downloaded to: {path}')
 " || echo "  Deferred — will download on first run."

@@ -216,13 +216,19 @@ class TranscriptionService:
                         use_auth_token=hf_token,
                         device=diarize_device,
                     )
-                except AttributeError:
+                except (AttributeError, TypeError):
                     logger.info("whisperx.DiarizationPipeline not available, using pyannote directly")
                     from pyannote.audio import Pipeline as PyannotePipeline
-                    diarize_model = PyannotePipeline.from_pretrained(
-                        "pyannote/speaker-diarization-3.1",
-                        use_auth_token=hf_token,
-                    ).to(diarize_device)
+                    try:
+                        diarize_model = PyannotePipeline.from_pretrained(
+                            "pyannote/speaker-diarization-3.1",
+                            token=hf_token,
+                        ).to(diarize_device)
+                    except TypeError:
+                        diarize_model = PyannotePipeline.from_pretrained(
+                            "pyannote/speaker-diarization-3.1",
+                            use_auth_token=hf_token,
+                        ).to(diarize_device)
 
                 if diarize_model is not None:
                     if hasattr(diarize_model, '__call__'):
