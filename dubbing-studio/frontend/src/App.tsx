@@ -1,5 +1,5 @@
 import React from "react";
-import { Mic2, Layers } from "lucide-react";
+import { Mic2, Layers, Trash2 } from "lucide-react";
 import { UploadForm } from "./components/UploadForm";
 import { JobCard } from "./components/JobCard";
 import { SystemStatusBar } from "./components/SystemStatusBar";
@@ -7,7 +7,7 @@ import { useJobs } from "./hooks/useJobs";
 import type { Job } from "./types";
 
 export default function App() {
-  const { jobs, loading, updateJob, addJob } = useJobs();
+  const { jobs, loading, updateJob, addJob, clearAll } = useJobs();
 
   const handleJobCreated = (job: Job) => {
     addJob(job);
@@ -84,6 +84,18 @@ export default function App() {
 
           {/* Right: Jobs list */}
           <div className="space-y-6">
+            {jobs.length > 0 && (
+              <div className="flex justify-end">
+                <button
+                  onClick={() => { if (confirm("Clear all jobs?")) clearAll(); }}
+                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-surface-700/50"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Clear All
+                </button>
+              </div>
+            )}
+
             {/* Active jobs */}
             {activeJobs.length > 0 && (
               <section>

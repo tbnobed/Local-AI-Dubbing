@@ -48,6 +48,11 @@ export async function getLanguages(): Promise<Record<string, { name: string; cod
   return res.json();
 }
 
+export async function clearAllJobs(): Promise<void> {
+  const res = await fetch(`${BASE}/jobs/`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to clear jobs");
+}
+
 export function getDownloadUrl(jobId: string, type: "video" | "srt", lang?: string): string {
   if (type === "video") return `${BASE}/jobs/${jobId}/download/video`;
   return `${BASE}/jobs/${jobId}/download/srt?lang=${lang || "translated"}`;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { listJobs } from "../lib/api";
+import { listJobs, clearAllJobs } from "../lib/api";
 import type { Job } from "../types";
 
 export function useJobs() {
@@ -35,5 +35,10 @@ export function useJobs() {
     setJobs((prev) => [job, ...prev]);
   }, []);
 
-  return { jobs, loading, error, refresh: fetch, updateJob, addJob };
+  const clearAll = useCallback(async () => {
+    await clearAllJobs();
+    setJobs([]);
+  }, []);
+
+  return { jobs, loading, error, refresh: fetch, updateJob, addJob, clearAll };
 }

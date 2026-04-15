@@ -111,6 +111,23 @@ async def list_jobs(
     return [_job_to_response(j) for j in jobs]
 
 
+@router.delete("/")
+async def clear_all_jobs(db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import delete
+    result = await db.execute(select(Job))
+    jobs = result.scalars().all()
+    for job in jobs:
+        if job.celery_task_id:
+            try:
+                from app.core.celery_app import celery_app
+                celery_app.control.revoke(job.celery_task_id, terminate=True)
+            except Exception:
+                pass
+    await db.execute(delete(Job))
+    await db.commit()
+    return {"message": f"Cleared {len(jobs)} jobs"}
+
+
 @router.get("/{job_id}", response_model=JobResponse)
 async def get_job(job_id: str, db: AsyncSession = Depends(get_db)):
     job = await db.get(Job, job_id)
