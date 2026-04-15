@@ -115,6 +115,13 @@ def run_dubbing_pipeline(self, job_id: str):
         })
 
     try:
+        import torch as _torch
+        if _torch.cuda.is_available():
+            _torch.cuda.empty_cache()
+            import gc as _gc
+            _gc.collect()
+            logger.info(f"GPU memory cleared. GPU 0: {_torch.cuda.memory_allocated(0)/1e9:.1f}GB used, GPU 1: {_torch.cuda.memory_allocated(1)/1e9:.1f}GB used")
+
         output_dir = settings.outputs_dir / job_id
         output_dir.mkdir(parents=True, exist_ok=True)
 

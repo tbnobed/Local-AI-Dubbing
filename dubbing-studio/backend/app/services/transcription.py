@@ -102,6 +102,7 @@ class TranscriptionService:
             generate_kwargs["language"] = source_language
 
         ts_mode = "word" if word_timestamps else True
+        batch_size = 2 if word_timestamps else self.config.whisper_batch_size
 
         pipe = pipeline(
             "automatic-speech-recognition",
@@ -111,7 +112,7 @@ class TranscriptionService:
             torch_dtype=torch_dtype,
             device=device,
             chunk_length_s=30,
-            batch_size=self.config.whisper_batch_size,
+            batch_size=batch_size,
             return_timestamps=ts_mode,
         )
 
