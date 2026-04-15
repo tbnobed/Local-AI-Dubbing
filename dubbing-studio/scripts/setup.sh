@@ -55,18 +55,24 @@ if command -v nvidia-smi &>/dev/null; then
 fi
 echo "PyTorch CUDA index: $CUDA_INDEX"
 
-# Check ffmpeg
+# Check / install ffmpeg
 if ! command -v ffmpeg &>/dev/null; then
-    echo "ERROR: ffmpeg is required but not installed."
-    echo "Install: sudo apt install ffmpeg   (Ubuntu/Debian)"
-    echo "     or: brew install ffmpeg       (macOS)"
-    exit 1
+    echo "ffmpeg not found — required for audio/video processing."
+    if command -v apt &>/dev/null; then
+        echo "Installing ffmpeg via apt..."
+        sudo apt install -y ffmpeg
+    elif command -v brew &>/dev/null; then
+        echo "Installing ffmpeg via Homebrew..."
+        brew install ffmpeg
+    else
+        echo "ERROR: Cannot auto-install ffmpeg. Please install manually."
+        exit 1
+    fi
 fi
 echo "ffmpeg: $(ffmpeg -version 2>&1 | head -1)"
 
 # Check / install Redis
 if ! command -v redis-server &>/dev/null; then
-    echo ""
     echo "Redis not found — required for job queuing."
     if command -v apt &>/dev/null; then
         echo "Installing Redis via apt..."
@@ -80,6 +86,24 @@ if ! command -v redis-server &>/dev/null; then
     fi
 fi
 echo "Redis: $(redis-server --version 2>&1 | head -1)"
+
+# Check / install Node.js (required for frontend build)
+if ! command -v npm &>/dev/null; then
+    echo "Node.js/npm not found — required for frontend build."
+    if command -v apt &>/dev/null; then
+        echo "Installing Node.js 20.x via NodeSource..."
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        sudo apt install -y nodejs
+    elif command -v brew &>/dev/null; then
+        echo "Installing Node.js via Homebrew..."
+        brew install node
+    else
+        echo "ERROR: Cannot auto-install Node.js. Please install manually from https://nodejs.org"
+        exit 1
+    fi
+fi
+echo "Node.js: $(node --version 2>&1)"
+echo "npm: $(npm --version 2>&1)"
 
 echo ""
 echo "──────────────────────────────────────────"
