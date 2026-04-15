@@ -1,0 +1,100 @@
+[2026-04-15 12:34:48,424: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 12:34:53,674: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[bd31e9f3-5cfa-4bd5-94c1-b72f3b2071dd] received
+[2026-04-15 12:34:53,677: INFO/ForkPoolWorker-1] Starting pipeline for job 3d2f3231-f7e4-413c-a721-378104006bbc
+[2026-04-15 12:34:53,778: INFO/ForkPoolWorker-1] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/3d2f3231-f7e4-413c-a721-378104006bbc.mp4
+[2026-04-15 12:34:56,480: INFO/ForkPoolWorker-1] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 12:34:58,587: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 12:34:58,587: WARNING/ForkPoolWorker-1] Device set to use cuda:0
+[2026-04-15 12:34:58,587: WARNING/ForkPoolWorker-1] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 12:34:58,587: INFO/ForkPoolWorker-1] Transcribing with transformers Whisper...
+[2026-04-15 12:35:01,583: INFO/ForkPoolWorker-1] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 12:35:01,597: INFO/ForkPoolWorker-1] Aligning words with WhisperX (lang=en) on cuda:1...
+[2026-04-15 12:35:04,248: INFO/ForkPoolWorker-1] Running speaker diarization (pyannote) on cuda:1...
+[2026-04-15 12:35:04,248: INFO/ForkPoolWorker-1] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 12:35:05,678: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/utils/reproducibility.py:74: ReproducibilityWarning: TensorFloat-32 (TF32) has been disabled as it might lead to reproducibility issues and lower accuracy.
+It can be re-enabled by calling
+   >>> import torch
+   >>> torch.backends.cuda.matmul.allow_tf32 = True
+   >>> torch.backends.cudnn.allow_tf32 = True
+See https://github.com/pyannote/pyannote-audio/issues/1370 for more details.
+
+  warnings.warn(
+
+[2026-04-15 12:35:06,034: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 12:35:11,446: WARNING/ForkPoolWorker-1] Speaker assignment failed: object of type 'DiarizeOutput' has no len()
+[2026-04-15 12:35:11,606: INFO/ForkPoolWorker-1] Pipeline complete: 45 segments, 1 speakers, lang=en
+[2026-04-15 12:35:11,625: INFO/ForkPoolWorker-1] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 12:35:12,513: WARNING/ForkPoolWorker-1] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 12:35:13,955: INFO/ForkPoolWorker-1] MADLAD-400 loaded on cuda:0
+[2026-04-15 12:35:28,215: INFO/ForkPoolWorker-1] Translated 45 segments from en to es
+[2026-04-15 12:35:28,247: INFO/ForkPoolWorker-1] Translation model unloaded.
+[2026-04-15 12:35:28,382: INFO/ForkPoolWorker-1] Extracted 42.0s voice sample for SPEAKER_00
+[2026-04-15 12:35:28,383: INFO/ForkPoolWorker-1] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/3d2f3231-f7e4-413c-a721-378104006bbc/3d2f3231-f7e4-413c-a721-378104006bbc_original_en.srt (45 entries)
+[2026-04-15 12:35:28,383: INFO/ForkPoolWorker-1] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/3d2f3231-f7e4-413c-a721-378104006bbc/3d2f3231-f7e4-413c-a721-378104006bbc_translated_es.srt (45 entries)
+[2026-04-15 12:35:28,400: INFO/ForkPoolWorker-1] Found Fish Speech 1.5 checkpoint at /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5
+[2026-04-15 12:35:28,511: INFO/ForkPoolWorker-1] Loading Fish Speech 1.5 decoder from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth
+[2026-04-15 12:35:28,693: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 12:35:28,693: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 12:35:28,701: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/finite_scalar_quantization.py:147: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 12:35:28,701: WARNING/ForkPoolWorker-1] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/lookup_free_quantization.py:209: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+
+[2026-04-15 12:35:28,799: WARNING/ForkPoolWorker-1] 2026-04-15 12:35:28.799 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+[2026-04-15 12:35:28,799: INFO/ForkPoolWorker-1] Loading Fish Speech 1.5 LLM...
+[2026-04-15 12:35:28,859: INFO/ForkPoolWorker-1] [rank: 0] Loading model from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/models/fish-speech/fish-speech-1.5, config: DualARModelArgs(model_type='dual_ar', vocab_size=102048, n_layer=24, n_head=16, dim=1024, intermediate_size=4096, n_local_heads=2, head_dim=64, rope_base=1000000.0, norm_eps=1e-06, max_seq_len=8192, dropout=0.0, tie_word_embeddings=False, attention_qkv_bias=False, codebook_size=1024, num_codebooks=8, use_gradient_checkpointing=True, initializer_range=0.02, is_reward_model=False, share_codebook_embeddings=True, scale_codebook_embeddings=False, n_fast_layer=4, fast_dim=1024, fast_n_head=16, fast_n_local_heads=2, fast_head_dim=64, fast_intermediate_size=4096, fast_attention_qkv_bias=False)
+[2026-04-15 12:35:31,659: INFO/ForkPoolWorker-1] [rank: 0] Loaded weights with error: <All keys matched successfully>
+[2026-04-15 12:35:31,763: WARNING/ForkPoolWorker-1] 2026-04-15 12:35:31.763 | INFO     | fish_speech.models.text2semantic.inference:load_model:681 - Restored model from checkpoint
+[2026-04-15 12:35:31,763: WARNING/ForkPoolWorker-1] 2026-04-15 12:35:31.763 | INFO     | fish_speech.models.text2semantic.inference:load_model:687 - Using DualARTransformer
+[2026-04-15 12:35:31,765: INFO/ForkPoolWorker-1] Fish Speech Python API not available: TTSInferenceEngine.__init__() got an unexpected keyword argument 'llm_queue'
+[2026-04-15 12:35:31,765: INFO/ForkPoolWorker-1] Falling back to Fish Speech CLI pipeline
+[2026-04-15 12:35:34,000: ERROR/ForkPoolWorker-1] Failed to synthesize segment 0: Codec encode failed:
+[2026-04-15 12:35:38,034: ERROR/ForkPoolWorker-1] Failed to synthesize segment 1: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:35:42,020: ERROR/ForkPoolWorker-1] Failed to synthesize segment 2: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:35:45,949: ERROR/ForkPoolWorker-1] Failed to synthesize segment 3: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:35:49,925: ERROR/ForkPoolWorker-1] Failed to synthesize segment 4: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:35:53,889: ERROR/ForkPoolWorker-1] Failed to synthesize segment 5: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:35:56,160: ERROR/ForkPoolWorker-1] Failed to synthesize segment 6: Codec encode failed:
+[2026-04-15 12:35:58,328: ERROR/ForkPoolWorker-1] Failed to synthesize segment 7: Codec encode failed:
+[2026-04-15 12:36:02,696: ERROR/ForkPoolWorker-1] Failed to synthesize segment 8: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:06,708: ERROR/ForkPoolWorker-1] Failed to synthesize segment 9: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:08,264: ERROR/ForkPoolWorker-1] Failed to synthesize segment 10: Codec encode failed:
+[2026-04-15 12:36:12,270: ERROR/ForkPoolWorker-1] Failed to synthesize segment 11: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:16,275: ERROR/ForkPoolWorker-1] Failed to synthesize segment 12: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:20,612: ERROR/ForkPoolWorker-1] Failed to synthesize segment 13: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:24,606: ERROR/ForkPoolWorker-1] Failed to synthesize segment 14: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:28,562: ERROR/ForkPoolWorker-1] Failed to synthesize segment 15: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d
+[2026-04-15 12:36:32,499: ERROR/ForkPoolWorker-1] Failed to synthesize segment 16: Codec encode failed: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is d

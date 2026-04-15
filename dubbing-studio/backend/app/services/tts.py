@@ -100,7 +100,7 @@ class TTSService:
             )
 
             logger.info("Loading Fish Speech 1.5 LLM...")
-            llm_queue = launch_thread_safe_queue(
+            llama_queue = launch_thread_safe_queue(
                 checkpoint_path=checkpoint_path,
                 device=device,
                 precision=precision,
@@ -108,7 +108,7 @@ class TTSService:
             )
 
             self._engine = TTSInferenceEngine(
-                llm_queue=llm_queue,
+                llama_queue=llama_queue,
                 decoder_model=decoder_model,
                 precision=precision,
                 compile=False,
