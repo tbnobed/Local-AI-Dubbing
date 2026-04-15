@@ -270,11 +270,47 @@ class TTSService:
                 streaming=False,
             )
 
-            result_chunks = list(engine.inference(request))
-            audio_data = b"".join(result_chunks)
+            results = list(engine.inference(request))
 
-            with open(output_path, "wb") as f:
-                f.write(audio_data)
+            audio_chunks = []
+            sample_rate = 44100
+            for result in results:
+                if isinstance(result, bytes):
+                    audio_chunks.append(result)
+                elif hasattr(result, "audio"):
+                    audio = result.audio
+                    if isinstance(audio, bytes):
+                        audio_chunks.append(audio)
+                    elif hasattr(audio, "numpy"):
+                        audio_np = audio.cpu().numpy() if hasattr(audio, "cpu") else audio.numpy()
+                        if hasattr(result, "sample_rate"):
+                            sample_rate = result.sample_rate
+                        sf.write(output_path, audio_np, sample_rate)
+                        info = sf.info(output_path)
+                        return info.duration
+                    elif isinstance(audio, np.ndarray):
+                        if hasattr(result, "sample_rate"):
+                            sample_rate = result.sample_rate
+                        sf.write(output_path, audio, sample_rate)
+                        info = sf.info(output_path)
+                        return info.duration
+                elif hasattr(result, "numpy"):
+                    audio_np = result.cpu().numpy() if hasattr(result, "cpu") else result.numpy()
+                    sf.write(output_path, audio_np, sample_rate)
+                    info = sf.info(output_path)
+                    return info.duration
+
+            if audio_chunks:
+                audio_data = b"".join(audio_chunks)
+                with open(output_path, "wb") as f:
+                    f.write(audio_data)
+            else:
+                raise RuntimeError(
+                    f"Fish Speech returned {len(results)} results of type "
+                    f"{type(results[0]).__name__ if results else 'empty'}, "
+                    f"could not extract audio data. "
+                    f"Attrs: {dir(results[0]) if results else 'N/A'}"
+                )
 
         info = sf.info(output_path)
         return info.duration
