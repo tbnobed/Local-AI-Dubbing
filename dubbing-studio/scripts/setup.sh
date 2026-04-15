@@ -80,23 +80,38 @@ echo "────────────────────────�
 
 cd "$BACKEND_DIR"
 
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
-    echo "Created virtual environment: $BACKEND_DIR/venv"
-else
-    echo "Virtual environment already exists"
+# Recreate venv if it exists but has stale/conflicting packages
+if [ -d "venv" ]; then
+    echo "Removing old virtual environment to get a clean slate..."
+    rm -rf venv
 fi
+
+python3 -m venv venv
+echo "Created virtual environment: $BACKEND_DIR/venv"
 
 source venv/bin/activate
 pip install --upgrade pip setuptools wheel -q
 
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 2: PyTorch with CUDA"
+echo "Step 2: PyTorch + WhisperX + onnxruntime"
 echo "──────────────────────────────────────────"
 
-echo "Installing PyTorch with CUDA ($CUDA_INDEX)..."
+# Install WhisperX first — it pulls in faster-whisper, pyannote, etc.
+# It may install CPU-only PyTorch, which we fix immediately after.
+echo "Installing WhisperX (transcription + diarization)..."
+pip install whisperx -q
+
+# Re-pin PyTorch with CUDA (WhisperX may have pulled CPU-only builds)
+echo "Pinning PyTorch with CUDA ($CUDA_INDEX)..."
 pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
+
+# onnxruntime-gpu replaces onnxruntime for GPU-accelerated diarization.
+# faster-whisper requires onnxruntime>=1.14 — onnxruntime-gpu satisfies this.
+echo "Installing onnxruntime-gpu..."
+pip install onnxruntime-gpu -q 2>/dev/null || {
+    echo "onnxruntime-gpu install failed, keeping onnxruntime (CPU diarization)"
+}
 
 echo ""
 echo "──────────────────────────────────────────"
@@ -107,25 +122,7 @@ pip install -r requirements.txt -q
 
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 4: WhisperX (transcription + diarization)"
-echo "──────────────────────────────────────────"
-
-# WhisperX may pull in CPU-only torch as a transitive dep.
-# Install it, then re-pin CUDA torch afterwards.
-pip install whisperx -q
-
-echo "Re-pinning PyTorch CUDA wheels (WhisperX may have overwritten)..."
-pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
-
-# onnxruntime-gpu replaces onnxruntime for GPU-accelerated diarization.
-# faster-whisper requires onnxruntime>=1.14 — onnxruntime-gpu satisfies this.
-pip install onnxruntime-gpu -q 2>/dev/null || {
-    echo "onnxruntime-gpu install failed, keeping onnxruntime (CPU diarization)"
-}
-
-echo ""
-echo "──────────────────────────────────────────"
-echo "Step 5: Fish Speech (voice cloning TTS)"
+echo "Step 4: Fish Speech (voice cloning TTS)"
 echo "──────────────────────────────────────────"
 
 cd "$ROOT_DIR"
@@ -136,6 +133,9 @@ else
     echo "Fish Speech repository already exists, pulling latest..."
     cd "$FISH_SPEECH_DIR" && git pull && cd "$ROOT_DIR"
 fi
+
+# Ensure venv is still active after cd
+source "$BACKEND_DIR/venv/bin/activate"
 
 cd "$FISH_SPEECH_DIR"
 echo "Installing Fish Speech (pip install -e .[$CUDA_INDEX])..."
@@ -151,13 +151,12 @@ pip install -e ".[$CUDA_INDEX]" -q 2>/dev/null || {
     }
 }
 
-# Re-pin PyTorch CUDA one more time (fish-speech may also overwrite)
+# Re-pin PyTorch CUDA one final time (fish-speech may also overwrite)
 echo "Final PyTorch CUDA re-pin..."
 pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
 
 # Download model checkpoint
 echo "Downloading Fish Speech 1.5 model weights (~3GB)..."
-pip install huggingface-hub[cli] -q
 cd "$BACKEND_DIR"
 mkdir -p data/models/fish-speech
 python3 -c "
@@ -172,11 +171,11 @@ print(f'Downloaded to: {path}')
 
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 6: Verify GPU setup"
+echo "Step 5: Verify GPU setup"
 echo "──────────────────────────────────────────"
 
 cd "$BACKEND_DIR"
-source venv/bin/activate
+source "$BACKEND_DIR/venv/bin/activate"
 
 python3 -c "
 import torch
@@ -216,7 +215,7 @@ except ImportError:
 
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 7: Frontend"
+echo "Step 6: Frontend"
 echo "──────────────────────────────────────────"
 
 cd "$FRONTEND_DIR"
@@ -231,7 +230,7 @@ fi
 
 echo ""
 echo "──────────────────────────────────────────"
-echo "Step 8: Configuration"
+echo "Step 7: Configuration"
 echo "──────────────────────────────────────────"
 
 cd "$BACKEND_DIR"
