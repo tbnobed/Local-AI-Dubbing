@@ -138,6 +138,11 @@ pip install whisperx -q
 echo "Pinning PyTorch with CUDA ($CUDA_INDEX)..."
 pip install torch torchvision torchaudio --index-url "https://download.pytorch.org/whl/$CUDA_INDEX" -q
 
+# CTranslate2 4.5.0+ is required for Blackwell (sm_120) GPU support.
+# Older versions produce "unsupported device cuda:0" on RTX 50xx GPUs.
+echo "Upgrading CTranslate2 for Blackwell GPU support..."
+pip install "ctranslate2>=4.5.0" -q
+
 # onnxruntime-gpu replaces onnxruntime for GPU-accelerated diarization.
 # faster-whisper requires onnxruntime>=1.14 — onnxruntime-gpu satisfies this.
 echo "Installing onnxruntime-gpu..."
@@ -217,10 +222,17 @@ if torch.cuda.is_available():
     print(f'CUDA version: {torch.version.cuda}')
     for i in range(torch.cuda.device_count()):
         name = torch.cuda.get_device_name(i)
+        cap = torch.cuda.get_device_capability(i)
         mem = torch.cuda.get_device_properties(i).total_mem / 1024**3
-        print(f'  GPU {i}: {name} ({mem:.0f} GB)')
+        print(f'  GPU {i}: {name} (sm_{cap[0]}{cap[1]}, {mem:.0f} GB)')
 else:
     print('WARNING: CUDA not detected — pipeline will be very slow on CPU')
+
+try:
+    import ctranslate2
+    print(f'CTranslate2: {ctranslate2.__version__}')
+except ImportError as e:
+    print(f'CTranslate2: MISSING ({e})')
 
 try:
     import whisperx
@@ -243,6 +255,17 @@ except ImportError:
         print(f'Fish Speech (engine): OK')
     except ImportError as e:
         print(f'Fish Speech: MISSING ({e})')
+
+# Smoke test: verify CUDA actually works (catches sm_120 kernel issues)
+if torch.cuda.is_available():
+    try:
+        x = torch.zeros(1, device='cuda:0')
+        del x
+        print('CUDA smoke test: PASSED')
+    except Exception as e:
+        print(f'CUDA smoke test: FAILED ({e})')
+        print('  This usually means PyTorch was not built with your GPU architecture.')
+        print('  Try: pip install torch --index-url https://download.pytorch.org/whl/cu128')
 " || echo "Could not verify full setup"
 
 echo ""
