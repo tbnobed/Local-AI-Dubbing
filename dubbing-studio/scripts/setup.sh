@@ -80,6 +80,18 @@ echo "ffmpeg: $(ffmpeg -version 2>&1 | head -1)"
 install_if_missing redis-server redis-server redis "Redis"
 echo "Redis: $(redis-server --version 2>&1 | head -1)"
 
+# portaudio dev headers — required by Fish Speech's pyaudio dependency
+if command -v apt &>/dev/null; then
+    if ! dpkg -s portaudio19-dev &>/dev/null 2>&1; then
+        echo "Installing portaudio19-dev (needed by Fish Speech)..."
+        sudo apt install -y portaudio19-dev
+    fi
+    echo "portaudio: installed"
+elif command -v brew &>/dev/null; then
+    brew list portaudio &>/dev/null 2>&1 || brew install portaudio
+    echo "portaudio: installed"
+fi
+
 if ! command -v npm &>/dev/null; then
     echo "Node.js/npm not found — installing Node.js 20.x..."
     if command -v apt &>/dev/null; then
@@ -251,7 +263,8 @@ if torch.cuda.is_available():
     for i in range(torch.cuda.device_count()):
         cap = torch.cuda.get_device_capability(i)
         name = torch.cuda.get_device_name(i)
-        mem = torch.cuda.get_device_properties(i).total_mem / 1024**3
+        props = torch.cuda.get_device_properties(i)
+        mem = (props.total_memory if hasattr(props, 'total_memory') else props.total_mem) / 1024**3
         print(f"  GPU {i}: {name} (sm_{cap[0]}{cap[1]}, {mem:.0f} GB)")
 
 # Transformers (used for Whisper transcription — pure PyTorch, Blackwell-safe)
