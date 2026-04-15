@@ -1,18 +1,62 @@
 """
-Translation service using Google MADLAD-400 3B.
+Translation service using Meta NLLB-200 3.3B.
 
-MADLAD-400 advantages over NLLB-200:
-  - Apache 2.0 license (commercially usable)
-  - 400+ languages (vs 200)
-  - Better translation quality on benchmarks
-  - Uses simple <2xx> prefix tags for target language
-
-Uses T5 architecture. Input format: "<2es> Hello world" → "Hola mundo"
+NLLB-200 (No Language Left Behind) uses BCP-47 style language codes
+with script suffixes, e.g. "spa_Latn" for Spanish, "fra_Latn" for French.
+The target language is set via the tokenizer's forced BOS token.
 """
 import logging
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+NLLB_LANG_CODES = {
+    "en": "eng_Latn",
+    "es": "spa_Latn",
+    "fr": "fra_Latn",
+    "de": "deu_Latn",
+    "it": "ita_Latn",
+    "pt": "por_Latn",
+    "ja": "jpn_Jpan",
+    "zh": "zho_Hans",
+    "ko": "kor_Hang",
+    "ar": "arb_Arab",
+    "ru": "rus_Cyrl",
+    "hi": "hin_Deva",
+    "nl": "nld_Latn",
+    "pl": "pol_Latn",
+    "tr": "tur_Latn",
+    "vi": "vie_Latn",
+    "th": "tha_Thai",
+    "sv": "swe_Latn",
+    "da": "dan_Latn",
+    "fi": "fin_Latn",
+    "no": "nob_Latn",
+    "cs": "ces_Latn",
+    "el": "ell_Grek",
+    "he": "heb_Hebr",
+    "hu": "hun_Latn",
+    "id": "ind_Latn",
+    "ms": "zsm_Latn",
+    "ro": "ron_Latn",
+    "sk": "slk_Latn",
+    "uk": "ukr_Cyrl",
+    "bg": "bul_Cyrl",
+    "ca": "cat_Latn",
+    "hr": "hrv_Latn",
+    "lt": "lit_Latn",
+    "lv": "lvs_Latn",
+    "et": "est_Latn",
+    "sl": "slv_Latn",
+    "sr": "srp_Cyrl",
+    "bn": "ben_Beng",
+    "ta": "tam_Taml",
+    "te": "tel_Telu",
+    "ur": "urd_Arab",
+    "fa": "pes_Arab",
+    "sw": "swh_Latn",
+    "tl": "tgl_Latn",
+}
 
 
 class TranslationService:
@@ -25,18 +69,18 @@ class TranslationService:
     def _load_model(self):
         if self._model is None:
             import torch
-            from transformers import T5ForConditionalGeneration, T5Tokenizer
+            from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
             model_name = self.config.translation_model
             logger.info(f"Loading translation model: {model_name}")
 
-            self._tokenizer = T5Tokenizer.from_pretrained(
+            self._tokenizer = AutoTokenizer.from_pretrained(
                 model_name,
-                cache_dir=str(self.config.models_dir / "madlad"),
+                cache_dir=str(self.config.models_dir / "nllb"),
             )
-            self._model = T5ForConditionalGeneration.from_pretrained(
+            self._model = AutoModelForSeq2SeqLM.from_pretrained(
                 model_name,
-                cache_dir=str(self.config.models_dir / "madlad"),
+                cache_dir=str(self.config.models_dir / "nllb"),
                 torch_dtype=torch.float16,
             )
 
@@ -50,20 +94,25 @@ class TranslationService:
 
             self._model = self._model.to(self._device)
             self._model.eval()
-            logger.info(f"MADLAD-400 loaded on {self._device}")
+            logger.info(f"NLLB-200 loaded on {self._device}")
 
         return self._model, self._tokenizer
+
+    def _get_nllb_code(self, lang: str) -> str:
+        if lang in NLLB_LANG_CODES:
+            return NLLB_LANG_CODES[lang]
+        nllb_from_config = self.config.supported_languages.get(lang, {}).get("nllb")
+        if nllb_from_config:
+            return nllb_from_config
+        return lang
 
     def translate_text(
         self,
         text: str,
+        source_lang: str,
         target_lang: str,
         max_length: int = 512,
     ) -> str:
-        """
-        Translate text using MADLAD-400.
-        MADLAD uses <2xx> prefix: "<2es> Hello" → "Hola"
-        """
         import torch
 
         if not text.strip():
@@ -71,12 +120,13 @@ class TranslationService:
 
         model, tokenizer = self._load_model()
 
-        # MADLAD-400 format: prepend target language tag
-        madlad_code = self.config.supported_languages.get(target_lang, {}).get("madlad", target_lang)
-        input_text = f"<2{madlad_code}> {text}"
+        src_code = self._get_nllb_code(source_lang)
+        tgt_code = self._get_nllb_code(target_lang)
+
+        tokenizer.src_lang = src_code
 
         inputs = tokenizer(
-            input_text,
+            text,
             return_tensors="pt",
             padding=True,
             truncation=True,
@@ -84,11 +134,14 @@ class TranslationService:
         )
         inputs = {k: v.to(self._device) for k, v in inputs.items()}
 
+        forced_bos_token_id = tokenizer.convert_tokens_to_ids(tgt_code)
+
         with torch.no_grad():
             translated_tokens = model.generate(
                 **inputs,
+                forced_bos_token_id=forced_bos_token_id,
                 max_length=max_length,
-                num_beams=4,
+                num_beams=5,
                 early_stopping=True,
                 no_repeat_ngram_size=3,
             )
@@ -103,11 +156,14 @@ class TranslationService:
         target_lang: str,
         progress_callback=None,
     ) -> list:
+        self._load_model()
+
         total = len(segments)
 
         for i, segment in enumerate(segments):
             translated_text = self.translate_text(
                 segment.text,
+                source_lang=source_lang,
                 target_lang=target_lang,
             )
             segment.translated_text = translated_text

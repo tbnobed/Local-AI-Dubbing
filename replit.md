@@ -56,7 +56,7 @@ A standalone local AI video dubbing system. Runs entirely on local GPU hardware.
 - **Whisper large-v3-turbo via transformers** (transcription — pure PyTorch, Blackwell-safe)
 - **WhisperX** (word-level alignment via wav2vec2 + speaker diarization via pyannote)
 - **pyannote community-1** (speaker diarization, requires HF token)
-- **MADLAD-400 3B** by Google (translation, Apache 2.0 license, 400+ languages)
+- **NLLB-200 3.3B** by Meta (translation, CC-BY-NC license, 200 languages, higher quality)
 - **Fish Speech 1.5** (voice cloning TTS, 80+ languages, CUDA 12.x native)
 
 ### GPU Setup

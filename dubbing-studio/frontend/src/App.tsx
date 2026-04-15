@@ -64,7 +64,7 @@ export default function App() {
                   { label: "Audio Extraction", desc: "ffmpeg" },
                   { label: "Speech Transcription", desc: "Whisper large-v3-turbo" },
                   { label: "Speaker Diarization", desc: "pyannote community-1" },
-                  { label: "Translation", desc: "MADLAD-400 3B (Google)" },
+                  { label: "Translation", desc: "NLLB-200 3.3B (Meta)" },
                   { label: "Voice Cloning + TTS", desc: "Fish Speech 1.5" },
                   { label: "Audio Mixing", desc: "ffmpeg + librosa" },
                 ].map((step, i) => (
