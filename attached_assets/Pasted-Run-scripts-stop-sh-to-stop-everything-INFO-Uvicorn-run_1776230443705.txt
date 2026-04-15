@@ -1,0 +1,57 @@
+Run ./scripts/stop.sh to stop everything
+
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started parent process [25495]
+INFO:     Started server process [25498]
+INFO:     Waiting for application startup.
+2026-04-14 22:19:04,524 [INFO] app.main: Initializing database...
+2026-04-14 22:19:04,526 [INFO] app.main: DubbingStudio ready.
+INFO:     Application startup complete.
+INFO:     Started server process [25497]
+INFO:     Waiting for application startup.
+2026-04-14 22:19:04,538 [INFO] app.main: Initializing database...
+2026-04-14 22:19:04,539 [INFO] app.main: DubbingStudio ready.
+INFO:     Application startup complete.
+INFO:     172.31.204.16:55208 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:63186 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:63186 - "GET / HTTP/1.1" 200 OK
+INFO:     172.31.204.16:63186 - "GET /assets/index-C0bN45-J.js HTTP/1.1" 304 Not Modified
+INFO:     172.31.204.16:54152 - "GET /assets/index-CkZrQoqc.css HTTP/1.1" 304 Not Modified
+INFO:     172.31.204.16:55208 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:58442 - "GET /icon.svg HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:63186 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:63186 - "GET / HTTP/1.1" 200 OK
+INFO:     172.31.204.16:63186 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:51493 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:59345 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:56655 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:56750 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:53172 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:55411 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:52249 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "POST /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:65241 - "WebSocket /ws/jobs/3d2f3231-f7e4-413c-a721-378104006bbc" [accepted]
+2026-04-14 22:20:20,114 [INFO] app.api.websocket: WebSocket connected for job 3d2f3231-f7e4-413c-a721-378104006bbc
+INFO:     connection open
+INFO:     172.31.204.16:54152 - "GET /api/jobs/ HTTP/1.1" 200 OK
+2026-04-14 22:20:23,242 [INFO] app.api.websocket: WebSocket disconnected for job 3d2f3231-f7e4-413c-a721-378104006bbc
+INFO:     connection closed
+INFO:     172.31.204.16:58714 - "GET /api/jobs/ HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     172.31.204.16:54152 - "GET /api/jobs/ HTTP/1.1" 200 OK
