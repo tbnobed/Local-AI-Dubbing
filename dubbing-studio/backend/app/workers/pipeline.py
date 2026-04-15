@@ -227,41 +227,13 @@ def run_dubbing_pipeline(self, job_id: str):
             return
 
         # ── Stage 5: Voice cloning + TTS (only when enabled) ──
-        from app.services.diarization import extract_speaker_voice_samples
-        samples_dir = str(temp_dir / "speaker_samples")
-        speaker_samples = extract_speaker_voice_samples(
-            audio_path, segments, samples_dir
-        )
+        # TODO: TTS temporarily disabled — testing alignment/diarization only
+        logger.info(f"Alignment + diarization verified. Skipping TTS (temporarily disabled).")
+        logger.info(f"Speakers detected: {speakers_detected}")
+        for seg in segments[:5]:
+            logger.info(f"  [{seg.speaker}] {seg.start:.1f}-{seg.end:.1f}: {seg.text[:60]}")
 
-        if not speaker_samples:
-            speaker_samples = {"SPEAKER_00": audio_path}
-
-        update_progress("cloning_voices", 1.0)
-
-        update_progress("synthesizing", 0.0)
-        synth_dir = str(temp_dir / "synthesized")
-
-        from app.services.tts import TTSService
-        tts = TTSService(settings)
-        segments = tts.synthesize_all_segments(
-            segments,
-            speaker_samples,
-            target_language,
-            synth_dir,
-            progress_callback=lambda p: update_progress("synthesizing", p),
-        )
-        tts.unload()
-        update_progress("synthesizing", 1.0)
-
-        # ── Stage 6: Mix and produce final video ──
-        update_progress("mixing", 0.0)
-
-        dubbed_audio_path = str(temp_dir / "dubbed_audio.wav")
-        mixer.build_dubbed_audio(segments, total_duration, dubbed_audio_path)
-
-        stem = Path(original_filename).stem
-        output_video_path = str(output_dir / f"{stem}_dubbed_{target_language}.mp4")
-        mixer.merge_audio_into_video(input_path, dubbed_audio_path, output_video_path)
+        update_progress("exporting_subtitles", 1.0)
 
         processing_time = time.time() - start_time
 
@@ -275,7 +247,7 @@ def run_dubbing_pipeline(self, job_id: str):
                         status=JobStatus.COMPLETED,
                         progress=100.0,
                         current_stage="completed",
-                        output_video_path=output_video_path,
+                        output_video_path=None,
                         output_srt_path=subtitle_paths.get("translated_srt"),
                         output_original_srt_path=subtitle_paths.get("original_srt"),
                         output_vtt_path=subtitle_paths.get("translated_vtt"),
@@ -290,10 +262,9 @@ def run_dubbing_pipeline(self, job_id: str):
             "status": "completed",
             "progress": 100.0,
             "stage": "completed",
-            "output_video_path": output_video_path,
         })
 
-        logger.info(f"Full dubbing pipeline complete for {job_id} in {processing_time:.1f}s")
+        logger.info(f"Alignment+diarization test complete for {job_id} in {processing_time:.1f}s")
 
     except Exception as e:
         logger.error(f"Pipeline failed for {job_id}: {e}", exc_info=True)
