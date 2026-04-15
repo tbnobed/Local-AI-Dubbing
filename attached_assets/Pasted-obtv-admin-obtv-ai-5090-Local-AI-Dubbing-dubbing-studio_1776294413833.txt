@@ -1,0 +1,41 @@
+obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio$ tail -f /tmp/dubbing-celery.log
+[2026-04-15 16:00:02,061: INFO/MainProcess] mingle: all alone
+[2026-04-15 16:00:02,077: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 16:01:36,243: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-04-15 16:01:36,244: INFO/MainProcess] mingle: searching for neighbors
+[2026-04-15 16:01:37,250: INFO/MainProcess] mingle: all alone
+[2026-04-15 16:01:37,265: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 16:03:15,487: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-04-15 16:03:15,487: INFO/MainProcess] mingle: searching for neighbors
+[2026-04-15 16:03:16,494: INFO/MainProcess] mingle: all alone
+[2026-04-15 16:03:16,510: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 16:03:54,443: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[bb3b14e5-f8d4-484b-85f2-85ae481cc4b2] received
+[2026-04-15 16:03:54,444: INFO/MainProcess] Starting pipeline for job 4bdc4e2f-f22c-4e1a-82cf-c0f153dd1953
+[2026-04-15 16:03:54,530: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/4bdc4e2f-f22c-4e1a-82cf-c0f153dd1953.mp4
+[2026-04-15 16:03:57,258: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 16:03:59,386: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 16:03:59,386: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 16:03:59,386: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 16:03:59,386: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 16:04:02,409: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 16:04:02,504: INFO/MainProcess] Transcription complete (fast): 15 segments, lang=en
+[2026-04-15 16:04:02,609: INFO/MainProcess] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 16:04:03,320: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 16:04:05,140: INFO/MainProcess] NLLB-200 loaded on cuda:1
+[2026-04-15 16:05:46,996: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-04-15 16:05:46,997: INFO/MainProcess] mingle: searching for neighbors
+[2026-04-15 16:05:48,003: INFO/MainProcess] mingle: all alone
+[2026-04-15 16:05:48,019: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 16:06:12,656: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[d33fe977-6db3-4776-8de7-8c94cd10bfd7] received
+[2026-04-15 16:06:12,656: INFO/MainProcess] Starting pipeline for job 9686ca58-816b-4251-94b9-93a93292e0af
+[2026-04-15 16:06:12,741: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/9686ca58-816b-4251-94b9-93a93292e0af.mp4
+[2026-04-15 16:06:15,428: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 16:06:17,597: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 16:06:17,597: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 16:06:17,597: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 16:06:17,597: INFO/MainProcess] Transcribing with transformers Whisper...
+[2026-04-15 16:06:20,599: INFO/MainProcess] Transcription complete: 15 raw segments, lang=en
+[2026-04-15 16:06:20,690: INFO/MainProcess] Transcription complete (fast): 15 segments, lang=en
+[2026-04-15 16:06:20,794: INFO/MainProcess] Loading translation model: google/madlad400-3b-mt
+[2026-04-15 16:06:21,542: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 16:06:23,347: INFO/MainProcess] NLLB-200 loaded on cuda:1
