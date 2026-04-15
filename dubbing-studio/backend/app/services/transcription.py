@@ -201,13 +201,9 @@ class TranscriptionService:
         if hf_token:
             try:
                 # Use secondary GPU for diarization (keeps primary GPU free for TTS/translation)
-                if self.config.use_gpu and torch.cuda.device_count() > 1:
-                    diarize_device = torch.device(f"cuda:{self.config.secondary_gpu_id}")
-                elif self.config.use_gpu and torch.cuda.is_available():
-                    diarize_device = torch.device(f"cuda:{self.config.primary_gpu_id}")
-                else:
-                    diarize_device = torch.device("cpu")
-                logger.info(f"Running speaker diarization (pyannote) on {diarize_device}...")
+                # Force diarization to CPU — pyannote causes SIGSEGV on Blackwell GPUs
+                diarize_device = torch.device("cpu")
+                logger.info(f"Running speaker diarization (pyannote) on CPU...")
 
                 # Try whisperx.DiarizationPipeline first, fall back to pyannote directly
                 diarize_model = None
