@@ -181,7 +181,7 @@ export function JobCard({ job, onUpdate }: Props) {
                   SRT ({job.target_language.toUpperCase()})
                 </a>
               )}
-              {job.output_original_srt_path && (
+              {job.output_srt_path && (
                 <a
                   href={getDownloadUrl(job.id, "srt", "original")}
                   download
@@ -191,6 +191,30 @@ export function JobCard({ job, onUpdate }: Props) {
                 >
                   <Download className="w-3.5 h-3.5" />
                   SRT ({job.source_language.toUpperCase()})
+                </a>
+              )}
+              {job.output_vtt_path && (
+                <a
+                  href={getDownloadUrl(job.id, "vtt", "translated")}
+                  download
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
+                             bg-brand-900/50 text-brand-300 border border-brand-700/30
+                             hover:bg-brand-800/50 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  VTT ({job.target_language.toUpperCase()})
+                </a>
+              )}
+              {job.output_vtt_path && (
+                <a
+                  href={getDownloadUrl(job.id, "vtt", "original")}
+                  download
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
+                             bg-surface-700 text-slate-300 border border-surface-500
+                             hover:bg-surface-600 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  VTT ({job.source_language.toUpperCase()})
                 </a>
               )}
             </div>

@@ -32,6 +32,8 @@ class JobResponse(BaseModel):
     output_video_path: Optional[str]
     output_srt_path: Optional[str]
     output_original_srt_path: Optional[str]
+    output_vtt_path: Optional[str]
+    output_original_vtt_path: Optional[str]
     error_message: Optional[str]
     processing_time_seconds: Optional[float]
     created_at: str
@@ -155,6 +157,8 @@ async def retry_job(job_id: str, db: AsyncSession = Depends(get_db)):
     job.output_video_path = None
     job.output_srt_path = None
     job.output_original_srt_path = None
+    job.output_vtt_path = None
+    job.output_original_vtt_path = None
     job.processing_time_seconds = None
     job.transcription_data = None
     job.speakers_detected = 0
@@ -214,6 +218,23 @@ async def download_srt(job_id: str, lang: str = "translated", db: AsyncSession =
     )
 
 
+@router.get("/{job_id}/download/vtt")
+async def download_vtt(job_id: str, lang: str = "translated", db: AsyncSession = Depends(get_db)):
+    job = await db.get(Job, job_id)
+    if not job or job.status != JobStatus.COMPLETED:
+        raise HTTPException(404, "Output not ready")
+
+    path = job.output_vtt_path if lang == "translated" else job.output_original_vtt_path
+    if not path or not os.path.exists(path):
+        raise HTTPException(404, "VTT file not found")
+
+    return FileResponse(
+        path,
+        media_type="text/vtt",
+        filename=Path(path).name,
+    )
+
+
 def _job_to_response(job: Job) -> JobResponse:
     return JobResponse(
         id=job.id,
@@ -228,6 +249,8 @@ def _job_to_response(job: Job) -> JobResponse:
         output_video_path=job.output_video_path,
         output_srt_path=job.output_srt_path,
         output_original_srt_path=job.output_original_srt_path,
+        output_vtt_path=getattr(job, "output_vtt_path", None),
+        output_original_vtt_path=getattr(job, "output_original_vtt_path", None),
         error_message=job.error_message,
         processing_time_seconds=job.processing_time_seconds,
         created_at=job.created_at.isoformat() if job.created_at else "",

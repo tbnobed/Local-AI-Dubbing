@@ -25,6 +25,8 @@ export interface Job {
   output_video_path: string | null;
   output_srt_path: string | null;
   output_original_srt_path: string | null;
+  output_vtt_path: string | null;
+  output_original_vtt_path: string | null;
   error_message: string | null;
   processing_time_seconds: number | null;
   created_at: string;

@@ -53,8 +53,9 @@ export async function clearAllJobs(): Promise<void> {
   if (!res.ok) throw new Error("Failed to clear jobs");
 }
 
-export function getDownloadUrl(jobId: string, type: "video" | "srt", lang?: string): string {
+export function getDownloadUrl(jobId: string, type: "video" | "srt" | "vtt", lang?: string): string {
   if (type === "video") return `${BASE}/jobs/${jobId}/download/video`;
+  if (type === "vtt") return `${BASE}/jobs/${jobId}/download/vtt?lang=${lang || "translated"}`;
   return `${BASE}/jobs/${jobId}/download/srt?lang=${lang || "translated"}`;
 }
 

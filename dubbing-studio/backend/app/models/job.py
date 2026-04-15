@@ -50,6 +50,8 @@ class Job(Base):
     output_video_path = Column(String, nullable=True)
     output_srt_path = Column(String, nullable=True)
     output_original_srt_path = Column(String, nullable=True)
+    output_vtt_path = Column(String, nullable=True)
+    output_original_vtt_path = Column(String, nullable=True)
     duration_seconds = Column(Float, nullable=True)
 
     # Metadata

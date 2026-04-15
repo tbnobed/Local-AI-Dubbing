@@ -177,21 +177,19 @@ def run_dubbing_pipeline(self, job_id: str):
         translator.unload()
         update_progress("translating", 1.0)
 
-        # ── Stage 4: Generate SRT files ──
-        original_srt = None
-        translated_srt = None
+        # ── Stage 4: Generate subtitle files (SRT + VTT) ──
+        subtitle_paths = {}
 
-        from app.services.subtitle_generator import generate_both_srts
+        from app.services.subtitle_generator import generate_all_subtitles
         if export_srt:
             if voice_cloning_enabled:
                 update_progress("cloning_voices", 0.0)
             else:
                 update_progress("exporting_subtitles", 0.0)
 
-            original_srt, translated_srt = generate_both_srts(
+            subtitle_paths = generate_all_subtitles(
                 segments, str(output_dir), job_id, source_language, target_language,
             )
-            logger.info(f"SRT files generated: original={original_srt}, translated={translated_srt}")
 
         if not voice_cloning_enabled:
             update_progress("exporting_subtitles", 1.0)
@@ -209,8 +207,10 @@ def run_dubbing_pipeline(self, job_id: str):
                             progress=100.0,
                             current_stage="completed",
                             output_video_path=None,
-                            output_srt_path=translated_srt,
-                            output_original_srt_path=original_srt,
+                            output_srt_path=subtitle_paths.get("translated_srt"),
+                            output_original_srt_path=subtitle_paths.get("original_srt"),
+                            output_vtt_path=subtitle_paths.get("translated_vtt"),
+                            output_original_vtt_path=subtitle_paths.get("original_vtt"),
                             duration_seconds=total_duration,
                             speakers_detected=speakers_detected,
                             transcription_data=transcription_data,
@@ -276,8 +276,10 @@ def run_dubbing_pipeline(self, job_id: str):
                         progress=100.0,
                         current_stage="completed",
                         output_video_path=output_video_path,
-                        output_srt_path=translated_srt,
-                        output_original_srt_path=original_srt,
+                        output_srt_path=subtitle_paths.get("translated_srt"),
+                        output_original_srt_path=subtitle_paths.get("original_srt"),
+                        output_vtt_path=subtitle_paths.get("translated_vtt"),
+                        output_original_vtt_path=subtitle_paths.get("original_vtt"),
                         duration_seconds=total_duration,
                         speakers_detected=speakers_detected,
                         transcription_data=transcription_data,
