@@ -204,8 +204,8 @@ class TranscriptionService:
             progress_callback(0.35, "aligning")
 
         # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
-        # wav2vec2 alignment is fast on CPU; GPU hangs on Blackwell (sm_120)
-        align_device = "cpu"
+        # Use primary GPU (cuda:0) — Whisper has been freed, context is warm
+        align_device = f"cuda:{self.config.primary_gpu_id}" if self.config.use_gpu and torch.cuda.is_available() else "cpu"
         logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on {align_device}...")
         audio = whisperx.load_audio(audio_path)
         duration = len(audio) / 16000.0
