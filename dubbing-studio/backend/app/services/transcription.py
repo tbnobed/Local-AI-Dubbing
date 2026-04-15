@@ -157,15 +157,9 @@ class TranscriptionService:
             progress_callback(0.35, "aligning")
 
         # --- Stage 2: Word-level alignment (WhisperX / wav2vec2) ---
-        # Use the secondary GPU for alignment to keep primary GPU free for
-        # later pipeline stages (translation, TTS). Falls back to CPU if it crashes.
-        if self.config.use_gpu and torch.cuda.device_count() > 1:
-            align_device = f"cuda:{self.config.secondary_gpu_id}"
-        elif self.config.use_gpu and torch.cuda.is_available():
-            align_device = f"cuda:{self.config.primary_gpu_id}"
-        else:
-            align_device = "cpu"
-        logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on {align_device}...")
+        # Force alignment to CPU — wav2vec2 causes intermittent SIGSEGV on Blackwell GPUs
+        align_device = "cpu"
+        logger.info(f"Aligning words with WhisperX (lang={detected_lang}) on CPU...")
         audio = whisperx.load_audio(audio_path)
         duration = len(audio) / 16000.0
 
