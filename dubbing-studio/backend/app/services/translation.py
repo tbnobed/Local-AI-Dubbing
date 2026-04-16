@@ -140,8 +140,8 @@ class TranslationService:
             translated_tokens = model.generate(
                 **inputs,
                 forced_bos_token_id=forced_bos_token_id,
-                max_length=max_length,
-                num_beams=5,
+                max_new_tokens=max_length,
+                num_beams=4,
                 early_stopping=True,
                 no_repeat_ngram_size=3,
             )
@@ -149,29 +149,99 @@ class TranslationService:
         result = tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]
         return result
 
+    def translate_batch(
+        self,
+        texts: list[str],
+        source_lang: str,
+        target_lang: str,
+        max_length: int = 512,
+    ) -> list[str]:
+        import torch
+
+        if not texts:
+            return []
+
+        model, tokenizer = self._load_model()
+        src_code = self._get_nllb_code(source_lang)
+        tgt_code = self._get_nllb_code(target_lang)
+        tokenizer.src_lang = src_code
+
+        inputs = tokenizer(
+            texts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        inputs = {k: v.to(self._device) for k, v in inputs.items()}
+
+        forced_bos_token_id = tokenizer.convert_tokens_to_ids(tgt_code)
+
+        with torch.no_grad():
+            translated_tokens = model.generate(
+                **inputs,
+                forced_bos_token_id=forced_bos_token_id,
+                max_new_tokens=max_length,
+                num_beams=4,
+                early_stopping=True,
+                no_repeat_ngram_size=3,
+            )
+
+        results = tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)
+        return results
+
     def translate_segments(
         self,
         segments: list,
         source_lang: str,
         target_lang: str,
         progress_callback=None,
+        batch_size: int = 8,
     ) -> list:
+        import time as _time
+
         self._load_model()
-
         total = len(segments)
+        logger.info(f"Translating {total} segments ({source_lang} -> {target_lang}), batch_size={batch_size}")
 
-        for i, segment in enumerate(segments):
-            translated_text = self.translate_text(
-                segment.text,
-                source_lang=source_lang,
-                target_lang=target_lang,
+        for batch_start in range(0, total, batch_size):
+            batch_end = min(batch_start + batch_size, total)
+            batch = segments[batch_start:batch_end]
+
+            texts = [seg.text for seg in batch]
+            non_empty_mask = [bool(t.strip()) for t in texts]
+
+            texts_to_translate = [t for t, m in zip(texts, non_empty_mask) if m]
+
+            t0 = _time.time()
+            if texts_to_translate:
+                translated = self.translate_batch(
+                    texts_to_translate,
+                    source_lang=source_lang,
+                    target_lang=target_lang,
+                )
+            else:
+                translated = []
+
+            dt = _time.time() - t0
+
+            tr_idx = 0
+            for seg, mask in zip(batch, non_empty_mask):
+                if mask:
+                    seg.translated_text = translated[tr_idx]
+                    tr_idx += 1
+                else:
+                    seg.translated_text = seg.text
+
+            logger.info(
+                f"Translated segments {batch_start+1}-{batch_end}/{total} "
+                f"in {dt:.1f}s"
             )
-            segment.translated_text = translated_text
 
             if progress_callback:
-                progress_callback((i + 1) / total)
+                progress_callback(batch_end / total)
 
-        logger.info(f"Translated {total} segments from {source_lang} to {target_lang}")
+        logger.info(f"Translation complete: {total} segments from {source_lang} to {target_lang}")
         return segments
 
     def unload(self):
