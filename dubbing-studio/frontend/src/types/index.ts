@@ -1,6 +1,7 @@
 export type JobStatus =
   | "pending"
   | "extracting_audio"
+  | "separating_audio"
   | "transcribing"
   | "diarizing"
   | "translating"

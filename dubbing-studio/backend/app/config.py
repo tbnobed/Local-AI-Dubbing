@@ -3,21 +3,22 @@ from pathlib import Path
 from typing import Optional
 import os
 
+_BASE_DIR = Path(__file__).parent.parent.resolve()
+_DATA_DIR = _BASE_DIR / "data"
+
 
 class Settings(BaseSettings):
     app_name: str = "DubbingStudio"
     debug: bool = False
 
-    # Paths
-    base_dir: Path = Path(__file__).parent.parent.parent
-    data_dir: Path = base_dir / "data"
-    uploads_dir: Path = data_dir / "uploads"
-    outputs_dir: Path = data_dir / "outputs"
-    temp_dir: Path = data_dir / "temp"
-    models_dir: Path = data_dir / "models"
+    base_dir: Path = _BASE_DIR
+    data_dir: Path = _DATA_DIR
+    uploads_dir: Path = _DATA_DIR / "uploads"
+    outputs_dir: Path = _DATA_DIR / "outputs"
+    temp_dir: Path = _DATA_DIR / "temp"
+    models_dir: Path = _DATA_DIR / "models"
 
-    # Database
-    database_url: str = "sqlite+aiosqlite:///./data/dubbing_studio.db"
+    database_url: str = f"sqlite+aiosqlite:///{_DATA_DIR / 'dubbing_studio.db'}"
 
     # Redis / Celery
     redis_url: str = "redis://localhost:6379/0"

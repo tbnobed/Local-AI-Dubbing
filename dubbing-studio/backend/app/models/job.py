@@ -12,9 +12,11 @@ Base = declarative_base()
 class JobStatus(str, Enum):
     PENDING = "pending"
     EXTRACTING_AUDIO = "extracting_audio"
+    SEPARATING_AUDIO = "separating_audio"
     TRANSCRIBING = "transcribing"
     DIARIZING = "diarizing"
     TRANSLATING = "translating"
+    EXPORTING_SUBTITLES = "exporting_subtitles"
     CLONING_VOICES = "cloning_voices"
     SYNTHESIZING = "synthesizing"
     MIXING = "mixing"

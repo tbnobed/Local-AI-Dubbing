@@ -1,0 +1,18 @@
+[2026-04-15 23:19:06,869: INFO/MainProcess] mingle: all alone
+[2026-04-15 23:19:06,889: INFO/MainProcess] celery@obtv-ai-5090 ready.
+[2026-04-15 23:19:06,892: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[7b107b30-9f5c-4c58-98ce-6b64e30c190d] received
+[2026-04-15 23:19:06,893: INFO/MainProcess] Starting pipeline for job 797a1a23-0af5-43ed-a371-ab1805458c12
+[2026-04-15 23:19:08,699: INFO/MainProcess] GPU memory cleared. GPU 0: 0.0GB used, GPU 1: 0.0GB used
+[2026-04-15 23:19:08,732: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/797a1a23-0af5-43ed-a371-ab1805458c12.mp4
+[2026-04-15 23:19:09,146: INFO/MainProcess] Demucs stems already exist, skipping separation
+[2026-04-15 23:19:09,146: INFO/MainProcess] Audio separation complete: vocals=yes, instrumentals=yes
+[2026-04-15 23:19:13,246: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 23:19:15,458: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 23:19:15,458: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 23:19:15,459: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 23:19:15,459: INFO/MainProcess] Transcribing with transformers Whisper (word-level timestamps)...
+[2026-04-15 23:19:43,624: INFO/MainProcess] Transcription complete: 47 segments, 717 words, lang=en
+[2026-04-15 23:19:43,846: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 23:19:43,846: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 23:19:49,345: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
