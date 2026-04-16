@@ -11,6 +11,7 @@ import clsx from "clsx";
 const STAGE_LABELS: Record<string, string> = {
   pending: "Queued",
   extracting_audio: "Extracting Audio",
+  separating_audio: "Separating Vocals & Music",
   transcribing: "Transcribing Speech",
   diarizing: "Identifying Speakers",
   translating: "Translating",

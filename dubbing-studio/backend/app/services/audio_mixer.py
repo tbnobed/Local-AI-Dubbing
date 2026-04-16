@@ -4,6 +4,7 @@ a complete audio track and mixes it with the original video.
 """
 import logging
 import os
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -81,6 +82,47 @@ class AudioMixerService:
 
         sf.write(output_path, output_audio, sample_rate)
         logger.info(f"Dubbed audio written to {output_path}")
+        return output_path
+
+    def build_final_audio(
+        self,
+        dubbed_vocals_path: str,
+        instrumental_path: str | None,
+        output_path: str,
+        instrumental_volume: float = 1.0,
+        vocals_volume: float = 1.0,
+    ) -> str:
+        """
+        Mix dubbed vocals with the original instrumental stem from Demucs.
+        If no instrumental stem is available, returns just the dubbed vocals.
+        """
+        import ffmpeg
+
+        if not instrumental_path or not os.path.exists(instrumental_path):
+            logger.info("No instrumental stem — using dubbed vocals only")
+            shutil.copy2(dubbed_vocals_path, output_path)
+            return output_path
+
+        logger.info(f"Mixing dubbed vocals (vol={vocals_volume}) + instrumentals (vol={instrumental_volume})")
+
+        vocals_in = ffmpeg.input(dubbed_vocals_path).audio
+        instrumental_in = ffmpeg.input(instrumental_path).audio
+
+        if vocals_volume != 1.0:
+            vocals_in = vocals_in.filter("volume", vocals_volume)
+        if instrumental_volume != 1.0:
+            instrumental_in = instrumental_in.filter("volume", instrumental_volume)
+
+        mixed = ffmpeg.filter(
+            [vocals_in, instrumental_in],
+            "amix",
+            inputs=2,
+            duration="longest",
+            normalize=0,
+        )
+
+        ffmpeg.output(mixed, output_path, acodec="pcm_s16le", ar=22050, ac=1).overwrite_output().run(quiet=True)
+        logger.info(f"Final mixed audio written: {output_path}")
         return output_path
 
     def merge_audio_into_video(

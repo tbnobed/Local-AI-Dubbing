@@ -3,12 +3,13 @@ Celery worker - orchestrates the full dubbing pipeline.
 
 Pipeline stages:
   1. Audio extraction (ffmpeg)
-  2. Transcription + alignment + diarization (WhisperX — all-in-one)
-  3. Translation (MADLAD-400 3B)
-  4. SRT subtitle export
+  2. Audio separation — Demucs htdemucs (vocals + instrumentals)
+  3. Transcription + alignment + diarization (Whisper + pyannote)
+  4. Translation (NLLB-200 3.3B)
+  5. SRT/VTT subtitle export
   --- below only when voice cloning is enabled ---
-  5. Voice sample extraction + TTS (Fish Speech 1.5)
-  6. Audio mixing + final video (ffmpeg)
+  6. Voice sample extraction from clean vocal stem + TTS (Fish Speech 1.5)
+  7. Audio mixing (dubbed vocals + original instrumentals) + final video
 """
 import logging
 import time
@@ -28,12 +29,13 @@ STAGE_WEIGHTS_SUBTITLES = {
 }
 
 STAGE_WEIGHTS_FULL = {
-    "extracting_audio": 0.05,
-    "transcribing": 0.30,
-    "translating": 0.15,
+    "extracting_audio": 0.03,
+    "separating_audio": 0.07,
+    "transcribing": 0.25,
+    "translating": 0.12,
     "cloning_voices": 0.05,
     "synthesizing": 0.35,
-    "mixing": 0.10,
+    "mixing": 0.13,
 }
 
 
@@ -136,7 +138,22 @@ def run_dubbing_pipeline(self, job_id: str):
         total_duration = video_info.get("duration", 0.0)
         update_progress("extracting_audio", 1.0)
 
-        # ── Stage 2: Transcribe (+ align + diarize if voice cloning) ──
+        # ── Stage 2: Separate audio with Demucs (vocals + instrumentals) ──
+        stems = {"vocals": None, "no_vocals": None, "original": audio_path}
+        if voice_cloning_enabled:
+            update_progress("separating_audio", 0.0)
+            from app.services.audio_separator import AudioSeparatorService
+            separator = AudioSeparatorService(settings)
+            stems = separator.separate(
+                audio_path,
+                str(temp_dir / "stems"),
+                device=f"cuda:{settings.primary_gpu_id}",
+            )
+            logger.info(f"Audio separation complete: vocals={'yes' if stems.get('vocals') else 'no'}, "
+                         f"instrumentals={'yes' if stems.get('no_vocals') else 'no'}")
+            update_progress("separating_audio", 1.0)
+
+        # ── Stage 3: Transcribe (+ align + diarize if voice cloning) ──
         update_progress("transcribing", 0.0)
         from app.services.transcription import TranscriptionService
         transcriber = TranscriptionService(settings)
@@ -233,11 +250,12 @@ def run_dubbing_pipeline(self, job_id: str):
             logger.info(f"Subtitles-only pipeline complete for {job_id} in {processing_time:.1f}s")
             return
 
-        # ── Stage 5: Voice cloning + TTS ──
+        # ── Stage 6: Voice cloning + TTS ──
         from app.services.diarization import extract_speaker_voice_samples
         samples_dir = str(temp_dir / "speaker_samples")
         speaker_samples = extract_speaker_voice_samples(
-            audio_path, segments, samples_dir
+            audio_path, segments, samples_dir,
+            vocals_path=stems.get("vocals"),
         )
 
         if not speaker_samples:
@@ -261,11 +279,18 @@ def run_dubbing_pipeline(self, job_id: str):
         tts.unload()
         update_progress("synthesizing", 1.0)
 
-        # ── Stage 6: Mix and produce final video ──
+        # ── Stage 7: Mix and produce final video ──
         update_progress("mixing", 0.0)
 
+        dubbed_vocals_path = str(temp_dir / "dubbed_vocals.wav")
+        mixer.build_dubbed_audio(segments, total_duration, dubbed_vocals_path)
+
         dubbed_audio_path = str(temp_dir / "dubbed_audio.wav")
-        mixer.build_dubbed_audio(segments, total_duration, dubbed_audio_path)
+        mixer.build_final_audio(
+            dubbed_vocals_path,
+            stems.get("no_vocals"),
+            dubbed_audio_path,
+        )
 
         stem = Path(original_filename).stem
         output_video_path = str(output_dir / f"{stem}_dubbed_{target_language}.mp4")

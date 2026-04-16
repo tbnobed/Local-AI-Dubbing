@@ -18,18 +18,28 @@ def extract_speaker_voice_samples(
     output_dir: str,
     min_duration: float = 8.0,
     max_duration: float = 30.0,
+    vocals_path: str | None = None,
 ) -> dict[str, str]:
     """
     Extract audio samples for each speaker from diarized segments.
-    Uses ffmpeg to cut and concatenate the best segments per speaker.
+
+    If vocals_path is provided (from Demucs separation), extracts from
+    the clean vocal stem for much better voice cloning quality.
+    Otherwise falls back to the original mixed audio.
+
     Returns dict of speaker_id -> audio_file_path.
     """
     import ffmpeg
 
+    source_audio = vocals_path if vocals_path and os.path.exists(vocals_path) else audio_path
+    if source_audio != audio_path:
+        logger.info(f"Extracting voice samples from clean vocal stem")
+    else:
+        logger.info(f"Extracting voice samples from original audio")
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Group segments by speaker
     speaker_segments: dict[str, list] = {}
     for seg in segments:
         speaker = getattr(seg, "speaker", "SPEAKER_00") or "SPEAKER_00"
@@ -39,7 +49,6 @@ def extract_speaker_voice_samples(
 
     samples = {}
     for speaker, segs in speaker_segments.items():
-        # Sort by duration (longest first), pick best clips
         sorted_segs = sorted(segs, key=lambda s: s.end - s.start, reverse=True)
 
         accumulated = 0.0
@@ -72,26 +81,24 @@ def extract_speaker_voice_samples(
                 seg = selected[0]
                 (
                     ffmpeg
-                    .input(audio_path, ss=seg.start, t=seg.end - seg.start)
+                    .input(source_audio, ss=seg.start, t=seg.end - seg.start)
                     .output(sample_path, ar=22050, ac=1, acodec="pcm_s16le")
                     .overwrite_output()
                     .run(quiet=True)
                 )
             else:
-                # Extract individual clips then concatenate via file list
                 clip_paths = []
                 for i, seg in enumerate(selected):
                     clip_path = str(output_dir / f"{speaker}_clip_{i}.wav")
                     (
                         ffmpeg
-                        .input(audio_path, ss=seg.start, t=seg.end - seg.start)
+                        .input(source_audio, ss=seg.start, t=seg.end - seg.start)
                         .output(clip_path, ar=22050, ac=1, acodec="pcm_s16le")
                         .overwrite_output()
                         .run(quiet=True)
                     )
                     clip_paths.append(clip_path)
 
-                # Use ffmpeg concat demuxer (more reliable than filter_complex)
                 concat_file = str(output_dir / f"{speaker}_concat.txt")
                 with open(concat_file, "w") as f:
                     for cp in clip_paths:
@@ -105,7 +112,6 @@ def extract_speaker_voice_samples(
                     .run(quiet=True)
                 )
 
-                # Clean up clips
                 for cp in clip_paths:
                     try:
                         os.remove(cp)
