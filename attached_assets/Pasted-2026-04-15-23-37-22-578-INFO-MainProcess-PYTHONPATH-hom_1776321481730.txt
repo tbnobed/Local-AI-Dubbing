@@ -1,0 +1,44 @@
+2026-04-15 23:37:22,578: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 23:37:22,578: ERROR/MainProcess] Pipeline failed for 2d7f9e8d-b99f-4d14-8348-d00377dfa091: [Errno 2] No such file or directory: '/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/backend'
+Traceback (most recent call last):
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/workers/pipeline.py", line 284, in run_dubbing_pipeline
+    segments = tts.synthesize_all_segments(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts.py", line 282, in synthesize_all_segments
+    results = self._run_worker_batch(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts.py", line 110, in _run_worker_batch
+    result = subprocess.run(
+             ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/backend'
+[2026-04-15 23:37:22,586: ERROR/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[a55fcff7-d45c-405c-a5e1-e7a306950f53] raised unexpected: FileNotFoundError(2, 'No such file or directory')
+Traceback (most recent call last):
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/celery/app/trace.py", line 585, in trace_task
+    R = retval = fun(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/celery/app/trace.py", line 858, in __protected_call__
+    return self.run(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/workers/pipeline.py", line 284, in run_dubbing_pipeline
+    segments = tts.synthesize_all_segments(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts.py", line 282, in synthesize_all_segments
+    results = self._run_worker_batch(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts.py", line 110, in _run_worker_batch
+    result = subprocess.run(
+             ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)

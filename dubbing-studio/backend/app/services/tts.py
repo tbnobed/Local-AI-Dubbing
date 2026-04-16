@@ -114,7 +114,7 @@ class TTSService:
                 text=True,
                 timeout=timeout,
                 env=env,
-                cwd=str(Path(self.config.base_dir) / "backend"),
+                cwd=str(self.config.base_dir),
                 start_new_session=True,
             )
 
@@ -150,7 +150,7 @@ class TTSService:
                         text=True,
                         timeout=timeout * 3,
                         env=env,
-                        cwd=str(Path(self.config.base_dir) / "backend"),
+                        cwd=str(self.config.base_dir),
                         start_new_session=True,
                     )
 
