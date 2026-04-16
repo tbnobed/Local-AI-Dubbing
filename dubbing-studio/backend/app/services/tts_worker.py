@@ -112,16 +112,24 @@ def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars,
                 text = text[:max_text_chars]
 
             data, sr = sf.read(speaker_wav)
+            full_ref_dur = len(data) / sr if sr > 0 else 0.0
             max_samples = int(max_ref_seconds * sr)
-            if len(data) > max_samples:
+            ref_truncated_ratio = 1.0
+            if len(data) > max_samples and full_ref_dur > 0:
                 data = data[:max_samples]
+                ref_truncated_ratio = max_ref_seconds / full_ref_dur
             buf = io.BytesIO()
             sf.write(buf, data, sr, format="wav")
 
             tokens_for_duration = int(original_duration * 21 * 1.3)
             segment_max_tokens = max(64, min(max_new_tokens, tokens_for_duration))
 
+            # Trim reference text proportionally to the trimmed reference audio
+            # so the text stays aligned with what's actually in the clip.
             ref_text_for_cloning = speaker_ref_text
+            if ref_truncated_ratio < 1.0 and ref_text_for_cloning:
+                keep_chars = max(20, int(len(ref_text_for_cloning) * ref_truncated_ratio))
+                ref_text_for_cloning = ref_text_for_cloning[:keep_chars]
             if len(ref_text_for_cloning) > 500:
                 ref_text_for_cloning = ref_text_for_cloning[:500]
 
