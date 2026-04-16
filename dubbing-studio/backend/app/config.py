@@ -3,15 +3,15 @@ from pathlib import Path
 from typing import Optional
 import os
 
-_BASE_DIR = Path(__file__).parent.parent.resolve()
-_DATA_DIR = _BASE_DIR / "data"
+_PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
+_DATA_DIR = _PROJECT_ROOT / "data"
 
 
 class Settings(BaseSettings):
     app_name: str = "DubbingStudio"
     debug: bool = False
 
-    base_dir: Path = _BASE_DIR
+    base_dir: Path = _PROJECT_ROOT
     data_dir: Path = _DATA_DIR
     uploads_dir: Path = _DATA_DIR / "uploads"
     outputs_dir: Path = _DATA_DIR / "outputs"
