@@ -79,7 +79,7 @@ def time_stretch(raw_path: str, stretched_path: str, original_duration: float):
     )
 
 
-def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars, max_new_tokens):
+def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars, max_new_tokens, device="cpu"):
     import numpy as np
     import soundfile as sf
     from fish_speech.utils.schema import ServeTTSRequest, ServeReferenceAudio
@@ -155,6 +155,12 @@ def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars,
             log.error(f"Segment {idx} failed: {e}")
             results.append({"index": idx, "success": False, "error": str(e)})
 
+        if device != "cpu":
+            import torch
+            torch.cuda.empty_cache()
+            import gc
+            gc.collect()
+
     return results
 
 
@@ -226,6 +232,7 @@ def main():
         results = synthesize_batch(
             batch, engine, output_dir,
             max_ref_seconds, max_text_chars, max_new_tokens,
+            device=device,
         )
 
     except Exception as e:

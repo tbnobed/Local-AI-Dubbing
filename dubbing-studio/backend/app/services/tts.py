@@ -192,7 +192,7 @@ class TTSService:
         target_language: str,
         output_dir: str,
         progress_callback=None,
-        batch_size: int = 8,
+        batch_size: int = 3,
     ) -> list:
         """Synthesize all translated segments with voice cloning.
 

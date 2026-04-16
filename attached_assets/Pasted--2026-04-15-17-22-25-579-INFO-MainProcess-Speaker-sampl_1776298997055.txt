@@ -1,0 +1,29 @@
+[2026-04-15 17:22:25,579: INFO/MainProcess] Speaker samples extracted: ['SPEAKER_08', 'SPEAKER_04', 'SPEAKER_07', 'SPEAKER_02', 'SPEAKER_01', 'SPEAKER_03', 'SPEAKER_00', 'SPEAKER_06']
+[2026-04-15 17:22:25,589: INFO/MainProcess] Synthesizing 47 segments in batches of 8 (~6 subprocess calls)
+[2026-04-15 17:22:25,589: INFO/MainProcess] Batch 1/6: segments [0, 1, 2, 3, 4, 5, 6, 7]
+[2026-04-15 17:22:25,590: INFO/MainProcess] Launching TTS worker: 8 segments, timeout=480s, gpu=0
+[2026-04-15 17:22:25,590: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:22:25,590: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:22:25,590: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:22:55,246: ERROR/MainProcess] TTS worker failed (rc=-11)
+[2026-04-15 17:22:55,246: ERROR/MainProcess] stderr (last 3000): .72 seconds, 54.86 tokens/sec
+2026-04-15 17:22:54.599 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 35.00 GB/s
+2026-04-15 17:22:54.599 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 1.88 GB
+2026-04-15 17:22:54.599 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 148])
+2026-04-15 17:22:54,817 [TTS-worker] INFO Segment 4: 19.2s synth -> 23.7s slot
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/utils.py:213: UserWarning: In 2.9, this function's implementation will be changed to use torchaudio.load_with_torchcodec` under the hood. Some parameters like ``normalize``, ``format``, ``buffer_size``, and ``backend`` will be ignored. We recommend that you port your code to rely directly on TorchCodec's decoder instead: https://docs.pytorch.org/torchcodec/stable/generated/torchcodec.decoders.AudioDecoder.html#torchcodec.decoders.AudioDecoder.
+  warnings.warn(
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/torchaudio/_backend/ffmpeg.py:88: UserWarning: torio.io._streaming_media_decoder.StreamingMediaDecoder has been deprecated. This deprecation is part of a large refactoring effort to transition TorchAudio into a maintenance phase. The decoding and encoding capabilities of PyTorch for both audio and video are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+2026-04-15 17:22:54.831 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+2026-04-15 17:22:54.836 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+2026-04-15 17:22:54.847 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Lo largo y lo corto de ella es que el Mesías vino en unos 490 años, que es 70 veces 7, y ese Mesías fue Jesucristo.
+2026-04-15 17:22:54.847 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+
+  0%|          | 0/299 [00:00<?, ?it/s]/usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|▏         | 6/299 [00:00<00:05, 55.55it/s]
+[2026-04-15 17:22:55,246: WARNING/MainProcess] SIGSEGV detected — retrying batch on CPU...
