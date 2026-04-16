@@ -69,21 +69,53 @@ else
     echo -e "${GREEN}Redis already running${NC}"
 fi
 
-# Start Celery worker in background
-echo -e "${YELLOW}Starting Celery worker...${NC}"
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-CUDA_DEVICE_ORDER=PCI_BUS_ID \
-PYTHONPATH="$ROOT_DIR/fish-speech:${PYTHONPATH:-}" \
-celery -A app.core.celery_app worker \
-    -Q dubbing \
-    --pool=solo \
-    -l info \
-    --logfile=/tmp/dubbing-celery.log \
-    --detach \
-    --pidfile=/tmp/dubbing-celery.pid
+# Start Celery worker supervisor in background.
+# Uses prefork pool with concurrency=1 and max-tasks-per-child=1 so that
+# EVERY dubbing job runs in a freshly-spawned child process. When the job
+# finishes the child exits and the OS reclaims all GPU/CUDA state —
+# critical on Blackwell GPUs where Whisper/pyannote/NLLB leave CUDA
+# contexts that can corrupt subsequent jobs.
+#
+# The supervisor loop restarts the master worker if it ever dies.
+echo -e "${YELLOW}Starting Celery worker (supervised)...${NC}"
 
-sleep 2
-echo -e "${GREEN}Celery worker started${NC}"
+# Kill any stale supervisor / worker first
+if [ -f /tmp/dubbing-celery-supervisor.pid ]; then
+    OLD_SUP=$(cat /tmp/dubbing-celery-supervisor.pid 2>/dev/null || true)
+    if [ -n "$OLD_SUP" ] && kill -0 "$OLD_SUP" 2>/dev/null; then
+        kill "$OLD_SUP" 2>/dev/null || true
+        sleep 1
+    fi
+fi
+pkill -9 -f "celery.*-A app.core.celery_app.*worker" 2>/dev/null || true
+
+(
+    while true; do
+        echo "[supervisor] starting celery worker at $(date)" >> /tmp/dubbing-celery-supervisor.log
+        PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+        CUDA_DEVICE_ORDER=PCI_BUS_ID \
+        PYTHONPATH="$ROOT_DIR/fish-speech:${PYTHONPATH:-}" \
+        celery -A app.core.celery_app worker \
+            -Q dubbing \
+            --pool=prefork \
+            --concurrency=1 \
+            --max-tasks-per-child=1 \
+            -l info \
+            --logfile=/tmp/dubbing-celery.log \
+            --pidfile=/tmp/dubbing-celery.pid \
+            >> /tmp/dubbing-celery-supervisor.log 2>&1
+        RC=$?
+        echo "[supervisor] celery exited rc=$RC at $(date), restarting in 2s" >> /tmp/dubbing-celery-supervisor.log
+        rm -f /tmp/dubbing-celery.pid
+        sleep 2
+    done
+) &
+SUPERVISOR_PID=$!
+echo $SUPERVISOR_PID > /tmp/dubbing-celery-supervisor.pid
+disown $SUPERVISOR_PID 2>/dev/null || true
+
+sleep 3
+echo -e "${GREEN}Celery worker started (supervisor pid=$SUPERVISOR_PID)${NC}"
 
 echo ""
 echo -e "${GREEN}╔══════════════════════════════════════════╗${NC}"
