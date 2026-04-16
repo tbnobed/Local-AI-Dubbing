@@ -43,6 +43,8 @@ class TTSService:
         batch: list[dict],
         output_dir: str,
         timeout_per_segment: int = 60,
+        gpu_id: int | None = None,
+        worker_tag: str = "",
     ) -> list[dict]:
         """Run a batch of TTS segments in an isolated subprocess.
 
@@ -50,12 +52,15 @@ class TTSService:
         results from stdout. When the process exits, ALL GPU memory
         is freed by the OS.
         """
+        if gpu_id is None:
+            gpu_id = self.config.primary_gpu_id
+
         fish_speech_dir = self._get_fish_speech_dir()
 
         worker_input = {
             "batch": batch,
             "output_dir": output_dir,
-            "gpu_id": self.config.primary_gpu_id,
+            "gpu_id": gpu_id,
             "models_dir": str(self.config.models_dir),
             "fish_speech_dir": fish_speech_dir,
             "max_ref_seconds": 10,
@@ -65,8 +70,9 @@ class TTSService:
 
         timeout = max(120, len(batch) * timeout_per_segment)
 
-        input_path = os.path.join(output_dir, f"_worker_input_{os.getpid()}.json")
-        output_json_path = os.path.join(output_dir, f"_worker_output_{os.getpid()}.json")
+        tag = worker_tag or str(os.getpid())
+        input_path = os.path.join(output_dir, f"_worker_input_{tag}.json")
+        output_json_path = os.path.join(output_dir, f"_worker_output_{tag}.json")
         worker_input["output_json_path"] = output_json_path
 
         with open(input_path, "w") as f:
@@ -94,8 +100,8 @@ class TTSService:
                 env["PYTHONPATH"] = fish_speech_dir
 
             logger.info(
-                f"Launching TTS worker: {len(batch)} segments, "
-                f"timeout={timeout}s, gpu={self.config.primary_gpu_id}"
+                f"Launching TTS worker [{tag}]: {len(batch)} segments, "
+                f"timeout={timeout}s, gpu={gpu_id}"
             )
             logger.info(f"Worker script: {WORKER_SCRIPT}")
             logger.info(f"Python: {python_cmd}")
@@ -196,9 +202,12 @@ class TTSService:
     ) -> list:
         """Synthesize all translated segments with voice cloning.
 
-        Processes segments in batches. Each batch runs in a completely
-        separate Python process. Safe for 2+ hour videos (500+ segments).
+        Distributes batches across both GPUs in parallel. Each batch runs
+        in a completely separate Python process. Safe for 2+ hour videos
+        (500+ segments).
         """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
         output_dir_path = Path(output_dir)
         output_dir_path.mkdir(parents=True, exist_ok=True)
 
@@ -235,41 +244,68 @@ class TTSService:
             logger.warning("No segments to synthesize")
             return segments
 
+        gpu_ids = [self.config.primary_gpu_id, self.config.secondary_gpu_id]
+        num_gpus = len(gpu_ids)
+
+        all_batches = []
+        for batch_start in range(0, total_work, batch_size):
+            all_batches.append(work_items[batch_start : batch_start + batch_size])
+
+        total_batches = len(all_batches)
         logger.info(
-            f"Synthesizing {total_work} segments in batches of {batch_size} "
-            f"(~{(total_work + batch_size - 1) // batch_size} subprocess calls)"
+            f"Synthesizing {total_work} segments in {total_batches} batches "
+            f"(batch_size={batch_size}) across {num_gpus} GPUs: {gpu_ids}"
         )
 
         completed = 0
-        for batch_start in range(0, total_work, batch_size):
-            batch = work_items[batch_start : batch_start + batch_size]
-            batch_indices = [b["index"] for b in batch]
-            batch_num = batch_start // batch_size + 1
-            total_batches = (total_work + batch_size - 1) // batch_size
-            logger.info(
-                f"Batch {batch_num}/{total_batches}: segments {batch_indices}"
-            )
+        batch_idx = 0
 
-            results = self._run_worker_batch(batch, output_dir)
+        while batch_idx < total_batches:
+            parallel = []
+            for g in range(num_gpus):
+                if batch_idx + g < total_batches:
+                    parallel.append((batch_idx + g, all_batches[batch_idx + g], gpu_ids[g]))
 
-            for result in results:
-                idx = result["index"]
-                seg = segments[idx]
-                if result.get("success"):
-                    seg.synth_audio_path = result["stretched_path"]
-                    seg.synth_duration = result.get("synth_duration", 0.0)
-                    logger.info(
-                        f"Segment {idx}: {result.get('synth_duration', 0):.1f}s "
-                        f"-> {result.get('original_duration', 0):.1f}s slot"
-                    )
-                else:
-                    seg.synth_audio_path = None
-                    seg.synth_duration = 0.0
-                    logger.error(
-                        f"Segment {idx} failed: {result.get('error', 'unknown')}"
-                    )
+            if len(parallel) == 1:
+                bi, batch, gid = parallel[0]
+                batch_indices = [b["index"] for b in batch]
+                logger.info(f"Batch {bi+1}/{total_batches} [GPU {gid}]: segments {batch_indices}")
+                results = self._run_worker_batch(
+                    batch, output_dir, gpu_id=gid,
+                    worker_tag=f"g{gid}_b{bi}",
+                )
+                self._apply_results(results, segments)
+                completed += len(batch)
+            else:
+                with ThreadPoolExecutor(max_workers=num_gpus) as executor:
+                    futures = {}
+                    for bi, batch, gid in parallel:
+                        batch_indices = [b["index"] for b in batch]
+                        logger.info(
+                            f"Batch {bi+1}/{total_batches} [GPU {gid}]: segments {batch_indices}"
+                        )
+                        future = executor.submit(
+                            self._run_worker_batch,
+                            batch, output_dir, gpu_id=gid,
+                            worker_tag=f"g{gid}_b{bi}",
+                        )
+                        futures[future] = (bi, batch)
 
-            completed += len(batch)
+                    for future in as_completed(futures):
+                        bi, batch = futures[future]
+                        try:
+                            results = future.result()
+                            self._apply_results(results, segments)
+                        except Exception as e:
+                            logger.error(f"Batch {bi+1} raised exception: {e}")
+                            for item in batch:
+                                seg = segments[item["index"]]
+                                seg.synth_audio_path = None
+                                seg.synth_duration = 0.0
+                        completed += len(batch)
+
+            batch_idx += len(parallel)
+
             if progress_callback:
                 progress_callback(completed / total_work)
 
@@ -284,6 +320,25 @@ class TTSService:
         )
         logger.info(f"TTS complete: {success_count}/{len(segments)} segments synthesized")
         return segments
+
+    def _apply_results(self, results: list[dict], segments: list):
+        """Apply worker results to segment objects."""
+        for result in results:
+            idx = result["index"]
+            seg = segments[idx]
+            if result.get("success"):
+                seg.synth_audio_path = result["stretched_path"]
+                seg.synth_duration = result.get("synth_duration", 0.0)
+                logger.info(
+                    f"Segment {idx}: {result.get('synth_duration', 0):.1f}s "
+                    f"-> {result.get('original_duration', 0):.1f}s slot"
+                )
+            else:
+                seg.synth_audio_path = None
+                seg.synth_duration = 0.0
+                logger.error(
+                    f"Segment {idx} failed: {result.get('error', 'unknown')}"
+                )
 
     def unload(self):
         pass

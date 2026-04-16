@@ -250,6 +250,18 @@ def run_dubbing_pipeline(self, job_id: str):
             logger.info(f"Subtitles-only pipeline complete for {job_id} in {processing_time:.1f}s")
             return
 
+        # ── Clear both GPUs before TTS (NLLB was on GPU 1, Whisper/Demucs on GPU 0) ──
+        import gc, torch
+        gc.collect()
+        if torch.cuda.is_available():
+            for gpu in [0, 1]:
+                try:
+                    torch.cuda.set_device(gpu)
+                    torch.cuda.empty_cache()
+                except Exception:
+                    pass
+            logger.info(f"GPU memory cleared before TTS. GPU 0: {torch.cuda.memory_allocated(0)/1e9:.1f}GB, GPU 1: {torch.cuda.memory_allocated(1)/1e9:.1f}GB")
+
         # ── Stage 6: Voice cloning + TTS ──
         from app.services.diarization import extract_speaker_voice_samples
         samples_dir = str(temp_dir / "speaker_samples")
