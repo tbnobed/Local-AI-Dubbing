@@ -11,6 +11,7 @@ Speaker diarization uses pyannote via WhisperX.
 """
 import gc
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -286,30 +287,39 @@ class TranscriptionService:
 
         if hf_token:
             try:
-                # pyannote hangs on Blackwell (sm_120) GPUs — use CPU
-                # Diarization is fast on CPU; the bottleneck was alignment (now handled by Whisper)
+                # pyannote hangs on Blackwell (sm_120) GPUs — force CPU by hiding CUDA entirely
+                # Diarization is fast on CPU (~30s per minute of audio)
                 diarize_device = torch.device("cpu")
-                logger.info(f"Running speaker diarization (pyannote) on CPU...")
+                logger.info(f"Running speaker diarization (pyannote) on CPU (CUDA hidden)...")
+
+                _saved_cuda_visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+                os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
                 diarize_model = None
                 try:
-                    diarize_model = whisperx.DiarizationPipeline(
-                        use_auth_token=hf_token,
-                        device=diarize_device,
-                    )
-                except (AttributeError, TypeError):
-                    logger.info("whisperx.DiarizationPipeline not available, using pyannote directly")
+                    logger.info("Loading pyannote pipeline...")
                     from pyannote.audio import Pipeline as PyannotePipeline
                     try:
                         diarize_model = PyannotePipeline.from_pretrained(
                             "pyannote/speaker-diarization-3.1",
                             token=hf_token,
-                        ).to(diarize_device)
+                        )
                     except TypeError:
                         diarize_model = PyannotePipeline.from_pretrained(
                             "pyannote/speaker-diarization-3.1",
                             use_auth_token=hf_token,
-                        ).to(diarize_device)
+                        )
+                    if diarize_model is not None:
+                        diarize_model.to(diarize_device)
+                    logger.info("Pyannote pipeline loaded, starting inference...")
+                except Exception as load_err:
+                    logger.error(f"Failed to load pyannote: {load_err}")
+                    raise
+                finally:
+                    if _saved_cuda_visible is None:
+                        os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+                    else:
+                        os.environ["CUDA_VISIBLE_DEVICES"] = _saved_cuda_visible
 
                 if diarize_model is not None:
                     if hasattr(diarize_model, '__call__'):
