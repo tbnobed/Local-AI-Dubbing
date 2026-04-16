@@ -19,7 +19,7 @@ def extract_speaker_voice_samples(
     min_duration: float = 8.0,
     max_duration: float = 30.0,
     vocals_path: str | None = None,
-) -> dict[str, str]:
+) -> tuple[dict[str, str], dict[str, str]]:
     """
     Extract audio samples for each speaker from diarized segments.
 
@@ -27,7 +27,10 @@ def extract_speaker_voice_samples(
     the clean vocal stem for much better voice cloning quality.
     Otherwise falls back to the original mixed audio.
 
-    Returns dict of speaker_id -> audio_file_path.
+    Returns (samples, texts):
+      samples: speaker_id -> audio_file_path
+      texts:   speaker_id -> concatenated transcript of the selected segments
+               (used as Fish Speech reference text for voice cloning)
     """
     import ffmpeg
 
@@ -48,6 +51,7 @@ def extract_speaker_voice_samples(
         speaker_segments[speaker].append(seg)
 
     samples = {}
+    texts = {}
     for speaker, segs in speaker_segments.items():
         sorted_segs = sorted(segs, key=lambda s: s.end - s.start, reverse=True)
 
@@ -123,9 +127,16 @@ def extract_speaker_voice_samples(
                     pass
 
             samples[speaker] = sample_path
-            logger.info(f"Extracted {accumulated:.1f}s voice sample for {speaker}")
+            ref_text = " ".join(
+                (getattr(s, "text", "") or "").strip() for s in selected
+            ).strip()
+            texts[speaker] = ref_text
+            logger.info(
+                f"Extracted {accumulated:.1f}s voice sample for {speaker} "
+                f"(ref text: {len(ref_text)} chars)"
+            )
 
         except Exception as e:
             logger.error(f"Failed to extract voice sample for {speaker}: {e}")
 
-    return samples
+    return samples, texts

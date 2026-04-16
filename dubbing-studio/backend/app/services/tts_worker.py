@@ -101,6 +101,7 @@ def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars,
         idx = item["index"]
         text = item["text"]
         speaker_wav = item["speaker_wav"]
+        speaker_ref_text = (item.get("speaker_ref_text") or "").strip()
         original_duration = item["original_duration"]
         raw_path = str(Path(output_dir) / f"seg_{idx:04d}_raw.wav")
         stretched_path = str(Path(output_dir) / f"seg_{idx:04d}.wav")
@@ -119,14 +120,20 @@ def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars,
 
             tokens_for_duration = int(original_duration * 21 * 1.3)
             segment_max_tokens = max(64, min(max_new_tokens, tokens_for_duration))
+
+            ref_text_for_cloning = speaker_ref_text
+            if len(ref_text_for_cloning) > 500:
+                ref_text_for_cloning = ref_text_for_cloning[:500]
+
             log.info(
                 f"Segment {idx}: text={len(text)} chars, "
-                f"slot={original_duration:.1f}s, max_tokens={segment_max_tokens}"
+                f"slot={original_duration:.1f}s, max_tokens={segment_max_tokens}, "
+                f"ref_text={len(ref_text_for_cloning)} chars"
             )
 
             request = ServeTTSRequest(
                 text=text,
-                references=[ServeReferenceAudio(audio=buf.getvalue(), text="")],
+                references=[ServeReferenceAudio(audio=buf.getvalue(), text=ref_text_for_cloning)],
                 format="wav",
                 streaming=False,
                 max_new_tokens=segment_max_tokens,

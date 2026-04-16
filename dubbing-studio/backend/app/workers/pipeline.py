@@ -265,13 +265,14 @@ def run_dubbing_pipeline(self, job_id: str):
         # ── Stage 6: Voice cloning + TTS ──
         from app.services.diarization import extract_speaker_voice_samples
         samples_dir = str(temp_dir / "speaker_samples")
-        speaker_samples = extract_speaker_voice_samples(
+        speaker_samples, speaker_texts = extract_speaker_voice_samples(
             audio_path, segments, samples_dir,
             vocals_path=stems.get("vocals"),
         )
 
         if not speaker_samples:
             speaker_samples = {"SPEAKER_00": audio_path}
+            speaker_texts = {"SPEAKER_00": ""}
 
         logger.info(f"Speaker samples extracted: {list(speaker_samples.keys())}")
         update_progress("cloning_voices", 1.0)
@@ -287,6 +288,7 @@ def run_dubbing_pipeline(self, job_id: str):
             target_language,
             synth_dir,
             progress_callback=lambda p: update_progress("synthesizing", p),
+            speaker_texts=speaker_texts,
         )
         tts.unload()
         update_progress("synthesizing", 1.0)

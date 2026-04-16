@@ -208,6 +208,7 @@ class TTSService:
         output_dir: str,
         progress_callback=None,
         batch_size: int = 1,
+        speaker_texts: dict[str, str] | None = None,
     ) -> list:
         """Synthesize all translated segments with voice cloning.
 
@@ -241,10 +242,15 @@ class TTSService:
                 seg.synth_duration = 0.0
                 continue
 
+            ref_text = ""
+            if speaker_texts:
+                ref_text = speaker_texts.get(speaker_id, "") or ""
+
             work_items.append({
                 "index": i,
                 "text": translated_text,
                 "speaker_wav": speaker_wav,
+                "speaker_ref_text": ref_text,
                 "original_duration": seg.end - seg.start,
             })
 
