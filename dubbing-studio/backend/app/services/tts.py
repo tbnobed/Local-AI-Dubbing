@@ -75,12 +75,23 @@ class TTSService:
         try:
             python_cmd = self._get_python_cmd()
 
-            env = os.environ.copy()
-            env["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-            env["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+            env = {
+                "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+                "HOME": os.environ.get("HOME", "/root"),
+                "LANG": os.environ.get("LANG", "en_US.UTF-8"),
+                "VIRTUAL_ENV": os.environ.get("VIRTUAL_ENV", ""),
+                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+                "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+                "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES", "0,1"),
+                "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
+                "CUDA_HOME": os.environ.get("CUDA_HOME", ""),
+            }
+            for k in list(env):
+                if not env[k]:
+                    del env[k]
+
             if fish_speech_dir:
-                existing = env.get("PYTHONPATH", "")
-                env["PYTHONPATH"] = f"{fish_speech_dir}:{existing}" if existing else fish_speech_dir
+                env["PYTHONPATH"] = fish_speech_dir
 
             logger.info(
                 f"Launching TTS worker: {len(batch)} segments, "
@@ -98,6 +109,7 @@ class TTSService:
                 timeout=timeout,
                 env=env,
                 cwd=str(Path(self.config.base_dir) / "backend"),
+                start_new_session=True,
             )
 
             if result.returncode != 0:
@@ -109,8 +121,7 @@ class TTSService:
 
                 if result.returncode == -11:
                     logger.warning(
-                        "SIGSEGV detected — likely Blackwell GPU incompatibility. "
-                        "Retrying batch on CPU..."
+                        "SIGSEGV detected — retrying batch on CPU..."
                     )
                     worker_input["gpu_id"] = -1
                     with open(input_path, "w") as f:
@@ -124,6 +135,7 @@ class TTSService:
                         timeout=timeout * 3,
                         env=env,
                         cwd=str(Path(self.config.base_dir) / "backend"),
+                        start_new_session=True,
                     )
 
                     if result.returncode != 0:
