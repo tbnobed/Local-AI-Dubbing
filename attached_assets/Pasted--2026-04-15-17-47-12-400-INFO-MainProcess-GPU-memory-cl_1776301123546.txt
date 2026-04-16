@@ -1,0 +1,429 @@
+[2026-04-15 17:47:12,400: INFO/MainProcess] GPU memory cleared. GPU 0: 0.0GB used, GPU 1: 0.0GB used
+[2026-04-15 17:47:12,425: INFO/MainProcess] Extracting audio from /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/uploads/928820ca-ec86-43ff-9f2e-24319caf559b.mp4
+[2026-04-15 17:47:12,817: INFO/MainProcess] Running Demucs (htdemucs) on cuda:0...
+[2026-04-15 17:47:18,259: INFO/MainProcess] Demucs separation complete: vocals=56315KB, instrumentals=56315KB
+[2026-04-15 17:47:18,259: INFO/MainProcess] Audio separation complete: vocals=yes, instrumentals=yes
+[2026-04-15 17:47:22,357: INFO/MainProcess] Loading transformers Whisper 'openai/whisper-large-v3-turbo' on cuda:0 (torch.float16)
+[2026-04-15 17:47:24,665: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+[2026-04-15 17:47:24,665: WARNING/MainProcess] Device set to use cuda:0
+[2026-04-15 17:47:24,665: WARNING/MainProcess] Using `chunk_length_s` is very experimental with seq2seq models. The results will not necessarily be entirely accurate and will have caveats. More information: https://github.com/huggingface/transformers/pull/20104. Ignore this warning with pipeline(..., ignore_warning=True). To use Whisper for long-form transcription, use rather the model's `generate` method directly as the model relies on it's own chunking mechanism (cf. Whisper original paper, section 3.8. Long-form Transcription).
+[2026-04-15 17:47:24,665: INFO/MainProcess] Transcribing with transformers Whisper (word-level timestamps)...
+[2026-04-15 17:47:52,673: INFO/MainProcess] Transcription complete: 47 segments, 717 words, lang=en
+[2026-04-15 17:47:52,905: INFO/MainProcess] Running speaker diarization (pyannote) on CPU...
+[2026-04-15 17:47:52,905: INFO/MainProcess] whisperx.DiarizationPipeline not available, using pyannote directly
+[2026-04-15 17:47:58,237: WARNING/MainProcess] /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:103: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std = sequences.std(dim=-1, correction=1)
+
+[2026-04-15 17:49:44,728: INFO/MainProcess] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 17:49:44,735: INFO/MainProcess] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 17:49:44,904: INFO/MainProcess] Pipeline complete: 47 segments, 8 speakers, lang=en
+[2026-04-15 17:49:45,076: INFO/MainProcess] Loading translation model: facebook/nllb-200-3.3B
+[2026-04-15 17:49:46,011: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|###3      | 1/3 [00:00<00:00,  2.60it/s]
+Loading checkpoint shards:  67%|######6   | 2/3 [00:00<00:00,  2.55it/s]
+Loading checkpoint shards: 100%|##########| 3/3 [00:00<00:00,  3.50it/s]
+[2026-04-15 17:49:48,513: INFO/MainProcess] NLLB-200 loaded on cuda:1
+[2026-04-15 17:49:58,878: INFO/MainProcess] Translated 47 segments from en to es
+[2026-04-15 17:49:58,921: INFO/MainProcess] Translation model unloaded.
+[2026-04-15 17:49:58,933: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/928820ca-ec86-43ff-9f2e-24319caf559b/928820ca-ec86-43ff-9f2e-24319caf559b_original_en.srt (47 entries)
+[2026-04-15 17:49:58,933: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/928820ca-ec86-43ff-9f2e-24319caf559b/928820ca-ec86-43ff-9f2e-24319caf559b_translated_es.srt (47 entries)
+[2026-04-15 17:49:58,934: INFO/MainProcess] VTT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/928820ca-ec86-43ff-9f2e-24319caf559b/928820ca-ec86-43ff-9f2e-24319caf559b_original_en.vtt (47 entries)
+[2026-04-15 17:49:58,934: INFO/MainProcess] VTT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/928820ca-ec86-43ff-9f2e-24319caf559b/928820ca-ec86-43ff-9f2e-24319caf559b_translated_es.vtt (47 entries)
+[2026-04-15 17:49:59,083: INFO/MainProcess] GPU memory cleared before TTS. GPU 0: 0.0GB, GPU 1: 0.0GB
+[2026-04-15 17:49:59,084: INFO/MainProcess] Extracting voice samples from clean vocal stem
+[2026-04-15 17:49:59,258: INFO/MainProcess] Extracted 28.9s voice sample for SPEAKER_08
+[2026-04-15 17:49:59,417: INFO/MainProcess] Extracted 35.9s voice sample for SPEAKER_04
+[2026-04-15 17:49:59,556: INFO/MainProcess] Extracted 31.9s voice sample for SPEAKER_07
+[2026-04-15 17:49:59,711: INFO/MainProcess] Extracted 31.3s voice sample for SPEAKER_02
+[2026-04-15 17:49:59,922: INFO/MainProcess] Extracted 15.9s voice sample for SPEAKER_01
+[2026-04-15 17:49:59,957: INFO/MainProcess] Extracted 12.4s voice sample for SPEAKER_03
+[2026-04-15 17:50:00,051: INFO/MainProcess] Extracted 14.0s voice sample for SPEAKER_00
+[2026-04-15 17:50:00,140: INFO/MainProcess] Extracted 12.2s voice sample for SPEAKER_06
+[2026-04-15 17:50:00,141: INFO/MainProcess] Speaker samples extracted: ['SPEAKER_08', 'SPEAKER_04', 'SPEAKER_07', 'SPEAKER_02', 'SPEAKER_01', 'SPEAKER_03', 'SPEAKER_00', 'SPEAKER_06']
+[2026-04-15 17:50:00,164: INFO/MainProcess] Synthesizing 47 segments in 47 batches (batch_size=1) across 2 GPUs: [0, 1]
+[2026-04-15 17:50:00,164: INFO/MainProcess] Batch 1/47 [GPU 0]: segments [0]
+[2026-04-15 17:50:00,165: INFO/MainProcess] Batch 2/47 [GPU 1]: segments [1]
+[2026-04-15 17:50:00,166: INFO/MainProcess] Launching TTS worker [g0_b0]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:50:00,166: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:00,167: INFO/MainProcess] Launching TTS worker [g1_b1]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:50:00,167: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:00,167: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:00,167: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:00,167: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:00,167: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:11,256: INFO/MainProcess] Segment 0: 6.5s -> 2.3s slot
+[2026-04-15 17:50:15,853: INFO/MainProcess] Segment 1: 13.9s -> 9.4s slot
+[2026-04-15 17:50:15,872: INFO/MainProcess] Batch 3/47 [GPU 0]: segments [2]
+[2026-04-15 17:50:15,872: INFO/MainProcess] Batch 4/47 [GPU 1]: segments [3]
+[2026-04-15 17:50:15,873: INFO/MainProcess] Launching TTS worker [g0_b2]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:50:15,873: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:15,873: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:15,873: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:15,873: INFO/MainProcess] Launching TTS worker [g1_b3]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:50:15,873: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:15,873: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:15,873: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:26,170: INFO/MainProcess] Segment 3: 3.2s -> 1.8s slot
+[2026-04-15 17:50:27,756: ERROR/MainProcess] TTS worker failed (rc=-6)
+[2026-04-15 17:50:27,757: ERROR/MainProcess] stderr (last 3000): y luego el mundo iba a ir al infierno en una canasta.
+2026-04-15 17:50:23.039 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+
+  0%|          | 0/299 [00:00<?, ?it/s]/usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  2%|▏         | 5/299 [00:00<00:06, 43.47it/s]
+  4%|▎         | 11/299 [00:00<00:05, 49.86it/s]
+  6%|▌         | 17/299 [00:00<00:05, 52.28it/s]
+  8%|▊         | 23/299 [00:00<00:05, 53.50it/s]
+ 10%|▉         | 29/299 [00:00<00:04, 54.20it/s]
+ 12%|█▏        | 35/299 [00:00<00:04, 54.61it/s]
+ 14%|█▎        | 41/299 [00:00<00:04, 54.89it/s]
+ 16%|█▌        | 47/299 [00:00<00:04, 55.09it/s]
+ 18%|█▊        | 53/299 [00:00<00:04, 55.18it/s]
+ 20%|█▉        | 59/299 [00:01<00:04, 55.29it/s]
+ 22%|██▏       | 65/299 [00:01<00:04, 55.29it/s]
+ 24%|██▎       | 71/299 [00:01<00:04, 55.28it/s]
+ 26%|██▌       | 77/299 [00:01<00:04, 55.32it/s]
+ 28%|██▊       | 83/299 [00:01<00:03, 55.27it/s]
+ 30%|██▉       | 89/299 [00:01<00:03, 54.87it/s]
+ 32%|███▏      | 95/299 [00:01<00:03, 54.88it/s]
+ 34%|███▍      | 101/299 [00:01<00:03, 54.91it/s]
+ 36%|███▌      | 107/299 [00:01<00:03, 54.74it/s]
+ 38%|███▊      | 113/299 [00:02<00:03, 54.69it/s]
+ 40%|███▉      | 119/299 [00:02<00:03, 54.49it/s]
+ 42%|████▏     | 125/299 [00:02<00:03, 54.53it/s]
+ 44%|████▍     | 131/299 [00:02<00:03, 54.61it/s]
+ 46%|████▌     | 137/299 [00:02<00:02, 54.65it/s]
+ 48%|████▊     | 143/299 [00:02<00:02, 54.66it/s]
+ 50%|████▉     | 149/299 [00:02<00:02, 54.63it/s]
+ 52%|█████▏    | 155/299 [00:02<00:02, 54.20it/s]
+ 54%|█████▍    | 161/299 [00:02<00:02, 54.31it/s]
+ 56%|█████▌    | 167/299 [00:03<00:02, 54.50it/s]
+ 58%|█████▊    | 173/299 [00:03<00:02, 54.70it/s]
+ 60%|█████▉    | 179/299 [00:03<00:02, 54.85it/s]
+ 62%|██████▏   | 185/299 [00:03<00:02, 54.94it/s]
+ 64%|██████▍   | 191/299 [00:03<00:01, 55.00it/s]
+ 64%|██████▍   | 192/299 [00:03<00:01, 54.27it/s]
+2026-04-15 17:50:26.734 | INFO     | fish_speech.models.text2semantic.inference:generate_long:860 - Generated 194 tokens in 3.70 seconds, 52.50 tokens/sec
+2026-04-15 17:50:26.734 | INFO     | fish_speech.models.text2semantic.inference:generate_long:863 - Bandwidth achieved: 33.49 GB/s
+2026-04-15 17:50:26.734 | INFO     | fish_speech.models.text2semantic.inference:generate_long:868 - GPU Memory used: 1.82 GB
+2026-04-15 17:50:26.734 | INFO     | fish_speech.inference_engine.vq_manager:decode_vq_tokens:20 - VQ features: torch.Size([8, 193])
+2026-04-15 17:50:27,008 [TTS-worker] INFO Segment 2: 9.0s synth -> 8.0s slot
+2026-04-15 17:50:27,107 [TTS-worker] INFO Results written to /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/temp/928820ca-ec86-43ff-9f2e-24319caf559b/synthesized/_worker_output_g0_b2.json
+corrupted size vs. prev_size
+
+[2026-04-15 17:50:27,757: ERROR/MainProcess] Segment 2 failed: Worker exit code -6
+[2026-04-15 17:50:27,775: INFO/MainProcess] Batch 5/47 [GPU 0]: segments [4]
+[2026-04-15 17:50:27,776: INFO/MainProcess] Batch 6/47 [GPU 1]: segments [5]
+[2026-04-15 17:50:27,778: INFO/MainProcess] Launching TTS worker [g0_b4]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:50:27,778: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:27,779: INFO/MainProcess] Launching TTS worker [g1_b5]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:50:27,779: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:27,779: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:27,780: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:27,780: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:27,780: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:42,660: INFO/MainProcess] Segment 5: 11.5s -> 9.2s slot
+[2026-04-15 17:50:45,711: INFO/MainProcess] Segment 4: 23.0s -> 23.7s slot
+[2026-04-15 17:50:45,733: INFO/MainProcess] Batch 7/47 [GPU 0]: segments [6]
+[2026-04-15 17:50:45,735: INFO/MainProcess] Batch 8/47 [GPU 1]: segments [7]
+[2026-04-15 17:50:45,736: INFO/MainProcess] Launching TTS worker [g0_b6]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:50:45,736: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:45,737: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:45,737: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:45,738: INFO/MainProcess] Launching TTS worker [g1_b7]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:50:45,739: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:50:45,739: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:50:45,739: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:50:55,636: INFO/MainProcess] Segment 6: 2.9s -> 3.2s slot
+[2026-04-15 17:51:01,732: INFO/MainProcess] Segment 7: 13.9s -> 7.1s slot
+[2026-04-15 17:51:01,750: INFO/MainProcess] Batch 9/47 [GPU 0]: segments [8]
+[2026-04-15 17:51:01,750: INFO/MainProcess] Batch 10/47 [GPU 1]: segments [9]
+[2026-04-15 17:51:01,751: INFO/MainProcess] Launching TTS worker [g0_b8]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:51:01,751: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:01,751: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:01,751: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:01,751: INFO/MainProcess] Launching TTS worker [g1_b9]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:51:01,751: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:01,752: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:01,752: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:11,133: INFO/MainProcess] Segment 9: 0.8s -> 0.5s slot
+[2026-04-15 17:51:11,423: INFO/MainProcess] Segment 8: 2.4s -> 3.9s slot
+[2026-04-15 17:51:11,440: INFO/MainProcess] Batch 11/47 [GPU 0]: segments [10]
+[2026-04-15 17:51:11,441: INFO/MainProcess] Batch 12/47 [GPU 1]: segments [11]
+[2026-04-15 17:51:11,443: INFO/MainProcess] Launching TTS worker [g0_b10]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:51:11,444: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:11,444: INFO/MainProcess] Launching TTS worker [g1_b11]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:51:11,444: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:11,444: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:11,444: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:11,445: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:11,445: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:22,728: INFO/MainProcess] Segment 10: 7.5s -> 3.2s slot
+[2026-04-15 17:51:24,513: INFO/MainProcess] Segment 11: 8.9s -> 8.2s slot
+[2026-04-15 17:51:24,526: INFO/MainProcess] Batch 13/47 [GPU 0]: segments [12]
+[2026-04-15 17:51:24,527: INFO/MainProcess] Batch 14/47 [GPU 1]: segments [13]
+[2026-04-15 17:51:24,527: INFO/MainProcess] Launching TTS worker [g0_b12]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:51:24,527: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:24,527: INFO/MainProcess] Launching TTS worker [g1_b13]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:51:24,527: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:24,527: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:24,527: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:24,528: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:24,528: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:34,832: INFO/MainProcess] Segment 12: 4.1s -> 3.7s slot
+[2026-04-15 17:51:38,302: INFO/MainProcess] Segment 13: 9.5s -> 10.1s slot
+[2026-04-15 17:51:38,317: INFO/MainProcess] Batch 15/47 [GPU 0]: segments [14]
+[2026-04-15 17:51:38,317: INFO/MainProcess] Batch 16/47 [GPU 1]: segments [15]
+[2026-04-15 17:51:38,317: INFO/MainProcess] Launching TTS worker [g0_b14]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:51:38,318: INFO/MainProcess] Launching TTS worker [g1_b15]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:51:38,318: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:38,318: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:38,318: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:38,318: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:38,318: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:38,318: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:48,182: INFO/MainProcess] Segment 15: 1.7s -> 1.5s slot
+[2026-04-15 17:51:52,490: INFO/MainProcess] Segment 14: 13.9s -> 7.8s slot
+[2026-04-15 17:51:52,507: INFO/MainProcess] Batch 17/47 [GPU 0]: segments [16]
+[2026-04-15 17:51:52,508: INFO/MainProcess] Batch 18/47 [GPU 1]: segments [17]
+[2026-04-15 17:51:52,510: INFO/MainProcess] Launching TTS worker [g0_b16]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:51:52,510: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:52,510: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:52,510: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:51:52,511: INFO/MainProcess] Launching TTS worker [g1_b17]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:51:52,511: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:51:52,511: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:51:52,512: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:04,149: INFO/MainProcess] Segment 16: 7.3s -> 3.5s slot
+[2026-04-15 17:52:08,081: INFO/MainProcess] Segment 17: 13.0s -> 7.7s slot
+[2026-04-15 17:52:08,095: INFO/MainProcess] Batch 19/47 [GPU 0]: segments [18]
+[2026-04-15 17:52:08,095: INFO/MainProcess] Batch 20/47 [GPU 1]: segments [19]
+[2026-04-15 17:52:08,095: INFO/MainProcess] Launching TTS worker [g0_b18]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:52:08,095: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:08,095: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:08,096: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:08,096: INFO/MainProcess] Launching TTS worker [g1_b19]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:52:08,096: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:08,096: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:08,096: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:17,820: INFO/MainProcess] Segment 19: 2.1s -> 1.9s slot
+[2026-04-15 17:52:19,073: INFO/MainProcess] Segment 18: 6.6s -> 5.2s slot
+[2026-04-15 17:52:19,095: INFO/MainProcess] Batch 21/47 [GPU 0]: segments [20]
+[2026-04-15 17:52:19,096: INFO/MainProcess] Batch 22/47 [GPU 1]: segments [21]
+[2026-04-15 17:52:19,098: INFO/MainProcess] Launching TTS worker [g1_b21]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:52:19,098: INFO/MainProcess] Launching TTS worker [g0_b20]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:52:19,099: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:19,099: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:19,100: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:19,099: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:19,100: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:19,100: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:28,359: INFO/MainProcess] Segment 20: 2.2s -> 1.2s slot
+[2026-04-15 17:52:28,671: INFO/MainProcess] Segment 21: 1.7s -> 3.0s slot
+[2026-04-15 17:52:28,689: INFO/MainProcess] Batch 23/47 [GPU 0]: segments [22]
+[2026-04-15 17:52:28,690: INFO/MainProcess] Batch 24/47 [GPU 1]: segments [23]
+[2026-04-15 17:52:28,690: INFO/MainProcess] Launching TTS worker [g0_b22]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:52:28,690: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:28,690: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:28,690: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:28,691: INFO/MainProcess] Launching TTS worker [g1_b23]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:52:28,691: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:28,691: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:28,691: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:42,069: INFO/MainProcess] Segment 23: 8.4s -> 4.6s slot
+[2026-04-15 17:52:43,641: INFO/MainProcess] Segment 22: 15.5s -> 12.4s slot
+[2026-04-15 17:52:43,658: INFO/MainProcess] Batch 25/47 [GPU 0]: segments [24]
+[2026-04-15 17:52:43,659: INFO/MainProcess] Batch 26/47 [GPU 1]: segments [25]
+[2026-04-15 17:52:43,661: INFO/MainProcess] Launching TTS worker [g0_b24]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:52:43,661: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:43,661: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:43,661: INFO/MainProcess] Launching TTS worker [g1_b25]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:52:43,662: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:43,661: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:43,662: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:43,662: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:56,071: INFO/MainProcess] Segment 24: 9.1s -> 8.1s slot
+[2026-04-15 17:52:56,132: INFO/MainProcess] Segment 25: 6.7s -> 5.9s slot
+[2026-04-15 17:52:56,153: INFO/MainProcess] Batch 27/47 [GPU 0]: segments [26]
+[2026-04-15 17:52:56,154: INFO/MainProcess] Batch 28/47 [GPU 1]: segments [27]
+[2026-04-15 17:52:56,157: INFO/MainProcess] Launching TTS worker [g0_b26]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:52:56,157: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:56,157: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:56,158: INFO/MainProcess] Launching TTS worker [g1_b27]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:52:56,158: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:52:56,158: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:52:56,159: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:52:56,159: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:10,759: INFO/MainProcess] Segment 26: 13.9s -> 8.5s slot
+[2026-04-15 17:53:12,568: INFO/MainProcess] Segment 27: 13.9s -> 6.5s slot
+[2026-04-15 17:53:12,586: INFO/MainProcess] Batch 29/47 [GPU 0]: segments [28]
+[2026-04-15 17:53:12,586: INFO/MainProcess] Batch 30/47 [GPU 1]: segments [29]
+[2026-04-15 17:53:12,587: INFO/MainProcess] Launching TTS worker [g0_b28]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:53:12,587: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:12,587: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:12,587: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:12,587: INFO/MainProcess] Launching TTS worker [g1_b29]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:53:12,587: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:12,587: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:12,587: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:26,519: INFO/MainProcess] Segment 28: 13.9s -> 15.0s slot
+[2026-04-15 17:53:27,956: INFO/MainProcess] Segment 29: 13.3s -> 7.4s slot
+[2026-04-15 17:53:27,969: INFO/MainProcess] Batch 31/47 [GPU 0]: segments [30]
+[2026-04-15 17:53:27,969: INFO/MainProcess] Batch 32/47 [GPU 1]: segments [31]
+[2026-04-15 17:53:27,970: INFO/MainProcess] Launching TTS worker [g0_b30]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:53:27,970: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:27,970: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:27,970: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:27,970: INFO/MainProcess] Launching TTS worker [g1_b31]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:53:27,970: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:27,970: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:27,970: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:40,083: INFO/MainProcess] Segment 30: 8.4s -> 6.0s slot
+[2026-04-15 17:53:41,281: INFO/MainProcess] Segment 31: 8.4s -> 2.0s slot
+[2026-04-15 17:53:41,295: INFO/MainProcess] Batch 33/47 [GPU 0]: segments [32]
+[2026-04-15 17:53:41,296: INFO/MainProcess] Batch 34/47 [GPU 1]: segments [33]
+[2026-04-15 17:53:41,296: INFO/MainProcess] Launching TTS worker [g0_b32]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:53:41,297: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:41,297: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:41,297: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:41,297: INFO/MainProcess] Launching TTS worker [g1_b33]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:53:41,297: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:41,297: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:41,297: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:51,693: INFO/MainProcess] Segment 32: 4.7s -> 4.2s slot
+[2026-04-15 17:53:54,107: INFO/MainProcess] Segment 33: 7.8s -> 4.4s slot
+[2026-04-15 17:53:54,112: INFO/MainProcess] Batch 35/47 [GPU 0]: segments [34]
+[2026-04-15 17:53:54,113: INFO/MainProcess] Batch 36/47 [GPU 1]: segments [35]
+[2026-04-15 17:53:54,113: INFO/MainProcess] Launching TTS worker [g0_b34]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:53:54,113: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:54,113: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:54,113: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:53:54,113: INFO/MainProcess] Launching TTS worker [g1_b35]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:53:54,113: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:53:54,114: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:53:54,114: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:07,524: INFO/MainProcess] Segment 35: 9.0s -> 4.6s slot
+[2026-04-15 17:54:08,334: INFO/MainProcess] Segment 34: 13.9s -> 6.1s slot
+[2026-04-15 17:54:08,355: INFO/MainProcess] Batch 37/47 [GPU 0]: segments [36]
+[2026-04-15 17:54:08,356: INFO/MainProcess] Batch 38/47 [GPU 1]: segments [37]
+[2026-04-15 17:54:08,359: INFO/MainProcess] Launching TTS worker [g0_b36]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:54:08,359: INFO/MainProcess] Launching TTS worker [g1_b37]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:54:08,359: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:54:08,359: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:54:08,360: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:54:08,360: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:54:08,360: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:08,360: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:19,006: INFO/MainProcess] Segment 37: 4.0s -> 5.6s slot
+[2026-04-15 17:54:20,381: INFO/MainProcess] Segment 36: 9.3s -> 5.8s slot
+[2026-04-15 17:54:20,403: INFO/MainProcess] Batch 39/47 [GPU 0]: segments [38]
+[2026-04-15 17:54:20,404: INFO/MainProcess] Batch 40/47 [GPU 1]: segments [39]
+[2026-04-15 17:54:20,406: INFO/MainProcess] Launching TTS worker [g0_b38]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:54:20,406: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:54:20,406: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:54:20,407: INFO/MainProcess] Launching TTS worker [g1_b39]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:54:20,407: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:20,407: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:54:20,408: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:54:20,408: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:30,837: INFO/MainProcess] Segment 38: 4.7s -> 3.4s slot
+[2026-04-15 17:54:32,428: INFO/MainProcess] Segment 39: 6.4s -> 1.4s slot
+[2026-04-15 17:54:32,441: INFO/MainProcess] Batch 41/47 [GPU 0]: segments [40]
+[2026-04-15 17:54:32,441: INFO/MainProcess] Batch 42/47 [GPU 1]: segments [41]
+[2026-04-15 17:54:32,441: INFO/MainProcess] Launching TTS worker [g0_b40]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:54:32,441: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:54:32,441: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:54:32,441: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:32,442: INFO/MainProcess] Launching TTS worker [g1_b41]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:54:32,442: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:54:32,442: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:54:32,442: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:54:41,963: INFO/MainProcess] Segment 40: 3.2s -> 2.2s slot
+[2026-04-15 17:54:43,901: ERROR/MainProcess] TTS worker failed (rc=-11)
+[2026-04-15 17:54:43,901: ERROR/MainProcess] stderr (last 3000): are being consolidated into TorchCodec. Please see https://github.com/pytorch/audio/issues/3902 for more information. It will be removed from the 2.9 release.
+  s = torchaudio.io.StreamReader(src, format, None, buffer_size)
+2026-04-15 17:54:39.404 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:43 - Loaded audio with 10.00 seconds
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/residual_fsq.py:170: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled = False):
+2026-04-15 17:54:39.628 | INFO     | fish_speech.inference_engine.vq_manager:encode_reference:50 - Encoded prompt: torch.Size([8, 216])
+2026-04-15 17:54:39.640 | INFO     | fish_speech.models.text2semantic.inference:generate_long:788 - Encoded text: Juan, cuando escribe el Apocalipsis, depende de Daniel.
+2026-04-15 17:54:39.762 | INFO     | fish_speech.models.text2semantic.inference:generate_long:806 - Generating sentence 1/1 of sample 1/1
+
+  0%|          | 0/299 [00:00<?, ?it/s]/usr/lib/python3.12/contextlib.py:105: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+
+  1%|▏         | 4/299 [00:00<00:07, 38.80it/s]
+  3%|▎         | 9/299 [00:00<00:07, 41.34it/s]
+  5%|▍         | 14/299 [00:00<00:06, 42.09it/s]
+  6%|▋         | 19/299 [00:00<00:06, 42.43it/s]
+  8%|▊         | 24/299 [00:00<00:06, 42.54it/s]
+ 10%|▉         | 29/299 [00:00<00:06, 42.58it/s]
+ 11%|█▏        | 34/299 [00:00<00:06, 42.61it/s]
+ 13%|█▎        | 39/299 [00:00<00:06, 42.66it/s]
+ 15%|█▍        | 44/299 [00:01<00:05, 42.64it/s]
+ 16%|█▋        | 49/299 [00:01<00:05, 42.58it/s]
+ 18%|█▊        | 54/299 [00:01<00:05, 42.49it/s]
+ 20%|█▉        | 59/299 [00:01<00:05, 42.41it/s]
+ 21%|██▏       | 64/299 [00:01<00:05, 42.48it/s]
+ 23%|██▎       | 69/299 [00:01<00:05, 42.49it/s]
+ 25%|██▍       | 74/299 [00:01<00:05, 42.45it/s]
+ 26%|██▋       | 79/299 [00:01<00:05, 42.43it/s]
+ 28%|██▊       | 84/299 [00:01<00:05, 42.23it/s]
+ 30%|██▉       | 89/299 [00:02<00:04, 42.22it/s]
+ 31%|███▏      | 94/299 [00:02<00:04, 42.32it/s]
+ 33%|███▎      | 99/299 [00:02<00:04, 42.44it/s]
+ 35%|███▍      | 104/299 [00:02<00:04, 42.52it/s]
+ 36%|███▋      | 109/299 [00:02<00:04, 42.54it/s]
+ 38%|███▊      | 114/299 [00:02<00:04, 42.58it/s]
+ 40%|███▉      | 119/299 [00:02<00:04, 42.51it/s]
+ 41%|████▏     | 124/299 [00:02<00:04, 42.55it/s]
+ 43%|████▎     | 129/299 [00:03<00:03, 42.55it/s]
+ 45%|████▍     | 134/299 [00:03<00:03, 42.60it/s]
+ 46%|████▋     | 139/299 [00:03<00:03, 42.64it/s]
+ 48%|████▊     | 144/299 [00:03<00:03, 42.68it/s]
+ 50%|████▉     | 149/299 [00:03<00:03, 42.69it/s]
+ 52%|█████▏    | 154/299 [00:03<00:03, 42.71it/s]
+ 53%|█████▎    | 159/299 [00:03<00:03, 42.73it/s]
+[2026-04-15 17:54:43,901: WARNING/MainProcess] SIGSEGV detected — retrying batch on CPU...
+[2026-04-15 17:55:23,599: INFO/MainProcess] Segment 41: 4.3s -> 2.5s slot
+[2026-04-15 17:55:23,613: INFO/MainProcess] Batch 43/47 [GPU 0]: segments [42]
+[2026-04-15 17:55:23,614: INFO/MainProcess] Batch 44/47 [GPU 1]: segments [43]
+[2026-04-15 17:55:23,614: INFO/MainProcess] Launching TTS worker [g0_b42]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:55:23,614: INFO/MainProcess] Launching TTS worker [g1_b43]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:55:23,614: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:55:23,615: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:55:23,615: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:55:23,615: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:55:23,615: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:55:23,615: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:55:35,204: INFO/MainProcess] Segment 43: 4.5s -> 2.1s slot
+[2026-04-15 17:55:43,583: INFO/MainProcess] Segment 42: 27.8s -> 18.7s slot
+[2026-04-15 17:55:43,600: INFO/MainProcess] Batch 45/47 [GPU 0]: segments [44]
+[2026-04-15 17:55:43,602: INFO/MainProcess] Batch 46/47 [GPU 1]: segments [45]
+[2026-04-15 17:55:43,602: INFO/MainProcess] Launching TTS worker [g0_b44]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:55:43,603: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:55:43,603: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:55:43,603: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:55:43,604: INFO/MainProcess] Launching TTS worker [g1_b45]: 1 segments, timeout=120s, gpu=1
+[2026-04-15 17:55:43,605: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:55:43,605: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:55:43,605: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:55:55,921: INFO/MainProcess] Segment 45: 6.8s -> 0.7s slot
+[2026-04-15 17:55:57,568: INFO/MainProcess] Segment 44: 13.9s -> 11.5s slot
+[2026-04-15 17:55:57,587: INFO/MainProcess] Batch 47/47 [GPU 0]: segments [46]
+[2026-04-15 17:55:57,589: INFO/MainProcess] Launching TTS worker [g0_b46]: 1 segments, timeout=120s, gpu=0
+[2026-04-15 17:55:57,589: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:55:57,589: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:55:57,589: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+[2026-04-15 17:56:06,191: INFO/MainProcess] Segment 46: 2.9s -> 0.1s slot
+[2026-04-15 17:56:06,210: INFO/MainProcess] TTS complete: 46/47 segments synthesized
+[2026-04-15 17:56:06,231: INFO/MainProcess] Building dubbed audio track (326.9s)
+[2026-04-15 17:56:12,451: INFO/MainProcess] Dubbed audio written to /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/temp/928820ca-ec86-43ff-9f2e-24319caf559b/dubbed_vocals.wav
+[2026-04-15 17:56:12,451: INFO/MainProcess] Mixing dubbed vocals (vol=1.0) + instrumentals (vol=1.0)
+[2026-04-15 17:56:12,649: INFO/MainProcess] Final mixed audio written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/temp/928820ca-ec86-43ff-9f2e-24319caf559b/dubbed_audio.wav
+[2026-04-15 17:56:12,649: INFO/MainProcess] Merging dubbed audio into video
+[2026-04-15 17:56:15,855: INFO/MainProcess] Final dubbed video: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/928820ca-ec86-43ff-9f2e-24319caf559b/test1_dubbed_es.mp4
+[2026-04-15 17:56:15,859: INFO/MainProcess] Full dubbing pipeline complete for 928820ca-ec86-43ff-9f2e-24319caf559b in 545.3s
+[2026-04-15 17:56:15,860: INFO/MainProcess] Task app.workers.pipeline.run_dubbing_pipeline[b2321d2c-1474-4959-8479-822d4c5a31c1] succeeded in 545.2833892240001s: None

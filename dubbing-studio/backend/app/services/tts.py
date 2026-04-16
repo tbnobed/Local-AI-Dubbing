@@ -118,6 +118,16 @@ class TTSService:
                 start_new_session=True,
             )
 
+            if os.path.exists(output_json_path):
+                with open(output_json_path) as f:
+                    results = json.load(f)
+                if result.returncode != 0:
+                    logger.warning(
+                        f"TTS worker crashed on exit (rc={result.returncode}) "
+                        f"but results were saved — treating as success"
+                    )
+                return results
+
             if result.returncode != 0:
                 logger.error(f"TTS worker failed (rc={result.returncode})")
                 if result.stderr:
@@ -125,9 +135,9 @@ class TTSService:
                 if result.stdout:
                     logger.error(f"stdout (last 1000): {result.stdout[-1000:]}")
 
-                if result.returncode == -11:
+                if result.returncode in (-11, -6):
                     logger.warning(
-                        "SIGSEGV detected — retrying batch on CPU..."
+                        f"Signal {-result.returncode} detected — retrying on CPU..."
                     )
                     worker_input["gpu_id"] = -1
                     with open(input_path, "w") as f:
@@ -144,6 +154,10 @@ class TTSService:
                         start_new_session=True,
                     )
 
+                    if os.path.exists(output_json_path):
+                        with open(output_json_path) as f:
+                            return json.load(f)
+
                     if result.returncode != 0:
                         logger.error(f"TTS worker CPU fallback also failed (rc={result.returncode})")
                         if result.stderr:
@@ -159,11 +173,6 @@ class TTSService:
                          "error": f"Worker exit code {result.returncode}"}
                         for item in batch
                     ]
-
-            if os.path.exists(output_json_path):
-                with open(output_json_path) as f:
-                    results = json.load(f)
-                return results
 
             try:
                 results = json.loads(result.stdout)
