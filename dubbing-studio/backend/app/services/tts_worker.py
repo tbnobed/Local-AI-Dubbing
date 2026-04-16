@@ -184,7 +184,12 @@ def main():
     results = []
     try:
         import torch
-        device = f"cuda:{gpu_id}"
+
+        if gpu_id < 0 or not torch.cuda.is_available():
+            device = "cpu"
+            log.info("Running Fish Speech on CPU")
+        else:
+            device = f"cuda:{gpu_id}"
 
         checkpoint_path = find_checkpoint(models_dir)
         decoder_ckpt = find_decoder_ckpt(checkpoint_path)
@@ -194,7 +199,10 @@ def main():
         from fish_speech.models.text2semantic.inference import launch_thread_safe_queue
         from fish_speech.models.vqgan.inference import load_model as load_decoder_model
 
-        precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+        if device == "cpu":
+            precision = torch.float32
+        else:
+            precision = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
         decoder_model = load_decoder_model(
             config_name="firefly_gan_vq",
@@ -213,7 +221,7 @@ def main():
             precision=precision,
             compile=False,
         )
-        log.info(f"Engine ready, processing {len(batch)} segments")
+        log.info(f"Engine ready on {device}, processing {len(batch)} segments")
 
         results = synthesize_batch(
             batch, engine, output_dir,
@@ -226,8 +234,14 @@ def main():
             if not any(r["index"] == item["index"] for r in results):
                 results.append({"index": item["index"], "success": False, "error": str(e)})
 
-    json.dump(results, sys.stdout)
-    sys.stdout.flush()
+    output_json_path = args.get("output_json_path")
+    if output_json_path:
+        with open(output_json_path, "w") as f:
+            json.dump(results, f)
+        log.info(f"Results written to {output_json_path}")
+    else:
+        json.dump(results, sys.stdout)
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":

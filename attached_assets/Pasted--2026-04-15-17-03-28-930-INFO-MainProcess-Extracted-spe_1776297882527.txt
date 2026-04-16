@@ -1,0 +1,46 @@
+[2026-04-15 17:03:28,930: INFO/MainProcess] Extracted speaker_diarization (type: Annotation)
+[2026-04-15 17:03:28,937: INFO/MainProcess] Converted diarization: 80 turns, 9 speakers
+[2026-04-15 17:03:29,104: INFO/MainProcess] Pipeline complete: 47 segments, 8 speakers, lang=en
+[2026-04-15 17:03:29,300: INFO/MainProcess] Loading translation model: facebook/nllb-200-3.3B
+[2026-04-15 17:03:30,348: WARNING/MainProcess] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|###3      | 1/3 [00:00<00:01,  1.63it/s]
+Loading checkpoint shards:  67%|######6   | 2/3 [00:01<00:00,  2.05it/s]
+Loading checkpoint shards: 100%|##########| 3/3 [00:01<00:00,  2.75it/s]
+[2026-04-15 17:03:33,091: INFO/MainProcess] NLLB-200 loaded on cuda:1
+[2026-04-15 17:03:43,448: INFO/MainProcess] Translated 47 segments from en to es
+[2026-04-15 17:03:43,493: INFO/MainProcess] Translation model unloaded.
+[2026-04-15 17:03:43,504: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/797a1a23-0af5-43ed-a371-ab1805458c12/797a1a23-0af5-43ed-a371-ab1805458c12_original_en.srt (47 entries)
+[2026-04-15 17:03:43,505: INFO/MainProcess] SRT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/797a1a23-0af5-43ed-a371-ab1805458c12/797a1a23-0af5-43ed-a371-ab1805458c12_translated_es.srt (47 entries)
+[2026-04-15 17:03:43,505: INFO/MainProcess] VTT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/797a1a23-0af5-43ed-a371-ab1805458c12/797a1a23-0af5-43ed-a371-ab1805458c12_original_en.vtt (47 entries)
+[2026-04-15 17:03:43,505: INFO/MainProcess] VTT written: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/data/outputs/797a1a23-0af5-43ed-a371-ab1805458c12/797a1a23-0af5-43ed-a371-ab1805458c12_translated_es.vtt (47 entries)
+[2026-04-15 17:03:43,505: INFO/MainProcess] Extracting voice samples from clean vocal stem
+[2026-04-15 17:03:43,707: INFO/MainProcess] Extracted 28.9s voice sample for SPEAKER_08
+[2026-04-15 17:03:43,882: INFO/MainProcess] Extracted 35.9s voice sample for SPEAKER_04
+[2026-04-15 17:03:44,008: INFO/MainProcess] Extracted 31.9s voice sample for SPEAKER_07
+[2026-04-15 17:03:44,164: INFO/MainProcess] Extracted 31.3s voice sample for SPEAKER_02
+[2026-04-15 17:03:44,377: INFO/MainProcess] Extracted 15.9s voice sample for SPEAKER_01
+[2026-04-15 17:03:44,413: INFO/MainProcess] Extracted 12.4s voice sample for SPEAKER_03
+[2026-04-15 17:03:44,516: INFO/MainProcess] Extracted 14.0s voice sample for SPEAKER_00
+[2026-04-15 17:03:44,611: INFO/MainProcess] Extracted 12.2s voice sample for SPEAKER_06
+[2026-04-15 17:03:44,611: INFO/MainProcess] Speaker samples extracted: ['SPEAKER_08', 'SPEAKER_04', 'SPEAKER_07', 'SPEAKER_02', 'SPEAKER_01', 'SPEAKER_03', 'SPEAKER_00', 'SPEAKER_06']
+[2026-04-15 17:03:44,631: INFO/MainProcess] Synthesizing 47 segments in batches of 8 (~6 subprocess calls)
+[2026-04-15 17:03:44,631: INFO/MainProcess] Batch 1/6: segments [0, 1, 2, 3, 4, 5, 6, 7]
+[2026-04-15 17:03:44,632: INFO/MainProcess] Launching TTS worker: 8 segments, timeout=480s, gpu=0
+[2026-04-15 17:03:44,632: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:03:44,632: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:03:44,632: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech:/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech:
+[2026-04-15 17:03:49,510: ERROR/MainProcess] TTS worker failed (rc=-11)
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 0 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 1 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 2 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 3 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 4 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 5 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 6 failed: Worker exit code -11
+[2026-04-15 17:03:49,510: ERROR/MainProcess] Segment 7 failed: Worker exit code -11
+[2026-04-15 17:03:49,539: INFO/MainProcess] Batch 2/6: segments [8, 9, 10, 11, 12, 13, 14, 15]
+[2026-04-15 17:03:49,540: INFO/MainProcess] Launching TTS worker: 8 segments, timeout=480s, gpu=0
+[2026-04-15 17:03:49,540: INFO/MainProcess] Worker script: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/app/services/tts_worker.py
+[2026-04-15 17:03:49,540: INFO/MainProcess] Python: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/bin/python3
+[2026-04-15 17:03:49,540: INFO/MainProcess] PYTHONPATH: /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech:/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech:

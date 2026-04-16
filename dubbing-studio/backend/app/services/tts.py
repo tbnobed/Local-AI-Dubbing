@@ -93,7 +93,7 @@ class TTSService:
             result = subprocess.run(
                 [python_cmd, str(WORKER_SCRIPT), input_path],
                 stdout=subprocess.PIPE,
-                stderr=None,
+                stderr=subprocess.PIPE,
                 text=True,
                 timeout=timeout,
                 env=env,
@@ -102,13 +102,45 @@ class TTSService:
 
             if result.returncode != 0:
                 logger.error(f"TTS worker failed (rc={result.returncode})")
+                if result.stderr:
+                    logger.error(f"stderr (last 3000): {result.stderr[-3000:]}")
                 if result.stdout:
-                    logger.error(f"stdout: {result.stdout[-2000:]}")
-                return [
-                    {"index": item["index"], "success": False,
-                     "error": f"Worker exit code {result.returncode}"}
-                    for item in batch
-                ]
+                    logger.error(f"stdout (last 1000): {result.stdout[-1000:]}")
+
+                if result.returncode == -11:
+                    logger.warning(
+                        "SIGSEGV detected — likely Blackwell GPU incompatibility. "
+                        "Retrying batch on CPU..."
+                    )
+                    worker_input["gpu_id"] = -1
+                    with open(input_path, "w") as f:
+                        json.dump(worker_input, f)
+
+                    result = subprocess.run(
+                        [python_cmd, str(WORKER_SCRIPT), input_path],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        timeout=timeout * 3,
+                        env=env,
+                        cwd=str(Path(self.config.base_dir) / "backend"),
+                    )
+
+                    if result.returncode != 0:
+                        logger.error(f"TTS worker CPU fallback also failed (rc={result.returncode})")
+                        if result.stderr:
+                            logger.error(f"stderr: {result.stderr[-3000:]}")
+                        return [
+                            {"index": item["index"], "success": False,
+                             "error": f"Worker exit code {result.returncode} (GPU+CPU)"}
+                            for item in batch
+                        ]
+                else:
+                    return [
+                        {"index": item["index"], "success": False,
+                         "error": f"Worker exit code {result.returncode}"}
+                        for item in batch
+                    ]
 
             if os.path.exists(output_json_path):
                 with open(output_json_path) as f:
