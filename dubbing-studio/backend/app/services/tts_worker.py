@@ -57,11 +57,23 @@ def time_stretch(raw_path: str, stretched_path: str, original_duration: float):
         return
 
     ratio = current_dur / original_duration
-    if abs(ratio - 1.0) < 0.02:
+    if abs(ratio - 1.0) < 0.05:
         shutil.copy2(raw_path, stretched_path)
         return
 
-    ratio = max(0.5, min(2.0, ratio))
+    if ratio > 1.5:
+        log.warning(
+            f"Synth audio {current_dur:.1f}s is much longer than slot {original_duration:.1f}s "
+            f"({ratio:.1f}x) — truncating to fit"
+        )
+        data, sr = sf.read(raw_path)
+        max_samples = int(original_duration * sr)
+        if len(data) > max_samples:
+            data = data[:max_samples]
+        sf.write(stretched_path, data, sr)
+        return
+
+    ratio = max(0.7, min(1.5, ratio))
     filters = []
     r = ratio
     while r > 2.0:
@@ -105,12 +117,19 @@ def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars,
             buf = io.BytesIO()
             sf.write(buf, data, sr, format="wav")
 
+            tokens_for_duration = int(original_duration * 21 * 1.3)
+            segment_max_tokens = max(64, min(max_new_tokens, tokens_for_duration))
+            log.info(
+                f"Segment {idx}: text={len(text)} chars, "
+                f"slot={original_duration:.1f}s, max_tokens={segment_max_tokens}"
+            )
+
             request = ServeTTSRequest(
                 text=text,
                 references=[ServeReferenceAudio(audio=buf.getvalue(), text="")],
                 format="wav",
                 streaming=False,
-                max_new_tokens=max_new_tokens,
+                max_new_tokens=segment_max_tokens,
             )
 
             all_audio = []

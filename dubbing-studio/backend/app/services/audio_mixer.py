@@ -33,7 +33,7 @@ class AudioMixerService:
         segments: list,
         total_duration: float,
         output_path: str,
-        sample_rate: int = 22050,
+        sample_rate: int = 44100,
     ) -> str:
         """
         Construct a full-length audio track by placing synthesized segments
@@ -121,7 +121,7 @@ class AudioMixerService:
             normalize=0,
         )
 
-        ffmpeg.output(mixed, output_path, acodec="pcm_s16le", ar=22050, ac=1).overwrite_output().run(quiet=True)
+        ffmpeg.output(mixed, output_path, acodec="pcm_s16le", ar=44100, ac=1).overwrite_output().run(quiet=True)
         logger.info(f"Final mixed audio written: {output_path}")
         return output_path
 

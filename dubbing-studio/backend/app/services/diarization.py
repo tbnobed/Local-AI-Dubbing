@@ -82,7 +82,7 @@ def extract_speaker_voice_samples(
                 (
                     ffmpeg
                     .input(source_audio, ss=seg.start, t=seg.end - seg.start)
-                    .output(sample_path, ar=22050, ac=1, acodec="pcm_s16le")
+                    .output(sample_path, ar=44100, ac=1, acodec="pcm_s16le")
                     .overwrite_output()
                     .run(quiet=True)
                 )
@@ -93,7 +93,7 @@ def extract_speaker_voice_samples(
                     (
                         ffmpeg
                         .input(source_audio, ss=seg.start, t=seg.end - seg.start)
-                        .output(clip_path, ar=22050, ac=1, acodec="pcm_s16le")
+                        .output(clip_path, ar=44100, ac=1, acodec="pcm_s16le")
                         .overwrite_output()
                         .run(quiet=True)
                     )
@@ -107,7 +107,7 @@ def extract_speaker_voice_samples(
                 (
                     ffmpeg
                     .input(concat_file, f="concat", safe=0)
-                    .output(sample_path, ar=22050, ac=1, acodec="pcm_s16le")
+                    .output(sample_path, ar=44100, ac=1, acodec="pcm_s16le")
                     .overwrite_output()
                     .run(quiet=True)
                 )

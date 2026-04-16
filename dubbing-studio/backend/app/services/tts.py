@@ -63,9 +63,9 @@ class TTSService:
             "gpu_id": gpu_id,
             "models_dir": str(self.config.models_dir),
             "fish_speech_dir": fish_speech_dir,
-            "max_ref_seconds": 10,
-            "max_text_chars": 300,
-            "max_new_tokens": 300,
+            "max_ref_seconds": 15,
+            "max_text_chars": 500,
+            "max_new_tokens": 1024,
         }
 
         timeout = max(120, len(batch) * timeout_per_segment)
