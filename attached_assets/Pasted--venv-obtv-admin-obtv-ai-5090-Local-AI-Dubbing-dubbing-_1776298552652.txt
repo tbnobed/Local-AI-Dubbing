@@ -1,0 +1,37 @@
+(venv) obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio/backend$ python3 -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.get_arch_list())"
+2.8.0+cu128
+12.8
+['sm_70', 'sm_75', 'sm_80', 'sm_86', 'sm_90', 'sm_100', 'sm_120']
+(venv) obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio/backend$ find ~/Local-AI-Dubbing/dubbing-studio/fish-speech -name "*.so" 2>/dev/null
+(venv) obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio/backend$ ls ~/Local-AI-Dubbing/dubbing-studio/fish-speech/
+pip list | grep -i fish
+API_FLAGS.txt           dockerfile      docs           fish_speech           inference.ipynb  mkdocs.yml      pyrightconfig.json  tools
+docker-compose.dev.yml  dockerfile.dev  entrypoint.sh  fish_speech.egg-info  LICENSE          pyproject.toml  README.md
+fish-speech                              0.1.0        /home/obtv-admin/Local-AI-Dubbing/dubbing-studio/fish-speech
+(venv) obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio/backend$ cd ~/Local-AI-Dubbing/dubbing-studio/backend
+source venv/bin/activate
+python3 -c "
+import sys
+sys.path.insert(0, '../fish-speech')
+from fish_speech.models.vqgan.inference import load_model
+print('VQGAN import OK')
+"
+VQGAN import OK
+(venv) obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio/backend$ python3 -c "
+import sys, torch
+sys.path.insert(0, '../fish-speech')
+from fish_speech.models.vqgan.inference import load_model
+model = load_model(config_name='firefly_gan_vq', checkpoint_path='../data/models/fish-speech/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth', device='cuda:0')
+print('Model loaded on GPU!')
+"
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:445: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/vector_quantize_pytorch.py:630: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/finite_scalar_quantization.py:147: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+/home/obtv-admin/Local-AI-Dubbing/dubbing-studio/backend/venv/lib/python3.12/site-packages/vector_quantize_pytorch/lookup_free_quantization.py:209: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled = False)
+2026-04-15 17:15:42.532 | INFO     | fish_speech.models.vqgan.inference:load_model:46 - Loaded model: <All keys matched successfully>
+Model loaded on GPU!
+(venv) obtv-admin@obtv-ai-5090:~/Local-AI-Dubbing/dubbing-studio/backend$
