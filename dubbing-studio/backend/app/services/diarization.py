@@ -73,15 +73,16 @@ def extract_speaker_voice_samples(
 
     # Score each candidate segment for voice-cloning suitability.
     # Sweet spot for Fish Speech reference is ~5s. Avoid overlapping speech.
+    # Score is RELATIVE — we don't hard-filter on duration so every speaker
+    # gets some clip. The TTS worker will truncate to max_ref_seconds anyway.
     IDEAL_DUR = 5.0
-    MIN_REF = 2.0
     MAX_REF = 8.0
 
     def _quality_score(seg) -> float:
         dur = seg.end - seg.start
-        if dur < MIN_REF:
-            return -1.0  # filter out
-        # Bell curve around IDEAL_DUR, falling off above MAX_REF
+        if dur < 0.4:
+            return -10.0  # genuinely useless
+        # Bell curve around IDEAL_DUR, with a softer falloff for short clips
         if dur <= MAX_REF:
             score = 1.0 - abs(dur - IDEAL_DUR) / IDEAL_DUR
         else:
@@ -89,24 +90,23 @@ def extract_speaker_voice_samples(
         # Penalize segments overlapping another speaker
         if _overlaps_other_speaker(seg.start, seg.end,
                                    getattr(seg, "speaker", "SPEAKER_00")):
-            score -= 0.5
+            score -= 0.4
         # Penalize empty/very short text (often noise/laughter)
         text = (getattr(seg, "text", "") or "").strip()
         if len(text) < 8:
-            score -= 0.3
+            score -= 0.2
         return score
 
     samples = {}
     texts = {}
     for speaker, segs in speaker_segments.items():
-        scored = [(s, _quality_score(s)) for s in segs]
-        scored = [t for t in scored if t[1] > -0.5]  # drop very poor candidates
+        scored = [(s, _quality_score(s)) for s in segs if (s.end - s.start) >= 0.4]
         # Sort by quality desc; tie-break by longer duration
         scored.sort(key=lambda t: (t[1], t[0].end - t[0].start), reverse=True)
 
         # Pick the SINGLE highest-quality clip if it's long enough on its own.
-        # This avoids concatenating multiple clips (which gets truncated to
-        # max_ref_seconds anyway) and ensures the TTS sees the best clip.
+        # If even the best is short, concatenate the top few clips so the
+        # speaker still gets a usable reference rather than being dropped.
         accumulated = 0.0
         selected = []
         if scored:
@@ -116,32 +116,27 @@ def extract_speaker_voice_samples(
                 selected = [best_seg]
                 accumulated = best_dur
             else:
-                # Best clip is short; concatenate the top few until we
-                # have enough audio.
                 for seg, _score in scored:
-                    dur = seg.end - seg.start
-                    if dur < 0.5:
-                        continue
                     selected.append(seg)
-                    accumulated += dur
+                    accumulated += seg.end - seg.start
                     if accumulated >= max_duration:
                         break
-                    if len(selected) >= 3:
+                    if len(selected) >= 4:
                         break
 
-        # Fallback: if quality filter eliminated everything, fall back to longest
+        # Last-resort fallback: take any clip we can find for this speaker
         if not selected:
-            sorted_segs = sorted(segs, key=lambda s: s.end - s.start, reverse=True)
-            for seg in sorted_segs:
-                dur = seg.end - seg.start
-                if dur < 0.5:
-                    continue
-                selected.append(seg)
-                accumulated += dur
-                if accumulated >= max_duration or len(selected) >= 5:
-                    break
+            any_segs = [s for s in segs if (s.end - s.start) >= 0.2]
+            if any_segs:
+                any_segs.sort(key=lambda s: s.end - s.start, reverse=True)
+                selected = any_segs[:1]
+                accumulated = selected[0].end - selected[0].start
 
         if not selected:
+            logger.warning(
+                f"No usable audio segments for {speaker} — voice cloning "
+                f"will fall back to another speaker for this voice"
+            )
             continue
 
         if accumulated < min_duration:
