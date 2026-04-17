@@ -139,29 +139,13 @@ def synthesize_batch(batch, engine, output_dir, max_ref_seconds, max_text_chars,
                 f"ref_text={len(ref_text_for_cloning)} chars"
             )
 
-            # Sampling tuned for stability:
-            #   temperature 0.7  -> defaults, expressive but not chaotic
-            #   top_p       0.7  -> tighter nucleus, fewer outlier tokens
-            #   repetition_penalty 1.35 -> reduces "stuck on a phoneme" loops
-            tts_kwargs = dict(
+            request = ServeTTSRequest(
                 text=text,
                 references=[ServeReferenceAudio(audio=buf.getvalue(), text=ref_text_for_cloning)],
                 format="wav",
                 streaming=False,
                 max_new_tokens=segment_max_tokens,
-                temperature=0.7,
-                top_p=0.7,
-                repetition_penalty=1.35,
             )
-            try:
-                request = ServeTTSRequest(**tts_kwargs)
-            except (TypeError, ValueError) as schema_err:
-                # Older Fish Speech versions may not have all sampling fields;
-                # fall back to the minimal request rather than crash the batch.
-                log.warning(f"Sampling params not supported, falling back: {schema_err}")
-                for k in ("temperature", "top_p", "repetition_penalty"):
-                    tts_kwargs.pop(k, None)
-                request = ServeTTSRequest(**tts_kwargs)
 
             all_audio = []
             sample_rate = 44100
