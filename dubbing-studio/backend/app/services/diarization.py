@@ -16,8 +16,8 @@ def extract_speaker_voice_samples(
     audio_path: str,
     segments: list,
     output_dir: str,
-    min_duration: float = 8.0,
-    max_duration: float = 30.0,
+    min_duration: float = 3.0,
+    max_duration: float = 8.0,
     vocals_path: str | None = None,
 ) -> tuple[dict[str, str], dict[str, str]]:
     """
@@ -104,18 +104,30 @@ def extract_speaker_voice_samples(
         # Sort by quality desc; tie-break by longer duration
         scored.sort(key=lambda t: (t[1], t[0].end - t[0].start), reverse=True)
 
+        # Pick the SINGLE highest-quality clip if it's long enough on its own.
+        # This avoids concatenating multiple clips (which gets truncated to
+        # max_ref_seconds anyway) and ensures the TTS sees the best clip.
         accumulated = 0.0
         selected = []
-        for seg, _score in scored:
-            dur = seg.end - seg.start
-            if dur < 0.5:
-                continue
-            selected.append(seg)
-            accumulated += dur
-            if accumulated >= max_duration:
-                break
-            if len(selected) >= 5:
-                break
+        if scored:
+            best_seg = scored[0][0]
+            best_dur = best_seg.end - best_seg.start
+            if best_dur >= min_duration:
+                selected = [best_seg]
+                accumulated = best_dur
+            else:
+                # Best clip is short; concatenate the top few until we
+                # have enough audio.
+                for seg, _score in scored:
+                    dur = seg.end - seg.start
+                    if dur < 0.5:
+                        continue
+                    selected.append(seg)
+                    accumulated += dur
+                    if accumulated >= max_duration:
+                        break
+                    if len(selected) >= 3:
+                        break
 
         # Fallback: if quality filter eliminated everything, fall back to longest
         if not selected:
