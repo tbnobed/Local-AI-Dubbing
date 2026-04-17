@@ -63,7 +63,7 @@ class TTSService:
             "gpu_id": gpu_id,
             "models_dir": str(self.config.models_dir),
             "fish_speech_dir": fish_speech_dir,
-            "max_ref_seconds": 6,
+            "max_ref_seconds": 4,
             "max_text_chars": 400,
             "max_new_tokens": 600,
         }
